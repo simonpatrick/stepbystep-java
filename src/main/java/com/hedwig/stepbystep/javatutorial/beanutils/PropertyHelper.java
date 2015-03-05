@@ -58,4 +58,48 @@ public class PropertyHelper {
 
         return null;
     }
+
+    public static <T> Object getMappedValue(T instance,String name){
+
+        try {
+            return PropertyUtils.getMappedProperty(instance,name);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static <T> Object getMappedValue(T instance,String name,String key){
+
+        try {
+            return PropertyUtils.getMappedProperty(instance,name,key);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static <T> Object getValue(T instance,String name){
+        try {
+            return PropertyUtils.getProperty(instance,name);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 }

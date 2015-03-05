@@ -87,4 +87,9 @@ public class Employee {
     public void setDeps(Map<String, User> deps) {
         this.deps = deps;
     }
+
+    public User getUser(String type){
+
+        return deps.get(type);
+    }
 }

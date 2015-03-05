@@ -48,4 +48,6 @@ public class PropertyHelperTest {
         System.out.println(PropertyHelper.getSimpleValue(e,"address"));
         Assert.assertEquals(PropertyHelper.getSimpleValue(e,"address"),a);
     }
+
+
 }

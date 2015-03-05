@@ -1,5 +1,7 @@
 package com.hedwig.stepbystep.javatutorial.beanutils.model;
 
+import com.google.common.base.MoreObjects;
+
 /**
  * Created by patrick on 15/3/5.
  *
@@ -42,5 +44,14 @@ public class User {
         user.setName("name1");
         user.setAge(23);
         return user;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("name", name)
+                .add("age", age)
+                .add("nickName", nickName)
+                .toString();
     }
 }
