@@ -35,4 +35,12 @@ public class User {
     public void setNickName(String nickName) {
         this.nickName = nickName;
     }
+
+    public static User getUser(){
+        User user = new User();
+        user.setNickName("nick1");
+        user.setName("name1");
+        user.setAge(23);
+        return user;
+    }
 }

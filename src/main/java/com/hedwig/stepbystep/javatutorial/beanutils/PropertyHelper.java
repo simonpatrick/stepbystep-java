@@ -28,4 +28,34 @@ public class PropertyHelper {
 
         return null;
     }
+
+
+    public static <T> Object getIndexValue(T instance,String name){
+        try {
+            return PropertyUtils.getIndexedProperty(instance,name);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+
+    public static <T> Object getIndexValue(T instance,String name,int index){
+        try {
+            return PropertyUtils.getIndexedProperty(instance,name,index);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 }

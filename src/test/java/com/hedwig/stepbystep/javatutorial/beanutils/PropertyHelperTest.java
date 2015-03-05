@@ -43,7 +43,6 @@ public class PropertyHelperTest {
         Assert.assertEquals(PropertyHelper.getSimpleValue(e,"FirstName1"),null);
     }
 
-
     @Test
     public void testGetSimpleValue_Objects() throws Exception {
         System.out.println(PropertyHelper.getSimpleValue(e,"address"));

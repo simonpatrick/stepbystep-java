@@ -1,6 +1,12 @@
 package com.hedwig.stepbystep.javatutorial.beanutils.model;
 
+import com.beust.jcommander.internal.Maps;
+import com.google.common.base.MoreObjects;
+
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 public class Employee {
 
@@ -9,6 +15,8 @@ public class Employee {
     private Date hireDate;
     private boolean isManager;
     private Address address;
+    private List<Employee> subs = new ArrayList<Employee>();
+    private Map<String,User> deps = Maps.newHashMap();
 
     public String getFirstName() {
         return firstName;
@@ -48,5 +56,35 @@ public class Employee {
 
     public void setAddress(Address address) {
         this.address = address;
+    }
+
+    public List<Employee> getSubs() {
+        return subs;
+    }
+
+    public void setSubs(List<Employee> subs) {
+        this.subs = subs;
+    }
+
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("firstName", firstName)
+                .add("lastName", lastName)
+                .add("hireDate", hireDate)
+                .add("isManager", isManager)
+                .add("address", address)
+                .add("subs", subs)
+                .add("deps", deps)
+                .toString();
+    }
+
+    public Map<String, User> getDeps() {
+        return deps;
+    }
+
+    public void setDeps(Map<String, User> deps) {
+        this.deps = deps;
     }
 }
