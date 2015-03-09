@@ -16,9 +16,10 @@ public class RetrySample implements IRetryAnalyzer {
     @Override
     public boolean retry(ITestResult result) {
         if(retryCount<maxRetryCount){
-            System.out.println("retrying testing"+result.getName()+" result "
+            System.out.println("retrying testing "+result.getName()+" why:  "
                     +getResultStatusName(result.getStatus()));
             retryCount++;
+            result.setStatus(1); //modify to true,if failed, it will reset to false
             return true;
         }
 
