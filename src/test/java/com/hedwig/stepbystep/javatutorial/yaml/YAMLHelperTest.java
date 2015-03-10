@@ -26,6 +26,11 @@ public class YAMLHelperTest {
         assertNotNull(map);
     }
 
+    @Test
+    public void testParse_AsClassMap() throws Exception {
+        Map map=YAMLHelper.parseAsClassMap("pages/baiduhomepage3.yaml", ElementDescription.class);
+        assertNotNull(map);
+    }
 
     @Test
     public void testParse_ElementDescription() throws Exception {
