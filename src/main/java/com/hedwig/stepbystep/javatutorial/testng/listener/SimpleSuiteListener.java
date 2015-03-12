@@ -5,6 +5,8 @@ import org.apache.logging.log4j.Logger;
 import org.testng.ISuite;
 import org.testng.ISuiteListener;
 
+import java.util.Map;
+
 /**
  * Created by patrick on 15/3/12.
  *
@@ -22,6 +24,10 @@ public class SimpleSuiteListener implements ISuiteListener {
 
     @Override
     public void onFinish(ISuite suite) {
+        for ( Map.Entry entry: suite.getResults().entrySet()) {
+            System.out.println(entry.getKey());
+            System.out.println(entry.getValue());
+        }
         logger.info("test_result"+suite.getResults());
     }
 }
