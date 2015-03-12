@@ -79,4 +79,14 @@ public class FileHelper {
         }
         return file;
     }
+
+    public static void checkIfSuitableFile(String path, String ...fileSuffix){
+
+        for (String s : fileSuffix) {
+            if(path.endsWith(s)) return;
+        }
+
+        throw  new RuntimeException("File suffix "+fileSuffix+" is not correct,please check the file");
+
+    }
 }

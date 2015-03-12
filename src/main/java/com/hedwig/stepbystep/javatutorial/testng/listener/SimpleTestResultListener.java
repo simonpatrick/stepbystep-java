@@ -37,12 +37,15 @@ public class SimpleTestResultListener implements IReporter,ITestListener{
 
     @Override
     public void onTestSuccess(ITestResult result) {
+
         System.out.println("test pass");
+        result.isSuccess();
     }
 
     @Override
     public void onTestFailure(ITestResult result) {
         System.out.println("test failed");
+
     }
 
     @Override

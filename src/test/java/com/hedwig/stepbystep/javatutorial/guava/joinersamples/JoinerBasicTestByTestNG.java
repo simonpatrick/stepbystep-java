@@ -29,12 +29,12 @@ public class JoinerBasicTestByTestNG {
         }
     }
 
-    @Test
+    @Test(description = "Joiner测试")
     public void testJoin() throws Exception {
         Assert.assertEquals(JoinerBasic.join("-", testArray),EXPECTED_RESULT);
     }
 
-    @Test
+    @Test(description = "Joiner测试_1")
     public void testJoin1() throws Exception {
         if(counter==0){
             counter++;
@@ -44,7 +44,7 @@ public class JoinerBasicTestByTestNG {
         Assert.assertEquals(JoinerBasic.join(SEPARATOR, testList),EXPECTED_RESULT);
     }
 
-    @Test
+    @Test(description = "Joiner测试_2")
     public void testJoinCountNull() throws Exception {
         testList.add(null);
         Assert.assertEquals(JoinerBasic.joinCountNull(SEPARATOR, "none", testList),EXPECTED_RESULT+"-none");
