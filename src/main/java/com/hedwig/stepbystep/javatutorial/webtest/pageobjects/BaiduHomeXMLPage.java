@@ -1,19 +1,19 @@
 package com.hedwig.stepbystep.javatutorial.webtest.pageobjects;
 
-import org.openqa.selenium.By;
+import com.hedwig.stepbystep.javatutorial.webtest.annotation.ElementName;
+import com.hedwig.stepbystep.javatutorial.webtest.annotation.PageObject;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.How;
-
 /**
  * Created by patrick on 15/3/9.
  *
  * @version $Id$
  */
 
-
+@PageObject(path = "pages/BaiduHomePageResource.xml")
 public class BaiduHomeXMLPage {
 
-    @FindBy()
     private WebElement keyword;
+
+    @ElementName(name = "submit")
+    private WebElement submit;
 }

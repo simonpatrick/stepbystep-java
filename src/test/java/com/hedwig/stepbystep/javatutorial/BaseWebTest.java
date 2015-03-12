@@ -21,8 +21,10 @@ public class BaseWebTest {
 
     @BeforeTest
     public void init(){
-        driver = new EventFiringWebDriver(d);
-        driver.register(new ScreenshotListener());
+        //driver = new EventFiringWebDriver(d);
+        //driver.register(new ScreenshotListener());
+        WebDriver driver = new EventFiringWebDriver(d);
+
     }
 
 
