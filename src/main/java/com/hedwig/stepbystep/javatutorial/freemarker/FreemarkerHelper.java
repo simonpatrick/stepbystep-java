@@ -29,9 +29,8 @@ public class FreemarkerHelper {
         Map map = Maps.newHashMap();
         map.put("SuiteName","MyFirstTest");
         Template template = cfg.getTemplate("test.ftl");
-        Writer out = new FileWriter(new File("test.html"));
+        Writer out = new FileWriter(new File(classPath+"test.html"));
         template.process(map,out);
-
 
     }
 }

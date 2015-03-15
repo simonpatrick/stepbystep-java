@@ -7,8 +7,8 @@
     <meta name="description" content=""/>
     <meta name="author" content=""/>
     <title>测试结果报告</title>
-    <link rel="stylesheet" href="css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="css/dashboard.css"/>
+    <link rel="stylesheet" href="asserts/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="asserts/css/dashboard.css"/>
 
 </head>
 <body>
@@ -36,13 +36,13 @@
             <h1 class="page-header">测试结果</h1>
 
             <div class="row placeholder">
-                <div class="col-xs-6 col-sm-3 placeholder">
+                <div class="col-xs-3 col-sm-3 placeholder">
                     <h4>${SuiteName}测试通过case总数：45</h4>
                 </div>
-                <div class="col-xs-6 col-sm-3 placeholder">
+                <div class="col-xs-3 col-sm-3 placeholder">
                     <h4>${SuiteName}测试失败case总数：34</h4>
                 </div>
-                <div class="col-xs-6 col-sm-3 placeholder">
+                <div class="col-xs-3 col-sm-3 placeholder">
                     <h4>测试忽略case总数：33</h4>
                 </div>
             </div>
@@ -85,7 +85,7 @@
 </div>
 
 <!-- Placed at the end of the document so the pages load faster -->
-<script src="js/jquery.min.map"></script>
-<script src="js/bootstrap.min.js"></script>
+<script src="asserts/js/jquery.min.map"></script>
+<script src="asserts/js/bootstrap.min.js"></script>
 </body>
 </html>
