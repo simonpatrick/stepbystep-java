@@ -4,7 +4,7 @@
         <!--<listener class-name="com.hedwig.stepbystep.javatutorial.testng.listener.RetryListener"></listener>-->
         <!--<listener class-name="com.hedwig.stepbystep.javatutorial.testng.listener.SimpleTestResultListener"></listener>-->
         <!--<listener class-name="com.hedwig.stepbystep.javatutorial.testng.listener.SimpleSuiteListener"></listener>-->
-        <!--<listener class-name="com.hedwig.stepbystep.javatutorial.testng.listener.SimpleTestListener"></listener>-->
+        <listener class-name="com.hedwig.stepbystep.javatutorial.testng.listener.SimpleTestListener"></listener>
     </listeners>
     <test name ="suite1">
         <classes>

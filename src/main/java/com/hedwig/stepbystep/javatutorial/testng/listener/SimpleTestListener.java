@@ -6,10 +6,10 @@ import com.hedwig.stepbystep.javatutorial.testng.testmodel.TestSuite;
 import com.hedwig.stepbystep.javatutorial.testng.testmodel.TestngAdaptor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.testng.ITestContext;
-import org.testng.ITestListener;
-import org.testng.ITestResult;
+import org.testng.*;
+import org.testng.xml.XmlSuite;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,7 +19,7 @@ import java.util.Map;
  */
 
 
-public class SimpleTestListener implements ITestListener{
+public class SimpleTestListener implements ITestListener,IReporter{
 
     private Map<String,TestSuite> testSuiteMap = Maps.newConcurrentMap();
     private static final Logger logger = LogManager.getLogger(SimpleTestListener.class.getName());
@@ -67,11 +67,11 @@ public class SimpleTestListener implements ITestListener{
         logger.info("All tested methods :{}",context.getAllTestMethods());
         logger.info("All passed tested methods :{}",context.getPassedTests());
         //init current test suite
-        if(testSuiteMap.get(context.getName())!=null){
+        if(testSuiteMap.get(context.getSuite().getName())!=null){
             throw new RuntimeException("same suite name is existing");
         }else{
-            TestSuite ts = new TestSuite(context.getStartDate(),context.getName());
-            testSuiteMap.put(context.getName(),ts);
+            TestSuite ts = new TestSuite(context.getStartDate(),context.getSuite().getName());
+            testSuiteMap.put(context.getSuite().getName(),ts);
         }
     }
 
@@ -85,13 +85,17 @@ public class SimpleTestListener implements ITestListener{
         logger.info("test result is {}",context.getPassedTests());
         logger.info("test result is {}",context.getFailedTests());
         //to do remove the failed but retry passed result
-        testSuiteMap.get(context.getName()).setEndDate(context.getEndDate());
-        System.out.println(testSuiteMap.size());
+        //todo need to avoid NPE
+        testSuiteMap.get(context.getSuite().getName()).setEndDate(context.getEndDate());
+        logger.info("test suite map size is {}"+ testSuiteMap.size());
+
+        //todo remove the failed but retried successful case
+
     }
 
     private TestSuite getCurrentTestSuite(ITestResult result){
-        if(testSuiteMap.get(result.getTestContext().getName())!=null){
-         return   testSuiteMap.get(result.getTestContext().getName());
+        if(testSuiteMap.get(result.getTestContext().getSuite().getName())!=null){
+         return   testSuiteMap.get(result.getTestContext().getSuite().getName());
         }
         throw new RuntimeException("test suite is not initialized,please check your testng file");
     }
@@ -112,5 +116,17 @@ public class SimpleTestListener implements ITestListener{
         }
 
         throw new RuntimeException("test case "+result.getMethod().getMethodName()+" is not initialized");
+    }
+
+    @Override
+    public void generateReport(List<XmlSuite> xmlSuites, List<ISuite> suites, String outputDirectory) {
+        logger.info(testSuiteMap);
+        for (Map.Entry<String,TestSuite> entry : testSuiteMap.entrySet()) {
+            System.out.println(entry);
+            System.out.println(entry.getValue().getSuiteName());
+            for (TestCase testCase : entry.getValue().getTestCases()) {
+                System.out.println(testCase);
+            }
+        }
     }
 }

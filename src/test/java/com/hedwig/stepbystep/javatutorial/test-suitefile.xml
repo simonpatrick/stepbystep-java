@@ -1,14 +1,14 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 <suite name="SuiteALL" verbose="1" >
     <listeners>
-        <!--<listener class-name="com.hedwig.stepbystep.javatutorial.testng.listener.RetryListener"></listener>-->
+        <listener class-name="com.hedwig.stepbystep.javatutorial.testng.listener.RetryListener"></listener>
         <!--<listener class-name="com.hedwig.stepbystep.javatutorial.testng.listener.SimpleTestResultListener"></listener>-->
         <!--<listener class-name="com.hedwig.stepbystep.javatutorial.testng.listener.SimpleSuiteListener"></listener>-->
         <listener class-name="com.hedwig.stepbystep.javatutorial.testng.listener.SimpleTestListener"></listener>
     </listeners>
     <suite-files>
         <suite-file path="test-listener.xml"></suite-file>
-        <suite-file path="test-listener1.xml"></suite-file>
+        <suite-file path="testng-io.xml"></suite-file>
     </suite-files>
 </suite>
 

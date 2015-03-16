@@ -1,5 +1,6 @@
 package com.hedwig.stepbystep.javatutorial.testng.testmodel;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 
 import java.util.Date;
@@ -73,4 +74,15 @@ public class TestSuite {
         return status;
     }
 
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("suiteName", suiteName)
+                .add("description", description)
+                .add("testCases", testCases)
+                .add("startedDate", startedDate)
+                .add("endDate", endDate)
+                .add("status", status)
+                .toString();
+    }
 }

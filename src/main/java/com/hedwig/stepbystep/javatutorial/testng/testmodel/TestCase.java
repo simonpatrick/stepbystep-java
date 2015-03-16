@@ -1,5 +1,6 @@
 package com.hedwig.stepbystep.javatutorial.testng.testmodel;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 
 import java.util.Date;
@@ -115,5 +116,22 @@ public class TestCase {
 
     public void setFailedScreenshotPath(List<String> failedScreenshotPath) {
         this.failedScreenshotPath = failedScreenshotPath;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("testClassName", testClassName)
+                .add("testMethodName", testMethodName)
+                .add("testDescription", testDescription)
+                .add("status", status)
+                .add("errors", errors)
+                .add("startedMills", startedMills)
+                .add("endMills", endMills)
+                .add("isSkipped", isSkipped)
+                .add("parameters", parameters)
+                .add("stepScreenshotPath", stepScreenshotPath)
+                .add("failedScreenshotPath", failedScreenshotPath)
+                .toString();
     }
 }
