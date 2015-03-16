@@ -2,8 +2,7 @@ package com.hedwig.stepbystep.javatutorial.guava.joinersamples;
 
 import com.google.common.collect.Maps;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +26,23 @@ public class JoinerBasicTestByTestNG {
         for (String s : testArray) {
             map.put("key"+s,"value"+s);
         }
+    }
+
+    @BeforeTest
+    public void beforeTest(){
+        System.out.println("before test");
+    }
+
+    @DataProvider(name = "test1")
+    public static Object[][] primeNumbers() {
+        return new Object[][] {{2, true}, {3, false}, {2, true}, {22, false}, {23,false}};
+    }
+
+    // This test will run 4 times since we have 5 parameters defined
+    @Test(dataProvider = "test1")
+    public void testPrimeNumberChecker(Integer inputNumber, Boolean expectedResult) {
+        System.out.println(inputNumber + " " + expectedResult);
+        Assert.assertEquals(expectedResult,Boolean.valueOf(inputNumber.equals(Integer.valueOf(2))));
     }
 
     @Test(description = "Joiner测试")
@@ -53,6 +69,16 @@ public class JoinerBasicTestByTestNG {
     @Test
     public void testJoin2() throws Exception {
         Assert.assertEquals(JoinerBasic.join("#","=",map),"key433=value433#key445=value445#key332=value332");
+    }
+
+    @AfterTest
+    public void AfterTest(){
+        System.out.println("after test!!!");
+    }
+
+    @AfterClass
+    public void destroyed(){
+        System.out.println("destroy something!!!");
     }
 
 }
