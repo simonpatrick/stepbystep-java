@@ -21,17 +21,18 @@ import java.util.Map;
 
 
 public class FreemarkerHelper {
-    private static final String SIMPLE_REPORT_TEMPLATE_DIR="/reports/templates/";
+    private static final String SIMPLE_REPORT_TEMPLATE_DIR="/templates/reports/";
     private static final String SIMPLE_REPORT_TEMPLATE_FILE="testresult.ftl";
-    private static final String SIMPLE_REPORT_DIR ="target/classes/simple-report/";
+    private static final String SIMPLE_REPORT_DIR ="target/test-classes/simple-report/";
     private static final String SIMPLE_REPORT_FILE="testresult.html";
+    private static String classPath =FreemarkerHelper.class.getClassLoader().getSystemResource("").getPath();
     private String outputPath;
 
     private FreemarkerHelper(){}
 
     public static void processSimpleReport(Map testResultData) throws IOException, TemplateException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-        cfg.setDirectoryForTemplateLoading(FileHelper.createDir(SIMPLE_REPORT_TEMPLATE_DIR));
+        cfg.setDirectoryForTemplateLoading(new File(classPath+SIMPLE_REPORT_TEMPLATE_DIR));
         cfg.setDefaultEncoding("UTF-8");
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
 //        Map root = new HashMap<>();
@@ -53,14 +54,14 @@ public class FreemarkerHelper {
         String classPath = FreemarkerHelper.class.getClassLoader().getResource("").getPath();
         System.out.println(classPath);
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-        cfg.setDirectoryForTemplateLoading(new File(classPath+"/reports/templates/"));
+        cfg.setDirectoryForTemplateLoading(new File(classPath+"/templates/reports/"));
         cfg.setDefaultEncoding("UTF-8");
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
 
         Map<String,TestSuite> testSuiteMap = Maps.newHashMap();
         Map root = new HashMap<>();
         TestSuite suite1 = new TestSuite("suite");
-        suite1.setPass(false);
+        suite1.setPassedSuite(false);
         TestCase testCase = new TestCase();
         testCase.setStatus(1);
         testCase.setTestMethodName("test1");
@@ -76,7 +77,7 @@ public class FreemarkerHelper {
         testCase1.setErrors(exception);
         testCase1.addFailedScreenshotPath("screenshots/screenshot-1426553167499.jpg", "screenshots/screenshot-1426553166647.jpg");
         suite1.addTestCase(testCase1);
-        System.out.println(suite1.isPass());
+        System.out.println(suite1.isTestSuiteFailed());
         testSuiteMap.put("suite1",suite1);
 
         System.out.println(suite1);
@@ -95,6 +96,12 @@ public class FreemarkerHelper {
 
     public static void main(String[] args) throws IOException, TemplateException {
 
-        FreemarkerHelper.process("testresult.ftl");
+       FreemarkerHelper.process("testresult.ftl");
+        String path = ClassLoader.getSystemResource("").getPath();
+        File file = new File("reports/templates/");
+        System.out.println(file.exists());
+        System.out.println(file.getPath());
+        System.out.println(path);
+
     }
 }

@@ -80,6 +80,18 @@ public class FileHelper {
         return file;
     }
 
+    public static File createFile(String fileName) {
+        File file = new File(fileName);
+        if(!file.exists()){
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return file;
+    }
+
     public static void checkIfSuitableFile(String path, String ...fileSuffix){
 
         for (String s : fileSuffix) {

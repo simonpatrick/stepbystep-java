@@ -1,4 +1,3 @@
-<div class="contain-fluid">
     <div class="row">
         <div class="sidebar col-sm-3 col-md-2">
             <ul class="nav nav-sidebar">

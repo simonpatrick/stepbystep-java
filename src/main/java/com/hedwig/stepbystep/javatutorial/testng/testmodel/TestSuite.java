@@ -3,10 +3,7 @@ package com.hedwig.stepbystep.javatutorial.testng.testmodel;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by patrick on 15/3/16.
@@ -23,7 +20,7 @@ public class TestSuite {
     private List<TestCase> failedTestCases = Lists.newArrayList();
     private Date startedDate;
     private Date endDate;
-    private Boolean isPass;
+    private boolean isPassedSuite;
 
     public TestSuite(String suiteName) {
         this.suiteName = suiteName;
@@ -88,7 +85,7 @@ public class TestSuite {
                 .add("testCases", testCases)
                 .add("startedDate", startedDate)
                 .add("endDate", endDate)
-                .add("isPass", isPass)
+                .add("isPassedSuite", isPassedSuite)
                 .toString();
     }
 
@@ -99,17 +96,31 @@ public class TestSuite {
         for (TestCase testCase : testCases) {
             String uniqueTestedMethod = testCase.getTestClassName()+testCase.getTestMethodName()+ testCase.getParameters();
             Integer status = testCase.getStatus();
-            if(status==1&&failedResult.get(uniqueTestedMethod)!=null){//retried case
-                failedResult.remove(uniqueTestedMethod);
-                passedResult.put(uniqueTestedMethod,testCase);
+            //already have failed result
+            if(failedResult.get(uniqueTestedMethod)!=null){
+                if(status==1){ //remove the failed case and add passed case,ad retry passed
+                    failedResult.remove(uniqueTestedMethod);
+                    passedResult.put(uniqueTestedMethod,testCase);
+                }// else do nothing,keep it there
             }else{
-                if(status==1) passedResult.put(uniqueTestedMethod,testCase);
-                if(status==2) failedResult.put(uniqueTestedMethod,testCase);
+                if(passedResult.get(uniqueTestedMethod)==null){
+                    if(status==1) {
+                        passedResult.put(uniqueTestedMethod,testCase);
+                    }else if(status==2) failedResult.put(uniqueTestedMethod,testCase);
+                }
             }
         }
-        this.passedTestCases = (List<TestCase>) passedResult.values();
-        this.failedTestCases = (List<TestCase>) failedResult.values();
-        return failedTestCases.size()>0?true:false;
+
+        for (TestCase c : passedResult.values()) {
+            passedTestCases.add(c);
+        }
+
+        for (TestCase f : failedResult.values()) {
+            failedTestCases.add(f);
+        }
+        isPassedSuite=!(failedTestCases.size()>0?true:false);
+        return !isPassedSuite;
+
     }
 
     public List<TestCase> getPassedTestCases() {
@@ -128,14 +139,11 @@ public class TestSuite {
         this.failedTestCases = failedTestCases;
     }
 
-    public boolean isPass() {
-        if(isPass==null){
-           isPass = !isTestSuiteFailed();
-        }
-        return isPass;
+    public boolean  getIsPassedSuite() {
+        return isPassedSuite;
     }
 
-    public void setPass(boolean isPass) {
-        this.isPass = isPass;
+    public void setPassedSuite(boolean isPassedSuite) {
+        this.isPassedSuite = isPassedSuite;
     }
 }

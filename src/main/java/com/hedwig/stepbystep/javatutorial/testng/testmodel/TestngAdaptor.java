@@ -15,7 +15,8 @@ public class TestngAdaptor {
         tc.setStartedMills(result.getStartMillis());
         tc.setEndMills(result.getEndMillis());
         tc.setParameters(result.getParameters());
-        tc.setTestClassName(result.getTestClass().getRealClass().getName());
+        tc.setTestClassName(result.getTestClass().getRealClass().getSimpleName());
+        tc.setTestRealClassName(result.getTestClass().getRealClass().getName());
         tc.setStatus(result.getStatus());
         tc.setTestMethodName(result.getMethod().getMethodName());
         tc.setErrors(result.getThrowable());

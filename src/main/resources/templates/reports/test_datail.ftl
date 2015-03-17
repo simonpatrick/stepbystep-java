@@ -12,7 +12,6 @@
             <thead>
             <tr>
                 <th>#</th>
-                <th>TestSuiteName</th>
                 <th>TestName</th>
                 <th>TestClass</th>
                 <th>TestMethod</th>
@@ -26,7 +25,6 @@
             <#list testcases as testcase>
             <tr>
                 <td>${testcase_index+1}</td>
-                <td>${key}</td>
                 <td>${testcase.testDescription}</td>
                 <td>${testcase.testClassName}</td>
                 <td>${testcase.testMethodName}</td>

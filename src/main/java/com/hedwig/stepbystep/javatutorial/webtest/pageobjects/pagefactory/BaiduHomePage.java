@@ -13,7 +13,7 @@ import org.openqa.selenium.support.How;
 
 public class BaiduHomePage {
 
-    @FindBy(id="kw")
+    @FindBy(id="kw1")
     private WebElement keyword;
 
     @FindBy(id="su")

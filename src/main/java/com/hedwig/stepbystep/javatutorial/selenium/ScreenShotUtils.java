@@ -23,9 +23,22 @@ public class ScreenShotUtils {
     private ScreenShotUtils(){}
     private static final String SCREENSHOT_PATH = "target/screenshots/";
     private static final String PIC_SUFFIX=".jpg";
+    private static String classPath = ScreenShotUtils.class.getClassLoader().getResource("").getPath();
 
     public static String takeScreenshot(WebDriver driver){
         File file = FileHelper.createFile(SCREENSHOT_PATH,generateFileName());
+        File pic = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+        try {
+            FileUtils.copyFile(pic,file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return file.getAbsolutePath();
+    }
+
+    public static String takeScreenshotForSimpleReport(WebDriver driver){
+        String jpgPath = classPath+"simple-report/screenshots/"+generateFileName();
+        File file = FileHelper.createFile(jpgPath);
         File pic = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
         try {
             FileUtils.copyFile(pic,file);

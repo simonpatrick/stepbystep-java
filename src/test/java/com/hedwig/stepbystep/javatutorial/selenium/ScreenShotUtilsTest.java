@@ -5,6 +5,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
+import org.testng.ITestContext;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -14,9 +15,10 @@ public class ScreenShotUtilsTest {
     private EventFiringWebDriver driver ;
 
     @BeforeTest
-    public void init(){
+    public void init(ITestContext context){
         driver = new EventFiringWebDriver(d);
         driver.register(new ScreenshotListener());
+        System.out.println(context.getStartDate());
     }
 
     @Test

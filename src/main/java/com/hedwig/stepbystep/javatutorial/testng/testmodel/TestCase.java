@@ -15,6 +15,7 @@ import java.util.List;
 
 public class TestCase {
     private String testClassName;
+    private String testRealClassName;
     private String testMethodName;
     private String testDescription;
     private int status;
@@ -23,7 +24,7 @@ public class TestCase {
     private long startedMills;
     private long endMills;
     private boolean isSkipped;
-    private Object[] parameters ;
+    private String parameters ;
     private List<String> stepScreenshotPath = Lists.newArrayList();
     private List<String> failedScreenshotPath = Lists.newArrayList();
 
@@ -67,13 +68,6 @@ public class TestCase {
         this.startedMills = startedMills;
     }
 
-    public Object[] getParameters() {
-        return parameters;
-    }
-
-    public void setParameters(Object[] parameters) {
-        this.parameters = parameters;
-    }
 
     public void setEndMills(long endMills) {
         this.endMills = endMills;
@@ -165,5 +159,26 @@ public class TestCase {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    public String getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(Object[] parameters) {
+        StringBuilder sb = new StringBuilder();
+        for (Object o : parameters) {
+            sb.append(o.toString());
+            sb.append(";");
+        }
+        this.parameters = sb.toString();
+    }
+
+    public String getTestRealClassName() {
+        return testRealClassName;
+    }
+
+    public void setTestRealClassName(String testRealClassName) {
+        this.testRealClassName = testRealClassName;
     }
 }

@@ -60,13 +60,3 @@ body {
     display: inline-block;
     border-radius: 50%;
 }
-
-td {
-    max-width: 60px;
-    word-break-wrap: true;
-    text-align: center;
-}
-
-th {
-    text-align: center;
-}

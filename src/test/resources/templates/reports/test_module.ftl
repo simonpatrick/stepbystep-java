@@ -18,6 +18,7 @@
             <tr>
                 <th>ID</th>
                 <th>测试模块</th>
+                <th>测试Case数量</th>
                 <th>测试结果</th>
             </tr>
             <tbody>
@@ -27,8 +28,10 @@
                     <td>${key_index+1}</td>
                     <td>${key}</td>
                     <#assign testsuite=testSuiteMap[key]>
+                    <td>${testsuite.testCases?size}<td>
                     <td>
-                        <#if testsuite.status>
+                        <#assign flag=testsuite.isPassedSuite>
+                        <#if flag>
                             <span class="label label-success">pass</span>
                         <#else >
                             <span class="label label-danger">failed</span>
