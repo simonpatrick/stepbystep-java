@@ -19,6 +19,7 @@ public class TestngAdaptor {
         tc.setStatus(result.getStatus());
         tc.setTestMethodName(result.getMethod().getMethodName());
         tc.setErrors(result.getThrowable());
+
         if(result.getMethod().getDescription()==null){
             tc.setTestDescription(result.getMethod().getMethodName());
         }else{

@@ -89,4 +89,10 @@ public class FileHelper {
         throw  new RuntimeException("File suffix "+fileSuffix+" is not correct,please check the file");
 
     }
+
+    public static File createDir(String dir) {
+        File d = new File(dir);
+        d.mkdir();
+        return d;
+    }
 }

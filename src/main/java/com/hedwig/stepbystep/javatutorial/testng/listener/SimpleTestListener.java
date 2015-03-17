@@ -1,14 +1,18 @@
 package com.hedwig.stepbystep.javatutorial.testng.listener;
 
 import com.google.common.collect.Maps;
+import com.hedwig.stepbystep.javatutorial.freemarker.FreemarkerHelper;
 import com.hedwig.stepbystep.javatutorial.testng.testmodel.TestCase;
 import com.hedwig.stepbystep.javatutorial.testng.testmodel.TestSuite;
 import com.hedwig.stepbystep.javatutorial.testng.testmodel.TestngAdaptor;
+import freemarker.template.TemplateException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.*;
 import org.testng.xml.XmlSuite;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +27,6 @@ public class SimpleTestListener implements ITestListener,IReporter{
 
     private Map<String,TestSuite> testSuiteMap = Maps.newConcurrentMap();
     private static final Logger logger = LogManager.getLogger(SimpleTestListener.class.getName());
-
 
     @Override
     public void onTestStart(ITestResult result) {
@@ -121,12 +124,39 @@ public class SimpleTestListener implements ITestListener,IReporter{
     @Override
     public void generateReport(List<XmlSuite> xmlSuites, List<ISuite> suites, String outputDirectory) {
         logger.info(testSuiteMap);
-        for (Map.Entry<String,TestSuite> entry : testSuiteMap.entrySet()) {
-            System.out.println(entry);
-            System.out.println(entry.getValue().getSuiteName());
-            for (TestCase testCase : entry.getValue().getTestCases()) {
-                System.out.println(testCase);
-            }
+//        for (Map.Entry<String,TestSuite> entry : testSuiteMap.entrySet()) {
+//            System.out.println(entry);
+//            System.out.println(entry.getValue().getSuiteName());
+//            for (TestCase testCase : entry.getValue().getTestCases()) {
+//                System.out.println(testCase);
+//            }
+//        }
+        Map freeMarkerData = new HashMap<>();
+        boolean isFailed = false;
+        int total_suite_count = testSuiteMap.size();
+        int total_test_case_count =0;
+        int total_failed_case_count=0;
+        int total_passed_case_count=0;
+        for (Map.Entry<String, TestSuite> testSuiteEntry: testSuiteMap.entrySet()) {
+            if(testSuiteEntry.getValue().isTestSuiteFailed()) isFailed =true;
+            total_suite_count+=testSuiteEntry.getValue().getTestCases().size();
+            total_failed_case_count+=testSuiteEntry.getValue().getFailedTestCases().size();
+            total_passed_case_count+=testSuiteEntry.getValue().getPassedTestCases().size();
+        }
+
+        freeMarkerData.put("testSuiteMap",testSuiteMap);
+        freeMarkerData.put("isFailed",isFailed);
+        freeMarkerData.put("total_suite_count",total_suite_count);
+        freeMarkerData.put("total_test_case_count",total_test_case_count);
+        freeMarkerData.put("total_failed_case_count",total_failed_case_count);
+        freeMarkerData.put("total_passed_case_count",total_passed_case_count);
+
+        try {
+            FreemarkerHelper.processSimpleReport(freeMarkerData);
+        } catch (IOException e) {
+            logger.error(e);
+        } catch (TemplateException e) {
+            logger.error(e);
         }
     }
 }

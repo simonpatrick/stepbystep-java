@@ -19,6 +19,7 @@ public class TestCase {
     private String testDescription;
     private int status;
     private Throwable errors ;
+    private String errorMessage;
     private long startedMills;
     private long endMills;
     private boolean isSkipped;
@@ -92,6 +93,7 @@ public class TestCase {
 
     public void setErrors(Throwable errors) {
         this.errors = errors;
+        generateErrorMessage();
     }
 
     public String getTestDescription() {
@@ -118,6 +120,12 @@ public class TestCase {
         this.failedScreenshotPath = failedScreenshotPath;
     }
 
+    public void addFailedScreenshotPath(String ... path){
+        for (String s : path) {
+            this.failedScreenshotPath.add(s);
+        }
+    }
+
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
@@ -133,5 +141,29 @@ public class TestCase {
                 .add("stepScreenshotPath", stepScreenshotPath)
                 .add("failedScreenshotPath", failedScreenshotPath)
                 .toString();
+    }
+
+    private void generateErrorMessage(){
+       if(errors==null) return ;
+        StringBuilder sb= new StringBuilder();
+        sb.append(errors.getMessage());
+        sb.append("\n");
+        sb.append("cause:");
+        sb.append("\n");
+        sb.append(errors.getCause());
+        sb.append("\n");
+        for (StackTraceElement stackTraceElement : errors.getStackTrace()) {
+            sb.append(stackTraceElement);
+            sb.append("\n");
+        }
+
+        this.errorMessage=sb.toString();
+    }
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 }
