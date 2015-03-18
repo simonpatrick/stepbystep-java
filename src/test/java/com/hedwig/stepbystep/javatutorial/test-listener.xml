@@ -8,8 +8,7 @@
     </listeners>
     <test name ="BaiDuHomePagePageFactory">
         <classes>
-            <class name="com.hedwig.stepbystep.javatutorial.webtest.pageobjects.pagefactory.BaiduHomePageFactoryTest">
-            </class>
+            <class name="com.hedwig.stepbystep.javatutorial.webtest.pageobjects.pagefactory.BaiduHomePageFactoryTest"></class>
         </classes>
     </test>
 </suite>

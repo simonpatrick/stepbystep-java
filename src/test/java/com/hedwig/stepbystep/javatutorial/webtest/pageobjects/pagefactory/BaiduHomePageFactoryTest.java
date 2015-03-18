@@ -15,6 +15,7 @@ public class BaiduHomePageFactoryTest extends BaseWebTest {
         BaiduHomePage page =  PageFactory.initElements(super.driver, BaiduHomePage.class);
         page.getKeyword().sendKeys("test");
         page.getSubmit().click();
+        page.getVoiceRec().click();
 
         assertNotNull(super.driver.getTitle());
     }

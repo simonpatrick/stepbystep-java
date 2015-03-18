@@ -141,10 +141,13 @@ public class TestCase {
        if(errors==null) return ;
         StringBuilder sb= new StringBuilder();
         sb.append(errors.getMessage());
+        sb.append("----------------------\n");
         sb.append("\n");
         sb.append("cause:");
+        sb.append("----------------------\n");
         sb.append("\n");
         sb.append(errors.getCause());
+        sb.append("----------------------\n");
         sb.append("\n");
         for (StackTraceElement stackTraceElement : errors.getStackTrace()) {
             sb.append(stackTraceElement);
@@ -166,6 +169,7 @@ public class TestCase {
     }
 
     public void setParameters(Object[] parameters) {
+
         StringBuilder sb = new StringBuilder();
         for (Object o : parameters) {
             sb.append(o.toString());
