@@ -48,7 +48,7 @@ public class BaseWebTest {
     }
 
     @AfterSuite
-    public void clearup(){
+    public void cleanup(){
 
         driver.quit();
     }
