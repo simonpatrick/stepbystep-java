@@ -137,6 +137,7 @@ public class SimpleWebDriverScreenShotTestListener extends AbstractWebDriverEven
 
     @Override
     public void onException(Throwable throwable, WebDriver driver) {
+
         String errorStringShotPath = ScreenShotUtils.takeScreenshotForSimpleReport(driver);
         getCurrentTestCase(currentResult.get()).addFailedScreenshotPath(errorStringShotPath);
     }

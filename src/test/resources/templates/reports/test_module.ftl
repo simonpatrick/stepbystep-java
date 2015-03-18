@@ -3,8 +3,8 @@
     <h3>
     <#if isFailed>
         <span class="label label-danger">Total: ${total_suite_count} test suites, ${total_test_case_count}
-            test cases,${total_passed_case_count} test cases passed,其他为相同case或者重试通过case
-        ${total_failed_case_count} test cases failed</span>
+            test cases,${total_passed_case_count} test cases 通过,
+        ${total_failed_case_count} test cases 失败，其他为相同case或者重试通过case</span>
     <#else>
         <span class="label label-success">Total: ${total_suite_count} test suites, ${total_test_case_count}
             test cases,${total_passed_case_count} test cases passed,其他为相同case或者重试通过case</span>

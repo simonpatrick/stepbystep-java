@@ -44,7 +44,6 @@ public class BaseWebTest {
 
     @AfterTest
     public void after(){
-
         driver.quit();
     }
 
