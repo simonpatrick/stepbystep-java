@@ -60,3 +60,26 @@ body {
     display: inline-block;
     border-radius: 50%;
 }
+
+td {
+    max-width: 120px;
+    text-align: left;
+    word-wrap:break-word;
+    align-content: flex-start;
+}
+
+td.idColumn {
+    width: 5px;
+}
+td.resultColumn{
+    width: 20px;
+}
+
+th {
+    text-align: left;
+    max-width: 120px;
+}
+
+table {
+    width: 95%;
+}

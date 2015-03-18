@@ -9,6 +9,7 @@
     <suite-files>
         <suite-file path="test-listener.xml"></suite-file>
         <suite-file path="testng-io.xml"></suite-file>
+        <suite-file path="test-listener1.xml"></suite-file>
     </suite-files>
 </suite>
 

@@ -24,7 +24,7 @@
             <#assign testcases=testSuiteMap[key].testCases>
             <#list testcases as testcase>
             <tr>
-                <td>${testcase_index+1}</td>
+                <td class="idColumn">${testcase_index+1}</td>
                 <td>${testcase.testDescription}</td>
                 <td>${testcase.testClassName}</td>
                 <td>${testcase.testMethodName}</td>
@@ -47,7 +47,7 @@
                 <#assign screenshotId="${key}_${testcase_index+1}_${testcase.testMethodName}"/>
                 <td>
                     <a onclick="hideOrShowScreenshot('#${screenshotId}')"
-                            class="btn btn-primary btn-xs">出错信息和截图</a>
+                            class="btn btn-danger btn-xs">出错信息和截图</a>
                 </td>
                 <div id="${screenshotId}" class="carousel slide hide" data-ride="carousel">
                     <ol class="carousel-indicators">

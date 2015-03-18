@@ -7,6 +7,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,20 +37,24 @@ public class ScreenShotUtils {
         return file.getAbsolutePath();
     }
 
-    public static String takeScreenshotForSimpleReport(WebDriver driver){
-        String jpgPath = classPath+"simple-report/screenshots/"+generateFileName();
-        File file = FileHelper.createFile(jpgPath);
+    public static void takeScreenshot(WebDriver driver, String path){
+        File file = FileHelper.createFile(path);
         File pic = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
         try {
             FileUtils.copyFile(pic,file);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return file.getAbsolutePath();
+    }
+
+    public static String takeScreenshotForSimpleReport(WebDriver driver){
+        String fileName = generateFileName();
+        String jpgPath = classPath+"simple-report/screenshots/"+fileName;
+        takeScreenshot(driver,jpgPath);
+        return "screenshots/"+fileName;
     }
 
     private static String generateFileName(){
         return "screenshot-"+System.currentTimeMillis()+PIC_SUFFIX;
     }
-
 }

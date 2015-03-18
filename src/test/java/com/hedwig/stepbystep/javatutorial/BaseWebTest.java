@@ -21,21 +21,15 @@ public class BaseWebTest {
     protected EventFiringWebDriver driver ;
     protected AbstractWebDriverEventListener eventListener;
 
-    @BeforeClass
-    public void init(){
-        initEventListener();
-    }
-
     @BeforeSuite
-    public void initEventListener(){
-        for (ITestListener listener : TestNG.getDefault().getTestListeners()) {
+    public void initEventListener(ITestContext  context){
+        for (ITestListener listener : ((TestRunner)context).getTestListeners()) {
             if(listener instanceof SimpleWebDriverScreenShotTestListener){
                 eventListener=(SimpleWebDriverScreenShotTestListener)listener;
                 return;
             }
         }
         eventListener = new SimpleWebDriverScreenShotTestListener();
-        TestNG.getDefault().addListener((ITestListener)eventListener);
     }
 
 
@@ -60,8 +54,4 @@ public class BaseWebTest {
         driver.quit();
     }
 
-    @AfterClass
-    public void clearup1(){
-        driver.quit();
-    }
 }
