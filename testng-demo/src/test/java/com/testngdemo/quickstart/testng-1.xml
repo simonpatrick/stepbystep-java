@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="Testng-01" verbose="1" parallel="methods" thread-count="4" >
+    <listeners>
+        <listener class-name="com.testngdemo.advanced.SimpleTestListener"/>
+    </listeners>
+    <test name="Nopackage" >
+        <classes>
+            <class name="com.testngdemo.quickstart.TestNgQuickStart" />
+            <class name="com.testngdemo.quickstart.TestNgQuickStartClassLevel" />
+        </classes>
+    </test>
+
+</suite>

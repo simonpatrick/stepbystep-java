@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results skipped="0" failed="0" total="1" passed="1">
+  <reporter-output>
+  </reporter-output>
+  <suite name="Command line suite" duration-ms="31" started-at="2015-03-17T19:28:39Z" finished-at="2015-03-17T19:28:39Z">
+    <groups>
+    </groups>
+    <test name="Command line test" duration-ms="31" started-at="2015-03-17T19:28:39Z" finished-at="2015-03-17T19:28:39Z">
+      <class name="com.testngdemo.advanced.TestngAnnotationTransform">
+        <test-method status="PASS" signature="before()[pri:0, instance:com.testngdemo.advanced.TestngAnnotationTransform@7cdbc5d3]" name="before" is-config="true" duration-ms="10" started-at="2015-03-18T03:28:39Z" finished-at="2015-03-18T03:28:39Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- before -->
+        <test-method status="PASS" signature="test_transferm1()[pri:0, instance:com.testngdemo.advanced.TestngAnnotationTransform@7cdbc5d3]" name="test_transferm1" duration-ms="1" started-at="2015-03-18T03:28:39Z" description="test_annotaion" finished-at="2015-03-18T03:28:39Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- test_transferm1 -->
+      </class> <!-- com.testngdemo.advanced.TestngAnnotationTransform -->
+    </test> <!-- Command line test -->
+  </suite> <!-- Command line suite -->
+</testng-results>

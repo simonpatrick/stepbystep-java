@@ -1,0 +1,19 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="Testng-02" verbose="1" >
+
+    <test name="02" preserve-order="false" >
+        <classes>
+            <class name="com.testngdemo.quickstart.TestNgAnnotaionAdvanced" />
+        </classes>
+        <groups>
+            <run>
+                <exclude name="P1"></exclude>
+                <exclude name="P2"></exclude>
+                <exclude name="P5"></exclude>
+
+            </run>
+        </groups>
+    </test>
+
+</suite>
