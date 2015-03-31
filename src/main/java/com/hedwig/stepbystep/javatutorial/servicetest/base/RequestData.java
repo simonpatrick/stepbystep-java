@@ -27,6 +27,7 @@ public class RequestData<T> {
                 .add("queryParameters", queryParameters)
                 .add("pathParameters", pathParameters)
                 .add("headers", headers)
+                .add("body",body)
                 .toString();
     }
 

@@ -65,6 +65,12 @@ public class BeanHelper {
         m.invoke(h,Integer.valueOf("1234"));
         System.out.println(m);
 
+        RequestData<Address> data = new RequestData<>();
+        data.setBody(new Address());
+
+        RequestData data1 = new RequestData();
+        BeanUtils.setProperty(data1,"body","testboday");
+        System.out.println(data1);
 
     }
 
