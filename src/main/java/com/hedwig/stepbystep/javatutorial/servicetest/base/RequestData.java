@@ -2,6 +2,7 @@ package com.hedwig.stepbystep.javatutorial.servicetest.base;
 
 import com.beust.jcommander.internal.Lists;
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.Maps;
 
 import java.util.List;
 import java.util.Map;
@@ -13,35 +14,12 @@ import java.util.Map;
  */
 
 
-public class RequestData {
+public class RequestData<T> {
 
-    private List<Map<String,String>> queryParameters= Lists.newArrayList();
-    private List<Map<String,String>> pathParameters= Lists.newArrayList();
-    private List<Map<String, String>> headers = Lists.newArrayList();
-
-    public List<Map<String, String>> getQueryParameters() {
-        return queryParameters;
-    }
-
-    public void setQueryParameters(List<Map<String, String>> queryParameters) {
-        this.queryParameters=queryParameters ;
-    }
-
-    public List<Map<String, String>> getPathParameters() {
-        return pathParameters;
-    }
-
-    public void setPathParameters(List<Map<String, String>> pathParameters) {
-        this.pathParameters = pathParameters;
-    }
-
-    public List<Map<String, String>> getHeaders() {
-        return headers;
-    }
-
-    public void setHeaders(List<Map<String, String>> headers) {
-        this.headers = headers;
-    }
+    private Map<String,String> queryParameters= Maps.newHashMap();
+    private Map<String,String> pathParameters=  Maps.newHashMap();
+    private Map<String,String>  headers = Maps.newHashMap();
+    private T body;
 
     @Override
     public String toString() {
@@ -50,5 +28,37 @@ public class RequestData {
                 .add("pathParameters", pathParameters)
                 .add("headers", headers)
                 .toString();
+    }
+
+    public Map<String, String> getQueryParameters() {
+        return queryParameters;
+    }
+
+    public void setQueryParameters(Map<String, String> queryParameters) {
+        this.queryParameters = queryParameters;
+    }
+
+    public Map<String, String> getPathParameters() {
+        return pathParameters;
+    }
+
+    public void setPathParameters(Map<String, String> pathParameters) {
+        this.pathParameters = pathParameters;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public void setHeaders(Map<String, String> headers) {
+        this.headers = headers;
+    }
+
+    public T getBody() {
+        return body;
+    }
+
+    public void setBody(T body) {
+        this.body = body;
     }
 }

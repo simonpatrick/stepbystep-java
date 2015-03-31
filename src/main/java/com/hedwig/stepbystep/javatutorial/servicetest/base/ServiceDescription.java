@@ -2,7 +2,7 @@ package com.hedwig.stepbystep.javatutorial.servicetest.base;
 
 import com.alibaba.fastjson.JSON;
 import com.beust.jcommander.internal.Lists;
-import com.dooioo.automation.helpers.FileHelper;
+import com.hedwig.stepbystep.javatutorial.helpers.FileHelper;
 import org.springframework.http.HttpMethod;
 
 import java.util.List;

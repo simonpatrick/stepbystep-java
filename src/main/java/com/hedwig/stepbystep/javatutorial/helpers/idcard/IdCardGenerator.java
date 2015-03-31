@@ -1,6 +1,6 @@
+/*
 package com.hedwig.stepbystep.javatutorial.helpers.idcard;
 
-import com.dooioo.automation.helpers.RandomHelper;
 
 import java.io.*;
 import java.util.Collection;
@@ -8,9 +8,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+*/
 /**
- * 身份证自动生成工具
- */
+* 身份证自动生成工具
+*//*
+
 public class IdCardGenerator {
 
 	public static final Map<String, Integer> areaCode = new HashMap<String, Integer>();
@@ -3579,7 +3581,8 @@ public class IdCardGenerator {
 		return builder.toString();
 	}
 
-	/*
+	*/
+/*
 	 * <p>18位身份证验证</p>
 	 * 根据〖中华人民共和国国家标准 GB 11643-1999〗中有关公民身份号码的规定，公民身份号码是特征组合码，由十七位数字本体码和一位数字校验码组成。
 	 * 排列顺序从左至右依次为：六位数字地址码，八位数字出生日期码，三位数字顺序码和一位数字校验码。
@@ -3589,7 +3592,8 @@ public class IdCardGenerator {
 	 * 3.用加出来和除以11，看余数是多少？
 	 * 4.余数只可能有0 1 2 3 4 5 6 7 8 9 10这11个数字。其分别对应的最后一位身份证的号码为1 0 X 9 8 7 6 5 4 3 2。
 	 * 5.通过上面得知如果余数是2，就会在身份证的第18位数字上出现罗马数字的Ⅹ。如果余数是10，身份证的最后一位号码就是2。
-	 */
+	 *//*
+
 	public char calcTrailingNumber(char[] chars) {
 		if (chars.length < 17) {
 			return ' ';
@@ -3664,3 +3668,4 @@ public class IdCardGenerator {
 	}
 
 }
+*/
