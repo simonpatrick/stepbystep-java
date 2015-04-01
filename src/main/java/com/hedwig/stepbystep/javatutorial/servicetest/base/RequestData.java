@@ -20,6 +20,7 @@ public class RequestData<T> {
     private Map<String,String> pathParameters=  Maps.newHashMap();
     private Map<String,String>  headers = Maps.newHashMap();
     private T body;
+    private List<String> testList;
 
     @Override
     public String toString() {
@@ -61,5 +62,13 @@ public class RequestData<T> {
 
     public void setBody(T body) {
         this.body = body;
+    }
+
+    public List<String> getTestList() {
+        return testList;
+    }
+
+    public void setTestList(List<String> testList) {
+        this.testList = testList;
     }
 }

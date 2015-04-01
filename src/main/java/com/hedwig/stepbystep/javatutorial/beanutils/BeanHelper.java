@@ -9,6 +9,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -43,9 +44,17 @@ public class BeanHelper {
         data.setBody(address);
         BeanUtils.setProperty(data, "pathParameters(for)", "test"); //set to Map
         BeanUtils.setProperty(data,"pathParameters(for2)","test2");
-
+        Field[] fields = RequestData.class.getDeclaredFields();
+        for (Field field : fields) {
+            if(field.getName().equalsIgnoreCase("testList")){
+                System.out.println(field.getType());
+                System.out.println(ReflectionHelper.getGenericParameterClass(field));
+            }
+        }
         System.out.println(data);
     }
+
+
 
     public static void SetListValue() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         Employee ee = new Employee();
@@ -71,6 +80,8 @@ public class BeanHelper {
         RequestData data1 = new RequestData();
         BeanUtils.setProperty(data1,"body","testboday");
         System.out.println(data1);
+        
+        
 
     }
 
