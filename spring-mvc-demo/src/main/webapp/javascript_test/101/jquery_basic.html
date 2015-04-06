@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>jquery basic</title>
+    <script type="text/javascript" src="../script/jquery-1.11.1.js"></script>
+    <script src="event_learning.js"></script>
+    <style type="text/css">
+        div.panel,p.flip
+        {
+            margin:0px;
+            padding:5px;
+            text-align:center;
+            background:#e5eecc;
+            border:solid 1px #c3c3c3;
+        }
+        div.panel
+        {
+            height:120px;
+            display:none;
+        }
+    </style>
+</head>
+<body>
+<button id = "hide" type="button">hide p</button>
+<button id = "show" type="button">show p</button>
+<button id="fade">fade</button>
+<p>test text</p>
+<div id="div1" style="width:80px;height:80px;display:none;background-color:red;"></div>
+<br>
+<div id="div2" style="width:80px;height:80px;display:none;background-color:green;"></div>
+<br>
+<div id="div3" style="width:80px;height:80px;display:none;background-color:blue;"></div>
+<div class="panel">
+    <p>this is for test this is test ok slide action</p>
+    <p>this is for test this is test ok slide action</p>
+</div>
+<p class="flip">flip trigger</p>
+<button id="button_animation">开始动画</button>
+<p>默认情况下，所有 HTML 元素的位置都是静态的，并且无法移动。如需对位置进行操作，记得首先把元素的 CSS position 属性设置为 relative、fixed 或 absolute。</p>
+<div id ="div_animation" style="background:#98bf21;height:100px;width:100px;position:absolute;">
+    hello
+</div>
+</body>
+</html>

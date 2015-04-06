@@ -1,0 +1,12 @@
+{
+  "apiName": "PdfParserAPI",
+  "endPoint": "https://api-dev.poolNo.com/fulfillment/pdf/v2/parsing/listingId/{%listingId%}",
+  "parameters": null,
+  "queryParameters": [
+    "fileInfoIds",
+    "eventId"
+  ],
+  "headers": null,
+  "requestBody": null,
+  "httpMethod": "GET"
+}

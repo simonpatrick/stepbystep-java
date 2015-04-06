@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>jquery dom</title>
+    <script type="text/javascript" src="../script/jquery-1.11.1.js"></script>
+    <style>
+        .important
+        {
+            font-weight:bold;
+            font-size:xx-large;
+        }
+
+        .blue
+        {
+            color:blue;
+        }
+    </style>
+    <script>
+        $(document).ready(function(){
+            $("#btn1").click(function(){
+                alert("Text: " + $("#test").text());
+                $("p").prepend("<b>Prepended text</b>. ");
+                $("p").addClass("important");
+                $("p").addClass("blue");
+            });
+            $("#btn2").click(function(){
+                alert("HTML: " + $("#test").html());
+                $("ol").prepend("<li>Prepended item</li>");
+            });
+            $("button").click(function(){
+                alert("Value: " + $("#input").val());
+                $("#input").val(function(i,oriText){
+                    return "new value:"+oriText+"new value"+i;
+                });
+                appendText();
+            });
+
+            $("#w3s").attr({
+                "href" : "http://www.w3school.com.cn/jquery",
+                "title" : "W3School jQuery Tutorial"
+            });
+            $("#w3s").remove();
+
+        });
+        function appendText()
+        {
+            var txt1="<p>Text.</p>";               // 以 HTML 创建新元素
+            var txt2=$("<p></p>").text("Text.");   // 以 jQuery 创建新元素
+            var txt3=document.createElement("p");  // 以 DOM 创建新元素
+            txt3.innerHTML="Text.";
+            $("p").append(txt1,txt2,txt3);         // 追加新元素
+        }
+    </script>
+</head>
+<body>
+<input id="input" value="test" type="text"/>
+<a id="w3s">teset</a>
+<p id="test">这是段落中的<b>粗体</b>文本。</p>
+<button id="btn1" >显示文本</button>
+<button id="btn2">显示 HTML</button>
+</body>
+</html>

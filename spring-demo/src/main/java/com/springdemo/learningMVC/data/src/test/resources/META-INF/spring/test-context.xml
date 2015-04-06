@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2009-2014. 上海诺诺镑客 All rights reserved.
+  ~ @(#) test-context.xml 2014-10-27 16:48
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <context:property-placeholder ignore-resource-not-found="true"
+                                  location="classpath*:/META-INF/config/test-*.properties" />
+
+    <context:component-scan base-package="com.nonobank.data.repository"
+                            use-default-filters="false">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Repository" />
+    </context:component-scan>
+
+    <!-- Druid 数据库源配置 -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+          init-method="init" destroy-method="close">
+        <!-- 基本属性 url、user、password -->
+        <property name="url" value="${testDataSource.jdbcUrl}"/>
+        <property name="username" value="${testDataSource.username}"/>
+        <property name="password" value="${testDataSource.password}"/>
+
+        <!-- 配置初始化大小、最小、最大 -->
+        <property name="initialSize" value="${testDataSource.initialSize}"/>
+        <property name="minIdle" value="${testDataSource.minIdle}"/>
+        <property name="maxActive" value="${testDataSource.maxActive}"/>
+
+        <!-- 配置获取连接等待超时的时间 -->
+        <property name="maxWait" value="${testDataSource.maxWait}"/>
+
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="60000"/>
+
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="300000"/>
+
+        <property name="validationQuery" value="VALUES (CURRENT_TIMESTAMP)"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnBorrow" value="false"/>
+        <property name="testOnReturn" value="false"/>
+
+        <!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+        <!--property name="poolPreparedStatements" value="true"/>
+        <property name="maxPoolPreparedStatementPerConnectionSize" value="20"/-->
+
+        <!-- 配置监控统计拦截的filters。状态统计：stat，日常记录：slf4j -->
+        <property name="filters" value="stat,slf4j"/>
+    </bean>
+
+    <jdbc:initialize-database data-source="dataSource" ignore-failures="ALL">
+        <jdbc:script location="classpath*:META-INF/config/test-database.sql" />
+    </jdbc:initialize-database>
+
+    <bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+        <property name="converters">
+            <set>
+                <bean class="com.nonobank.data.convert.spring.TimestampToDateTimeConverter" factory-method="getInstance" />
+            </set>
+        </property>
+    </bean>
+
+    <!--<bean id="queryDslJdbcTemplate" class="com.nonobank.data.jdbc.query.QueryDslJdbcTemplate">
+        <constructor-arg ref="dataSource" />
+        <property name="customColumnTypes">
+            <map key-type="java.lang.String" value-type="java.com.common.util.Map">
+                <entry key="TEST_DOMAIN">
+                    <map key-type="java.lang.String" value-type="com.mysema.query.sql.types.Type">
+                        <entry key="STATUS">
+                            <bean class="com.nonobank.data.jdbc.types.TUserStatusType" />
+                        </entry>
+                    </map>
+                </entry>
+            </map>
+        </property>
+    </bean>-->
+
+    <bean id="jpmRepositoryInterceptor" class="com.data.spring.aop.interceptor.CustomJamonPerformanceMonitorInterceptor">
+        <property name="enabled" value="${jpm.repository.enabled}" />
+        <property name="loggerName" value="${jpm.repository.loggerName}" />
+        <property name="showParameters" value="${jpm.repository.showParameters}" />
+        <property name="logTargetClassInvocation" value="true" />
+    </bean>
+
+    <bean id="jpmServiceInterceptor" class="com.data.spring.aop.interceptor.CustomJamonPerformanceMonitorInterceptor">
+        <property name="enabled" value="${jpm.service.enabled}" />
+        <property name="loggerName" value="${jpm.service.loggerName}" />
+        <property name="showParameters" value="${jpm.service.showParameters}" />
+        <property name="logTargetClassInvocation" value="true" />
+    </bean>
+
+    <bean id="domainRepositoryInterceptor" class="com.nonobank.data.repository.support.DomainRepositoryInterceptor" />
+
+    <aop:config proxy-target-class="true">
+        <aop:pointcut id="repositoryPointcut0"
+                      expression="@within(org.springframework.stereotype.Repository)" />
+        <aop:pointcut id="servicePointcut"
+                      expression="@within(org.springframework.stereotype.Service)" />
+        <aop:advisor pointcut-ref="repositoryPointcut0" advice-ref="jpmRepositoryInterceptor" />
+        <aop:advisor pointcut-ref="servicePointcut" advice-ref="jpmServiceInterceptor" />
+        <aop:advisor pointcut-ref="repositoryPointcut0" advice-ref="domainRepositoryInterceptor" />
+    </aop:config>
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManager" />
+
+    <import resource="test-redis.xml" />
+</beans>

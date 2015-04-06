@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2009-2014. 上海诺诺镑客 All rights reserved.
+  ~ @(#) logback-test.xml 2014-10-27 16:48
+  -->
+
+<configuration>
+
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+
+    <!-- To enable JMX Management -->
+    <jmxConfigurator/>
+
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%-5level|%-40.40logger{0}|%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com.nonobank" level="debug" />
+    <logger name="com.nonobank.data.jdbc.query" level="debug" />
+    <logger name="org.springframework.data" level="info" />
+
+    <logger name="org.springframework.beans" level="info" />
+
+    <root level="info">
+        <appender-ref ref="console" />
+    </root>
+</configuration>

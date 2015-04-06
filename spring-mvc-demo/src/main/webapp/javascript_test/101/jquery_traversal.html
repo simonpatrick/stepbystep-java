@@ -1,0 +1,66 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <script src="../script/jquery-1.11.1.js" type="text/javascript"></script>
+    <script src="dom_traversal.js" type="text/javascript"></script>
+    <title>dom traversal</title>
+</head>
+<body class="ancestors">body (曾曾祖父)
+<div id ="div1" style="width:500px;">div (曾祖父)
+    <ul>ul (祖父)
+        <li>li (直接父)
+            <span id="span1">span</span>
+        </li>
+    </ul>
+</div>
+<div id="div2">div (父)
+    <p>p</p>
+    <span id="span2">span</span>
+    <h2>h2</h2>
+    <h3>h3</h3>
+    <h4>h4</h4>
+    <h5>h5</h5>
+    <h6>h6</h6>
+    <p>p</p>
+</div>
+
+<div id="div3">
+    文档遍历处理
+    <button id="test1">文档筛选eq</button>
+    <button id="test2">文档筛选filter</button>
+    <button id="test3">文档筛选not</button>
+    <button id="test4">树遍历children</button>
+    <button id="test5">树遍历closest</button>
+    <button id="test6">树遍历find</button>
+
+    <ul class="level-1">
+        <li class="item-i">I</li>
+        <li class="item-ii">II
+            <ul class="level-2">
+                <li class="item-a">A</li>
+                <li class="item-b">B
+                    <ul class="level-3">
+                        <li class="item-1">1</li>
+                        <li class="item-2">2</li>
+                        <li class="item-3">3</li>
+                    </ul>
+                </li>
+                <li class="item-c">C</li>
+            </ul>
+        </li>
+        <li class="item-iii">III</li>
+    </ul>
+</div>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+

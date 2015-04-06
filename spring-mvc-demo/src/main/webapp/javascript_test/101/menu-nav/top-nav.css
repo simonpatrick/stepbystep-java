@@ -1,0 +1,47 @@
+.top-nav{
+    font-size: 14px;
+    font-weight: bold;
+    list-style: none;
+}
+
+
+.top-nav li{
+    float: left;
+    margin-right: 1px;
+}
+
+.top-nav li a {
+    line-height: 34px;
+    text-decoration: none;
+    background: #FFCACA;
+    color:#999999;
+    display: block;
+    width:80px;
+    text-align: center;
+}
+
+.top-nav ul{
+    list-style: none;
+    display: none;
+    padding: 0;
+    position: absolute;
+    height: 0;
+    overflow: hidden;
+}
+
+.top-nav li a:hover{
+    background: url(../../image/bg.jpg) 0 0 repeat-x;
+}
+
+.home{
+    color:#008000;
+    display: block;
+    background: url(../../image/bg.jpg) 0 0 repeat-x;
+}
+
+.corner{
+    display: block;
+    height: 11px;
+    background: url("../../image/triangle.jpg");
+
+}

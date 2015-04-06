@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2009-2014. 上海诺诺镑客 All rights reserved.
+  ~ @(#) test-context-jta.xml 2014-11-11 11:06
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <context:property-placeholder ignore-resource-not-found="true"
+                                  location="classpath*:/META-INF/config/*-jta.properties" />
+
+    <import resource="classpath:/META-INF/spring/default-activemq.xml" />
+
+    <context:component-scan base-package="com.nonobank.data.jdbc, com.nonobank.data.service, com.nonobank.data.repository"
+                            use-default-filters="false">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Service" />
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Component" />
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Repository" />
+    </context:component-scan>
+
+    <bean id="userTransaction" class="com.atomikos.icatch.jta.UserTransactionImp">
+        <property name="transactionTimeout" value="1000"/>
+    </bean>
+
+    <bean id="ds1" class="com.atomikos.jdbc.AtomikosDataSourceBean"
+            init-method="init" destroy-method="close">
+        <property name="uniqueResourceName" value="${ds1.name}" />
+        <property name="xaDataSourceClassName" value="${ds1.className}" />
+        <property name="xaProperties">
+            <props>
+                <prop key="url">${ds1.jdbcUrl}</prop>
+                <prop key="user">${ds1.username}</prop>
+                <prop key="password">${ds1.password}</prop>
+            </props>
+        </property>
+        <property name="minPoolSize" value="${ds1.minPoolSize}"/>
+        <property name="maxPoolSize" value="${ds1.maxPoolSize}"/>
+        <property name="testQuery" value="select CURRENT_TIMESTAMP" />
+        <!--<property name="borrowConnectionTimeout" value="30"/>
+        <property name="maintenanceInterval" value="60" />-->
+    </bean>
+
+    <bean id="ds2" class="com.atomikos.jdbc.AtomikosDataSourceBean"
+          init-method="init" destroy-method="close">
+        <property name="uniqueResourceName" value="${ds2.name}" />
+        <property name="xaDataSourceClassName" value="${ds2.className}" />
+        <property name="xaProperties">
+            <props>
+                <prop key="url">${ds2.jdbcUrl}</prop>
+                <prop key="user">${ds2.username}</prop>
+                <prop key="password">${ds2.password}</prop>
+            </props>
+        </property>
+        <property name="minPoolSize" value="${ds2.minPoolSize}"/>
+        <property name="maxPoolSize" value="${ds2.maxPoolSize}"/>
+        <property name="testQuery" value="select CURRENT_TIMESTAMP" />
+        <!--<property name="borrowConnectionTimeout" value="30"/>
+        <property name="maintenanceInterval" value="60" />-->
+    </bean>
+
+    <bean id="activeMQXAConnectionFactory"
+          class="org.apache.activemq.ActiveMQXAConnectionFactory">
+        <property name="brokerURL" value="${jms.brokerURL}" />
+    </bean>
+
+    <bean id="jmsAtomikosConnectionFactory" class="com.atomikos.jms.AtomikosConnectionFactoryBean"
+            init-method="init" destroy-method="close">
+        <property name="uniqueResourceName" value="ds3" />
+        <property name="localTransactionMode" value="false" />
+        <property name="xaConnectionFactory" ref="activeMQXAConnectionFactory"/>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+        <property name="transactionManager">
+            <bean class="com.atomikos.icatch.jta.UserTransactionManager"
+                    init-method="init" destroy-method="close">
+                <property name="forceShutdown" value="true"/>
+            </bean>
+        </property>
+        <property name="userTransaction" ref="userTransaction"/>
+    </bean>
+
+    <bean id="ds1JdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="ds1"/>
+    </bean>
+    <bean id="ds2JdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="ds2"/>
+    </bean>
+    <bean id="xaJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="jmsAtomikosConnectionFactory"/>
+    </bean>
+
+    <bean id="ds1QueryDslJdbcTemplate" class="com.nonobank.data.jdbc.query.QueryDslJdbcTemplate">
+        <constructor-arg ref="ds1JdbcTemplate"/>
+    </bean>
+
+    <bean id="ds2QueryDslJdbcTemplate" class="com.nonobank.data.jdbc.query.QueryDslJdbcTemplate">
+        <constructor-arg ref="ds2JdbcTemplate"/>
+    </bean>
+
+    <bean id="defaultEntityUpdateListener" class="com.nonobank.data.repository.listener.DefaultEntityUpdateListener">
+        <property name="queryDslJdbcTemplate" ref="ds1QueryDslJdbcTemplate"/>
+    </bean>
+
+    <bean id="transactionInterceptor" class="org.springframework.transaction.interceptor.TransactionInterceptor">
+        <property name="transactionManager" ref="transactionManager"/>
+        <property name="transactionAttributeSource">
+            <bean class="org.springframework.transaction.annotation.AnnotationTransactionAttributeSource" />
+        </property>
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true" />
+
+    <bean id="simpleTextMessageListener" class="com.nonobank.data.jms.SimpleTextMessageListener" />
+
+    <bean id="testJmsContainer"
+          class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="transactionManager" ref="transactionManager"/>
+        <property name="connectionFactory" ref="jmsAtomikosConnectionFactory"/>
+        <property name="destinationResolver" ref="beanFactoryDestinationResolver"/>
+        <property name="messageListener" ref="simpleTextMessageListener" />
+        <property name="destination" ref="defaultQueue"/>
+    </bean>
+</beans>

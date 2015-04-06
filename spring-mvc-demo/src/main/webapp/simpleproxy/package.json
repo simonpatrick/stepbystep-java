@@ -1,0 +1,13 @@
+{
+  "name" : "simpleproxy",
+  "description" : "A simple node.js-based proxy.",
+  "version" : "0.1",
+  "main" : "simpleproxy.js",
+  "author" : {
+    "name" : "simonpatrick"
+  },
+  "keywords" : [ "node", "nodejs", "proxy", "http" ],
+  "licenses" : {
+    "type" : "MIT"
+  }
+}
