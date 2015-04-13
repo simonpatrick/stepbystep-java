@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html ng-app="demoApp">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>angular_101</title>
+    <link rel="stylesheet" href="../../css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../../css/bootstrap-theme.min.css"/>
+</head>
+<body>
+<div ng-controller="SimpleController" class="container" ng-init="names=['dave','patrick','simon']">
+    Name:<input type="text" ng-model="newCustomer.name">
+    Name:<input type="text" ng-model="newCustomer.city">
+    <button ng-click="addCustomer()">add customer</button>
+    <ul>
+        <li ng-repeat="name in names">{{ name }}</li>
+        <li ng-repeat="name in names |filter:nameText|orderBy:'name'">{{name|uppercase}}</li>
+    </ul>
+    <ul >
+        <li ng-repeat="cust in customers">{{cust.name +":" + cust.city}}</li>
+    </ul>
+</div>
+<script src="../../js/angular.min.js"></script>
+<script src="SimpleController.js"></script>
+</body>
+</html>
