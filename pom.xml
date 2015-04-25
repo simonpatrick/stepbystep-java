@@ -15,6 +15,7 @@
         <module>hedwig-designpattern</module>
         <module>hedwig-algorithms</module>
         <module>hedwig-functionaljava</module>
+        <module>hedwig-data-examples</module>
     </modules>
 
     <properties>
