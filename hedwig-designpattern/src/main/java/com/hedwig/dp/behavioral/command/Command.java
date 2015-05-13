@@ -8,7 +8,7 @@ package com.hedwig.dp.behavioral.command;
 
 
 public abstract class Command {
-    public abstract void execute();
+    public abstract void execute(Target target);
     public abstract void undo();
     @Override
     public abstract String toString();

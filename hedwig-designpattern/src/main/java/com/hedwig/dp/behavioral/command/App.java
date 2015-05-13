@@ -8,7 +8,17 @@ package com.hedwig.dp.behavioral.command;
 
 
 public class App {
-    public static void main(String[] args) {
 
+    public static void main(String[] args) {
+        Wizard wizard = new Wizard();
+        DefaultTarget target = new DefaultTarget();
+        target.printStatus();
+        wizard.castSpell(new ShrinkSpell(),target);
+        target.printStatus();
+
+        wizard.castSpell(new InvisibilitySpell(),target);
+        target.printStatus();
+        wizard.undoLastSpell();
+        target.printStatus();
     }
 }
