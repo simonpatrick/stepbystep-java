@@ -10,6 +10,6 @@ public class MyAsyncExceptionHandler extends SimpleAsyncUncaughtExceptionHandler
 
     @Override
     public void handleUncaughtException(Throwable throwable, Method method, Object... args) {
-        System.out.println("MyAsyncExceptionHandler happened, message : " + throwable.getMessage()+"method name:"+method.getName());
+        System.out.println("MyAsyncExceptionHandler happened, message : " + throwable.getMessage() + "method name:" + method.getName());
     }
 }

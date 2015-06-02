@@ -17,13 +17,15 @@ public class TodoController {
     private static final ConcurrentSkipListMap<Long, ToDoList> ToDoListRepository = new ConcurrentSkipListMap<Long, ToDoList>();
 
     @RequestMapping(value = "/ToDoList", method = RequestMethod.GET, produces = "application/json")
-    public @ResponseBody
+    public
+    @ResponseBody
     List<ToDoList> list() {
         return new ArrayList<ToDoList>(ToDoListRepository.values());
     }
 
     @RequestMapping(value = "/ToDoList/{id}", method = RequestMethod.GET, produces = "application/json")
-    public @ResponseBody
+    public
+    @ResponseBody
     ToDoList getById(@PathVariable long id) {
         return ToDoListRepository.get(id);
     }

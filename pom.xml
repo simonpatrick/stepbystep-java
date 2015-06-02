@@ -16,6 +16,8 @@
         <module>hedwig-algorithms</module>
         <module>hedwig-functionaljava</module>
         <module>hedwig-data-examples</module>
+        <module>hedwig-performance-bm</module>
+        <module>spring-mvc-angularjs</module>
     </modules>
 
     <properties>
