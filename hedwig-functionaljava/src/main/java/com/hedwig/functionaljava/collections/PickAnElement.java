@@ -17,12 +17,12 @@ import static java.util.stream.Collectors.joining;
 
 public class PickAnElement {
     public static void main(String[] args) {
-        final List<String> startWithN = friends.stream().filter(name->name.startsWith("N"))
+        final List<String> startWithN = friends.stream().filter(name -> name.startsWith("N"))
                 .collect(Collectors.toList());
         System.out.println(startWithN);
         System.out.println(friends.stream().filter(name -> name.startsWith("N"))
                 .count());
-        Predicate<String> startN = name->name.startsWith("N");
+        Predicate<String> startN = name -> name.startsWith("N");
         System.out.println(friends.stream().filter(startN)
                 .count());
         System.out.println(friends.stream()
@@ -30,14 +30,14 @@ public class PickAnElement {
                 .collect(joining(", ")));
 
         List<String> transformedList = Lists.newLinkedList();
-        friends.forEach(element->transformedList.add(element.toUpperCase()));
+        friends.forEach(element -> transformedList.add(element.toUpperCase()));
         System.out.println(transformedList);
 
-        friends.stream().map(name->name.toLowerCase())
-                .forEach(element ->{
+        friends.stream().map(name -> name.toLowerCase())
+                .forEach(element -> {
                     transformedList.add(element);
                     System.out.println(transformedList);
-                } );
+                });
         System.out.println(transformedList);
     }
 }

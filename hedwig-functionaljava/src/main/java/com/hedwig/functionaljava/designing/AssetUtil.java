@@ -5,7 +5,9 @@ import java.util.List;
 import com.hedwig.functionaljava.designing.Asset.AssetType;
 
 public class AssetUtil {
-  public static int totalAssetValues(final List<Asset> assets) {
+
+
+    public static int totalAssetValues(final List<Asset> assets) {
     return assets.stream()
                  .mapToInt(Asset::getValue)
                  .sum();
