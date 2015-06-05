@@ -1,4 +1,4 @@
-package com.testngdemo.quickstart;
+package com.hedwig.stepbystep.javatutorial.quickstart;
 
 import org.testng.annotations.*;
 

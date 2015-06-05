@@ -1,4 +1,4 @@
-package com.testngdemo.advanced;
+package com.hedwig.stepbystep.javatutorial.advanced;
 
 import org.testng.ITestContext;
 import org.testng.ITestListener;

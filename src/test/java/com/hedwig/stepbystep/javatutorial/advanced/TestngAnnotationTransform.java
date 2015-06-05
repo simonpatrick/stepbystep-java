@@ -1,4 +1,4 @@
-package com.testngdemo.advanced;
+package com.hedwig.stepbystep.javatutorial.advanced;
 
 import com.google.common.collect.Lists;
 import org.testng.*;

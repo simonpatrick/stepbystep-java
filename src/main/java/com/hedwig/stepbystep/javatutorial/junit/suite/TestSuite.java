@@ -1,8 +1,8 @@
 package com.hedwig.stepbystep.javatutorial.junit.suite;
 
-import com.testinglearning.junit.basic.MatcherAssertionTests;
-import com.testinglearning.junit.basic.SimpleJUnitTests;
-import com.testinglearning.junit.parameterized.FibonacciTest;
+import com.hedwig.stepbystep.javatutorial.junit.basic.MatcherAssertionTests;
+import com.hedwig.stepbystep.javatutorial.junit.basic.SimpleJUnitTests;
+import com.hedwig.stepbystep.javatutorial.junit.parameterized.FibonacciTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 

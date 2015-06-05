@@ -1,4 +1,4 @@
-package com.testngdemo.advanced;
+package com.hedwig.stepbystep.javatutorial.advanced;
 
 import org.testng.IReporter;
 import org.testng.ISuite;
