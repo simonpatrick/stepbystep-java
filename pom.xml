@@ -9,7 +9,6 @@
     <packaging>pom</packaging>
     <version>0.1-SNAPSHOT</version>
     <modules>
-        <module>testng-demo</module>
         <module>spring-demo</module>
         <module>spring-mvc-demo</module>
         <module>hedwig-designpattern</module>
@@ -17,6 +16,7 @@
         <module>hedwig-functionaljava</module>
         <module>hedwig-data-examples</module>
         <module>hedwig-performance-bm</module>
+        <module>dropwizards-samples</module>
     </modules>
 
     <properties>
