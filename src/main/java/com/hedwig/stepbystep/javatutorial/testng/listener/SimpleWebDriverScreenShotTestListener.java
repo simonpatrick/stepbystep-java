@@ -3,6 +3,7 @@ package com.hedwig.stepbystep.javatutorial.testng.listener;
 import com.google.common.collect.Maps;
 import com.hedwig.stepbystep.javatutorial.freemarker.FreemarkerHelper;
 import com.hedwig.stepbystep.javatutorial.selenium.ScreenShotUtils;
+import com.hedwig.stepbystep.javatutorial.testng.experiement.TestCaseDescription;
 import com.hedwig.stepbystep.javatutorial.testng.testmodel.TestCase;
 import com.hedwig.stepbystep.javatutorial.testng.testmodel.TestSuite;
 import com.hedwig.stepbystep.javatutorial.testng.testmodel.TestngAdaptor;
@@ -33,6 +34,10 @@ public class SimpleWebDriverScreenShotTestListener extends AbstractWebDriverEven
     private static final Logger logger = LogManager.getLogger(SimpleWebDriverScreenShotTestListener.class.getName());
     private ThreadLocal<ITestContext> testngContext= new ThreadLocal<>() ;
     private ThreadLocal<ITestResult> currentResult=new ThreadLocal<>();
+
+    //threadLocal-> current ITestContext,ITestResult
+    //TestResultLogging->getCurrent ITestContext,ITestResult -> logging is putting one to this map
+    //Then aggregate these logs to TestResult
     @Override
     public void onTestStart(ITestResult result) {
         //init current test case
@@ -93,6 +98,7 @@ public class SimpleWebDriverScreenShotTestListener extends AbstractWebDriverEven
      */
     private TestCase getCurrentTestCase(ITestResult result){
         TestSuite suite = getCurrentTestSuite(result);
+        //(result.getParameters() instanceof TestCaseDescription)
         for (TestCase tc: suite.getTestCases()) {
             if(tc.getStartedMills()==result.getStartMillis()
                     &&tc.getTestClassName().equalsIgnoreCase(result.getMethod().getRealClass().getSimpleName())

@@ -1,0 +1,12 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="Logger Suite">
+    <listeners>
+    </listeners>
+    <parameter name="priority" value="P1"></parameter>
+    <suite-files>
+        <suite-file path="testng.xml">
+            <parameter name="test1234" value="1234"></parameter>
+        </suite-file>
+        <suite-file path="testng-2.xml"></suite-file>
+    </suite-files>
+</suite>
