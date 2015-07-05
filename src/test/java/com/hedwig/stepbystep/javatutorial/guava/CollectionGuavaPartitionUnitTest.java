@@ -1,6 +1,6 @@
 package com.hedwig.stepbystep.javatutorial.guava;
 
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import java.util.Collection;
