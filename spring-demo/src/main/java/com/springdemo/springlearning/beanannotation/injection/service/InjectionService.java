@@ -1,14 +1,15 @@
 package com.springdemo.springlearning.beanannotation.injection.service;
 
-import com.interview.springlearning.beanannotation.injection.dao.BeanAnnotationDao;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
+import com.springdemo.springlearning.beanannotation.injection.dao.BeanAnnotationDao;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class InjectionService {
-    private static final Logger logger = LogManager.getLogger(InjectionService.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(InjectionService.class.getName());
     @Autowired
     private BeanAnnotationDao dao;
 

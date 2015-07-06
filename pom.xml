@@ -10,7 +10,6 @@
     <version>0.1-SNAPSHOT</version>
     <modules>
         <module>spring-demo</module>
-        <module>spring-mvc-demo</module>
         <module>hedwig-designpattern</module>
         <module>hedwig-algorithms</module>
         <module>hedwig-functionaljava</module>

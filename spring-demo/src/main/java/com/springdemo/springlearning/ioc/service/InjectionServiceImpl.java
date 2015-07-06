@@ -1,11 +1,8 @@
 package com.springdemo.springlearning.ioc.service;
 
-import com.interview.springlearning.ioc.dao.InjectionDao;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.springdemo.springlearning.ioc.dao.InjectionDao;
 
 public class InjectionServiceImpl implements InjectionService {
-    private static final Logger logger = LogManager.getLogger(InjectionServiceImpl.class.getName());
     private InjectionDao dao;
 
     public InjectionServiceImpl(InjectionDao dao) {
@@ -17,7 +14,6 @@ public class InjectionServiceImpl implements InjectionService {
 
     @Override
     public void post() {
-        logger.info("start save injection dao data");
         dao.save();
     }
 
