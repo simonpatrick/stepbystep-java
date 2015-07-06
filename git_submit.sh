@@ -1,10 +1,10 @@
 #! /bin/bash
 
-comment = $1
+comment=$1
 
-if [ ! -n comment ]; then
+if [ ! -n "$comment" ]; then
  echo "your comment is empty"
- comment ="make your changes"
+ comment="make your changes"
 fi
 
 echo "your comments is $comment"
@@ -12,9 +12,9 @@ echo "your comments is $comment"
 echo "start add changes"
 git add .
 echo "start commit changes"
-git commit -m comment
+git commit -m "$comment"
 
-echo "srat push changes"
+echo "start push changes"
 git push
 
 echo "Done.........."
