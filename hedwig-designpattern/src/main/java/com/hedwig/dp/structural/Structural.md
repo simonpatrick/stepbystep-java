@@ -14,3 +14,4 @@ entities.
 * [FluentInterface](FluentInterface) [:notebook:](http://en.wikipedia.org/wiki/Fluent_interface)
 * [Proxy](Proxy) [:notebook:](http://en.wikipedia.org/wiki/Proxy_pattern)
 * [Registry](Registry) [:notebook:](http://en.wikipedia.org/wiki/Service_locator_pattern)
+
