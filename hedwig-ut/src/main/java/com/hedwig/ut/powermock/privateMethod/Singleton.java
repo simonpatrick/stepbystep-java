@@ -1,0 +1,14 @@
+package com.hedwig.ut.powermock.privateMethod;
+
+public class Singleton {
+    private static Singleton singleton = new Singleton();
+    private Singleton() { }
+
+    public static Singleton getInstance() {
+        return singleton;
+    }
+
+    public int crazyServerStuff() {
+        return 1;
+    }
+}
