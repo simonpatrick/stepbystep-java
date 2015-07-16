@@ -12,7 +12,7 @@
 package com.hedwig.algorithm.graphs;
 
 
-import com.interview.algorithm.datastructure.graph.GraphNode;
+import com.hedwig.algorithm.datastructure.graph.GraphNode;
 
 public class GraphFindRoute {
 	
