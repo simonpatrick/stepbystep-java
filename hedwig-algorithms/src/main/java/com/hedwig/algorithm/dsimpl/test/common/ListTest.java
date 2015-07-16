@@ -1,6 +1,7 @@
 package com.hedwig.algorithm.dsimpl.test.common;
 
-import com.jwetherell.algorithms.data_structures.interfaces.IList;
+
+import com.hedwig.algorithm.dsimpl.interfaces.IList;
 
 public class ListTest {
 

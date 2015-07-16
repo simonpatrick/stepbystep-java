@@ -1,8 +1,9 @@
 package com.hedwig.algorithm.dsimpl;
 
+import com.hedwig.algorithm.dsimpl.interfaces.ISet;
+
 import java.util.Random;
 
-import com.jwetherell.algorithms.data_structures.interfaces.ISet;
 
 /**
  * Skip List. A skip list is a data structure for storing a sorted list of items

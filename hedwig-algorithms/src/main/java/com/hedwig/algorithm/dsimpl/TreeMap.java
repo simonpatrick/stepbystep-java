@@ -1,10 +1,10 @@
 package com.hedwig.algorithm.dsimpl;
 
+import com.hedwig.algorithm.dsimpl.interfaces.IMap;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import com.jwetherell.algorithms.data_structures.BinarySearchTree.Node;
-import com.jwetherell.algorithms.data_structures.interfaces.IMap;
 
 /**
  * An tree used to store key->values pairs, this is an implementation of an
@@ -69,7 +69,7 @@ public class TreeMap<K extends Comparable<K>, V> implements BinarySearchTree.INo
      */
     @Override
     public V remove(K key) {
-        Node<K> node = tree.removeValue(key);
+        BinarySearchTree.Node<K> node = tree.removeValue(key);
         V value = null;
         if (node instanceof TreeMapNode) {
             TreeMapNode<K, V> treeMapNode = (TreeMapNode<K, V>) node;
@@ -102,12 +102,12 @@ public class TreeMap<K extends Comparable<K>, V> implements BinarySearchTree.INo
     @Override
     public boolean validate() {
         java.util.Set<K> keys = new java.util.HashSet<K>();
-        Node<K> node = tree.root;
+        BinarySearchTree.Node<K> node = tree.root;
         if (node!=null && !validate(node,keys)) return false;
         return (keys.size()==size());
     }
 
-    private boolean validate(Node<K> node, java.util.Set<K> keys) {
+    private boolean validate(BinarySearchTree.Node<K> node, java.util.Set<K> keys) {
         if (!(node instanceof TreeMapNode)) return false;
 
         TreeMapNode<K,V> tmn = (TreeMapNode<K,V>)node;
@@ -314,13 +314,13 @@ public class TreeMap<K extends Comparable<K>, V> implements BinarySearchTree.INo
                 }
             };
             if (map.tree!=null && map.tree.root!=null) {
-                Node<K> n = map.tree.root;
+                BinarySearchTree.Node<K> n = map.tree.root;
                 levelOrder(n,set);
             }
             return set;
         }
 
-        private void levelOrder(Node<K> node, java.util.Set<Entry<K, V>> set) {
+        private void levelOrder(BinarySearchTree.Node<K> node, java.util.Set<Entry<K, V>> set) {
             TreeMapNode<K,V> tmn = null;
             if (node instanceof TreeMapNode) {
                 tmn = (TreeMapNode<K,V>)node;

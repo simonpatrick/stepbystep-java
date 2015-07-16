@@ -6,9 +6,9 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collections;
 import java.util.Random;
 
+import com.hedwig.algorithm.dsimpl.QuadTree;
 import org.junit.Test;
 
-import com.jwetherell.algorithms.data_structures.QuadTree;
 
 public class QuadTreeTests {
 

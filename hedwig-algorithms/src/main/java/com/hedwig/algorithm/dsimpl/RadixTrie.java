@@ -1,6 +1,7 @@
 package com.hedwig.algorithm.dsimpl;
 
-import com.jwetherell.algorithms.data_structures.interfaces.IMap;
+
+import com.hedwig.algorithm.dsimpl.interfaces.IMap;
 
 /**
  * A radix trie or radix tree is a space-optimized trie data structure where

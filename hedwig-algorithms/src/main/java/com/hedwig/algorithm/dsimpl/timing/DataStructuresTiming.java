@@ -1,5 +1,8 @@
 package com.hedwig.algorithm.dsimpl.timing;
 
+import com.hedwig.algorithm.dsimpl.RadixTrie;
+import com.hedwig.algorithm.dsimpl.*;
+
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Collection;
@@ -10,26 +13,6 @@ import java.util.NavigableSet;
 import java.util.Random;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
-
-import com.jwetherell.algorithms.data_structures.AVLTree;
-import com.jwetherell.algorithms.data_structures.BTree;
-import com.jwetherell.algorithms.data_structures.BinaryHeap;
-import com.jwetherell.algorithms.data_structures.BinarySearchTree;
-import com.jwetherell.algorithms.data_structures.HashArrayMappedTrie;
-import com.jwetherell.algorithms.data_structures.HashMap;
-import com.jwetherell.algorithms.data_structures.List;
-import com.jwetherell.algorithms.data_structures.PatriciaTrie;
-import com.jwetherell.algorithms.data_structures.Queue;
-import com.jwetherell.algorithms.data_structures.RadixTrie;
-import com.jwetherell.algorithms.data_structures.RedBlackTree;
-import com.jwetherell.algorithms.data_structures.SkipList;
-import com.jwetherell.algorithms.data_structures.SkipListMap;
-import com.jwetherell.algorithms.data_structures.SplayTree;
-import com.jwetherell.algorithms.data_structures.Stack;
-import com.jwetherell.algorithms.data_structures.Treap;
-import com.jwetherell.algorithms.data_structures.TreeMap;
-import com.jwetherell.algorithms.data_structures.Trie;
-import com.jwetherell.algorithms.data_structures.TrieMap;
 
 @SuppressWarnings("unchecked")
 public class DataStructuresTiming {

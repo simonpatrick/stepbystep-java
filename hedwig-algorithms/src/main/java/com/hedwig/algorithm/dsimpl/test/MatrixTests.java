@@ -2,9 +2,9 @@ package com.hedwig.algorithm.dsimpl.test;
 
 import static org.junit.Assert.assertTrue;
 
+import com.hedwig.algorithm.dsimpl.Matrix;
 import org.junit.Test;
 
-import com.jwetherell.algorithms.data_structures.Matrix;
 
 public class MatrixTests {
 

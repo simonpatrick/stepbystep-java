@@ -1,11 +1,12 @@
 package com.hedwig.algorithm.dsimpl;
 
+import com.hedwig.algorithm.dsimpl.interfaces.ITree;
+
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Deque;
 
-import com.jwetherell.algorithms.data_structures.interfaces.ITree;
 
 /**
  * B-tree is a tree data structure that keeps data sorted and allows searches,

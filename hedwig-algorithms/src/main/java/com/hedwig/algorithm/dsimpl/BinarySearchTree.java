@@ -1,5 +1,7 @@
 package com.hedwig.algorithm.dsimpl;
 
+import com.hedwig.algorithm.dsimpl.interfaces.ITree;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -9,7 +11,6 @@ import java.util.Random;
 import java.util.Queue;
 import java.util.Set;
 
-import com.jwetherell.algorithms.data_structures.interfaces.ITree;
 
 /**
  * A binary search tree (BST), which may sometimes also be called an ordered or

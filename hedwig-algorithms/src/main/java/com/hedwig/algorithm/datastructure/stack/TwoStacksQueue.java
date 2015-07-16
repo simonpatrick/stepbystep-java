@@ -11,7 +11,7 @@
 package com.hedwig.algorithm.datastructure.stack;
 
 
-import com.interview.algorithm.datastructure.queue.IQueue;
+import com.hedwig.algorithm.datastructure.queue.IQueue;
 
 public class TwoStacksQueue<AT> implements IQueue<AT> {
 	

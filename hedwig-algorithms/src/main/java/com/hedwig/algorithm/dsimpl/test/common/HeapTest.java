@@ -1,10 +1,10 @@
 package com.hedwig.algorithm.dsimpl.test.common;
 
+import com.hedwig.algorithm.dsimpl.BinaryHeap;
+import com.hedwig.algorithm.dsimpl.interfaces.IHeap;
+import com.hedwig.algorithm.dsimpl.test.common.Utils.*;
 import java.util.Arrays;
 
-import com.jwetherell.algorithms.data_structures.BinaryHeap;
-import com.jwetherell.algorithms.data_structures.interfaces.IHeap;
-import com.jwetherell.algorithms.data_structures.test.common.Utils.Type;
 
 public class HeapTest {
 
@@ -31,13 +31,13 @@ public class HeapTest {
      * @return True if the heap passes it's invariants tests.
      */
     @SuppressWarnings("unchecked")
-    public static <T extends Comparable<T>> boolean testHeap(BinaryHeap.Type heapType, IHeap<T> heap, Type type, String name, 
+    public static <T extends Comparable<T>> boolean testHeap(BinaryHeap.Type heapType, IHeap<T> heap, Utils.Type type, String name,
                                                              T[] unsorted, T[] sorted, T invalid) {
         for (int i = 0; i < unsorted.length; i++) {
             T item = null;
-            if (type==Type.Integer) {
+            if (type== Utils.Type.Integer) {
                 item = unsorted[i];
-            } else if (type==Type.String) {
+            } else if (type== Utils.Type.String) {
                 item = (T)String.valueOf(unsorted[i]);
             }
             boolean added = heap.add(item);

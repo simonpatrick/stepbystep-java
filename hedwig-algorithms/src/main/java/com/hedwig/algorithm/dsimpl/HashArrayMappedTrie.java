@@ -1,10 +1,11 @@
 package com.hedwig.algorithm.dsimpl;
 
+import com.hedwig.algorithm.dsimpl.interfaces.IMap;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.jwetherell.algorithms.data_structures.interfaces.IMap;
 
 /**
  * A hash array mapped trie (HAMT) is an implementation of an associative 

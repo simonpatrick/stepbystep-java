@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+import com.hedwig.algorithm.dsimpl.IntervalTree;
 import org.junit.Test;
 
-import com.jwetherell.algorithms.data_structures.IntervalTree;
 
 public class IntervalTreeTests {
 	

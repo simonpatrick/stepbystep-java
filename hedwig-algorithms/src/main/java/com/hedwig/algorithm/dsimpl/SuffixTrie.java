@@ -1,10 +1,10 @@
 package com.hedwig.algorithm.dsimpl;
 
+import com.hedwig.algorithm.dsimpl.interfaces.ISuffixTree;
+
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.jwetherell.algorithms.data_structures.Trie.Node;
-import com.jwetherell.algorithms.data_structures.interfaces.ISuffixTree;
 
 /**
  * A suffix trie is a data structure that presents the suffixes of a given
@@ -91,7 +91,7 @@ public class SuffixTrie<C extends CharSequence> implements ISuffixTree<C> {
      */
     private Set<String> getSuffixes(Trie.Node node) {
         StringBuilder builder = new StringBuilder();
-        if (node.character != Node.SENTINAL) builder.append(node.character);
+        if (node.character != Trie.Node.SENTINAL) builder.append(node.character);
         Set<String> set = new TreeSet<String>();
         if (node.isWord) {
             set.add(builder.toString());
@@ -114,7 +114,7 @@ public class SuffixTrie<C extends CharSequence> implements ISuffixTree<C> {
      */
     private Set<String> getSuffixes(Trie.Node node, String prefix) {
         StringBuilder builder = new StringBuilder(prefix);
-        if (node.character != Node.SENTINAL) builder.append(node.character);
+        if (node.character != Trie.Node.SENTINAL) builder.append(node.character);
         Set<String> set = new TreeSet<String>();
         if (node.isWord) {
             set.add(builder.toString());

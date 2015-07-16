@@ -1,12 +1,13 @@
 package com.hedwig.algorithm.dsimpl;
 
+import com.hedwig.algorithm.dsimpl.interfaces.IHeap;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
 
-import com.jwetherell.algorithms.data_structures.interfaces.IHeap;
 
 /**
  * A binary heap is a heap data structure created using a binary tree. It can be

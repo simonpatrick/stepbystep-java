@@ -1,5 +1,7 @@
 package com.hedwig.algorithm.dsimpl;
 
+import com.hedwig.algorithm.dsimpl.interfaces.ISuffixTree;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,7 +10,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import com.jwetherell.algorithms.data_structures.interfaces.ISuffixTree;
 
 /**
  * A suffix tree is a data structure that presents the suffixes of a given

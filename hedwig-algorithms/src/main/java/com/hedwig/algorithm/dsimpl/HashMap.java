@@ -1,9 +1,10 @@
 package com.hedwig.algorithm.dsimpl;
 
+import com.hedwig.algorithm.dsimpl.interfaces.IMap;
+
 import java.util.LinkedList;
 import java.util.List;
 
-import com.jwetherell.algorithms.data_structures.interfaces.IMap;
 
 /**
  * Hash Map backed by an array of ArrayLists. hash map is a data structure that

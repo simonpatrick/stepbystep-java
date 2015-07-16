@@ -1,8 +1,7 @@
 package com.hedwig.algorithm.dsimpl.test.common;
 
 import java.util.Collection;
-
-import com.jwetherell.algorithms.data_structures.test.common.Utils.Type;
+import com.hedwig.algorithm.dsimpl.test.common.Utils.*;
 
 public class JavaCollectionTest {
 

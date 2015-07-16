@@ -1,8 +1,8 @@
 package com.hedwig.algorithm.dsimpl.test.common;
 
-import com.jwetherell.algorithms.data_structures.interfaces.ITree;
-import com.jwetherell.algorithms.data_structures.test.common.Utils.Type;
 
+import com.hedwig.algorithm.dsimpl.interfaces.ITree;
+import com.hedwig.algorithm.dsimpl.test.common.Utils.Type;
 public class TreeTest {
 
     /**
@@ -22,14 +22,14 @@ public class TreeTest {
      * @return True if the tree passes it's invariants tests.
      */
     @SuppressWarnings("unchecked")
-    public static <C extends Comparable<C>, T extends Comparable<T>> boolean testTree(ITree<C> tree, Type type, String name, 
+    public static <C extends Comparable<C>, T extends Comparable<T>> boolean testTree(ITree<C> tree, Type type, String name,
                                                                                       T[] data, T invalid) {
         for (int i = 0; i < data.length; i++) {
             T value = data[i];
             C item = null;
-            if (type == Type.Integer) {
+            if (type == Utils.Type.Integer) {
                 item = (C)value;
-            } else if (type == Type.String) {
+            } else if (type == Utils.Type.String) {
                 item = (C)String.valueOf(value);
             }
             boolean added = tree.add(item);
@@ -46,9 +46,9 @@ public class TreeTest {
         }
 
         C invalidItem = null;
-        if (type == Type.Integer) {
+        if (type == Utils.Type.Integer) {
             invalidItem = (C)invalid;
-        } else if (type == Type.String) {
+        } else if (type == Utils.Type.String) {
             invalidItem = (C)String.valueOf(invalid);
         }
         boolean contains = tree.contains(invalidItem);
@@ -87,9 +87,9 @@ public class TreeTest {
         for (int i = 0; i < half; i++) {
             T value = data[i];
             C item = null;
-            if (type == Type.Integer) {
+            if (type == Utils.Type.Integer) {
                 item = (C)value;
-            } else if (type == Type.String) {
+            } else if (type == Utils.Type.String) {
                 item = (C)String.valueOf(value);
             }
             boolean added = tree.add(item);

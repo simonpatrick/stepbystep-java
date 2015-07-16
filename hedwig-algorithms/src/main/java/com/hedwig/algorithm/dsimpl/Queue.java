@@ -1,6 +1,7 @@
 package com.hedwig.algorithm.dsimpl;
 
-import com.jwetherell.algorithms.data_structures.interfaces.IQueue;
+
+import com.hedwig.algorithm.dsimpl.interfaces.IQueue;
 
 @SuppressWarnings("unchecked")
 public interface Queue<T> extends IQueue<T> {

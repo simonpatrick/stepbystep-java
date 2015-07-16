@@ -1,7 +1,7 @@
 package com.hedwig.algorithm.dsimpl;
 
-import com.jwetherell.algorithms.data_structures.SkipList.Node;
-import com.jwetherell.algorithms.data_structures.interfaces.IMap;
+
+import com.hedwig.algorithm.dsimpl.interfaces.IMap;
 
 /**
  * A set used to store key->values pairs, this is an implementation of an
@@ -65,7 +65,7 @@ public class SkipListMap<K extends Comparable<K>, V> implements SkipList.INodeCr
      */
     @Override
     public V remove(K key) {
-        Node<K> node = list.removeValue(key);
+        SkipList.Node<K> node = list.removeValue(key);
         V value = null;
         if (node instanceof SkipListMapNode) {
             SkipListMapNode<K, V> treeMapNode = (SkipListMapNode<K, V>) node;
@@ -100,11 +100,11 @@ public class SkipListMap<K extends Comparable<K>, V> implements SkipList.INodeCr
         if (list==null) return true;
 
         java.util.Set<K> keys = new java.util.HashSet<K>();
-        Node<K> node = list.head;
+        SkipList.Node<K> node = list.head;
         if (node==null) return true;
         if (!validate(node,keys)) return false;
 
-        Node<K> next = node.getNext(0);
+        SkipList.Node<K> next = node.getNext(0);
         while (next!=null) {
             if (!validate(next, keys)) return false;
             next = next.getNext(0);
@@ -113,7 +113,7 @@ public class SkipListMap<K extends Comparable<K>, V> implements SkipList.INodeCr
         return (keys.size()==size());
     }
 
-    private boolean validate(Node<K> node, java.util.Set<K> keys) {
+    private boolean validate(SkipList.Node<K> node, java.util.Set<K> keys) {
         if (!(node instanceof SkipListMapNode)) return false;
 
         SkipListMapNode<K,V> tmn = (SkipListMapNode<K,V>)node;
@@ -141,7 +141,7 @@ public class SkipListMap<K extends Comparable<K>, V> implements SkipList.INodeCr
     public String toString() {
         StringBuilder builder = new StringBuilder();
         if (list!=null && list.head!=null) {
-            Node<K> node = list.head;
+            SkipList.Node<K> node = list.head;
             while (node!=null) {
                 if (!(node instanceof SkipListMapNode)) continue;
 
@@ -167,7 +167,7 @@ public class SkipListMap<K extends Comparable<K>, V> implements SkipList.INodeCr
      * {@inheritDoc}
      */
     @Override
-    public void swapNode(Node<K> node, Node<K> next) {
+    public void swapNode(SkipList.Node<K> node, SkipList.Node<K> next) {
         K key = node.data;
         node.data = next.data;
         next.data = key;
@@ -318,7 +318,7 @@ public class SkipListMap<K extends Comparable<K>, V> implements SkipList.INodeCr
                 }
             };
             if (map.list!=null && map.list.head!=null) {
-                Node<K> n = map.list.head;
+                SkipList.Node<K> n = map.list.head;
                 while (n!=null) {
                     if (!(n instanceof SkipListMapNode)) continue;
 

@@ -1,5 +1,6 @@
 package com.hedwig.learnalg.trees.tree2Json;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 
 import java.util.List;
@@ -28,6 +29,7 @@ public class TreeNode {
     public TreeNode(String name){
         this.name=name;
     }
+
     private boolean isRoot(){
         return parent==null?true:false;
     }
@@ -39,6 +41,8 @@ public class TreeNode {
         TreeNode c2 = new TreeNode();
         c1.getChildren().add(c2);
         c2.setParent(c1);
+        System.out.println(root);
+
     }
 
     public TreeNode getCurrent() {
@@ -71,5 +75,15 @@ public class TreeNode {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("current", current)
+                .add("children", children)
+                .add("parent", parent)
+                .add("name", name)
+                .toString();
     }
 }

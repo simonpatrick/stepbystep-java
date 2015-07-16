@@ -6,11 +6,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+import com.hedwig.algorithm.dsimpl.SegmentTree;
 import org.junit.Test;
-
-import com.jwetherell.algorithms.data_structures.SegmentTree;
-import com.jwetherell.algorithms.data_structures.SegmentTree.DynamicSegmentTree;
-import com.jwetherell.algorithms.data_structures.SegmentTree.FlatSegmentTree;
 
 public class SegmentTreeTests {
     
@@ -27,7 +24,7 @@ public class SegmentTreeTests {
             segments.add(new SegmentTree.Data.QuadrantData(1, 0, 1, 0, 0)); // second point in the 1st quadrant
             segments.add(new SegmentTree.Data.QuadrantData(2, 0, 0, 1, 0)); // third point in the 2nd quadrant
             segments.add(new SegmentTree.Data.QuadrantData(3, 0, 0, 0, 1)); // fourth point in the 3rd quadrant
-            FlatSegmentTree<SegmentTree.Data.QuadrantData> tree = new FlatSegmentTree<SegmentTree.Data.QuadrantData>(segments);
+            SegmentTree.FlatSegmentTree<SegmentTree.Data.QuadrantData> tree = new SegmentTree.FlatSegmentTree<SegmentTree.Data.QuadrantData>(segments);
 
             SegmentTree.Data.QuadrantData query = tree.query(0, 3);
             assertTrue("Quad tree query error. query=0->3 result="+query, (query.quad0==1 && query.quad1==1 && query.quad2==1 && query.quad3==1));
@@ -50,7 +47,7 @@ public class SegmentTreeTests {
             segments.add(new SegmentTree.Data.RangeMaximumData<Integer>(6,     (Integer) 0));
             segments.add(new SegmentTree.Data.RangeMaximumData<Integer>(7, 17, (Integer) 7));
             segments.add(new SegmentTree.Data.RangeMaximumData<Integer>(21,    (Integer) 10));
-            FlatSegmentTree<SegmentTree.Data.RangeMaximumData<Integer>> tree = new FlatSegmentTree<SegmentTree.Data.RangeMaximumData<Integer>>(segments, 3);
+            SegmentTree.FlatSegmentTree<SegmentTree.Data.RangeMaximumData<Integer>> tree = new SegmentTree.FlatSegmentTree<SegmentTree.Data.RangeMaximumData<Integer>>(segments, 3);
 
             SegmentTree.Data.RangeMaximumData<Integer> query = tree.query(0, 7);
             assertTrue("Segment tree query error. query=0->7 result="+query, query.maximum==7);
@@ -75,7 +72,7 @@ public class SegmentTreeTests {
             segments.add(new SegmentTree.Data.RangeMinimumData<Integer>(5,  (Integer) 5));
             segments.add(new SegmentTree.Data.RangeMinimumData<Integer>(6,  (Integer) 0));
             segments.add(new SegmentTree.Data.RangeMinimumData<Integer>(17, (Integer) 7));
-            FlatSegmentTree<SegmentTree.Data.RangeMinimumData<Integer>> tree = new FlatSegmentTree<SegmentTree.Data.RangeMinimumData<Integer>>(segments, 5);
+            SegmentTree.FlatSegmentTree<SegmentTree.Data.RangeMinimumData<Integer>> tree = new SegmentTree.FlatSegmentTree<SegmentTree.Data.RangeMinimumData<Integer>>(segments, 5);
 
             SegmentTree.Data.RangeMinimumData<Integer> query = tree.query(0, 7);
             assertTrue("Segment tree query error. query=0->7 result="+query, query.minimum==0);
@@ -100,7 +97,7 @@ public class SegmentTreeTests {
             segments.add(new SegmentTree.Data.RangeSumData<Integer>(5,  (Integer) 5));
             segments.add(new SegmentTree.Data.RangeSumData<Integer>(6,  (Integer) 0));
             segments.add(new SegmentTree.Data.RangeSumData<Integer>(17, (Integer) 7));
-            FlatSegmentTree<SegmentTree.Data.RangeSumData<Integer>> tree = new FlatSegmentTree<SegmentTree.Data.RangeSumData<Integer>>(segments, 10);
+            SegmentTree.FlatSegmentTree<SegmentTree.Data.RangeSumData<Integer>> tree = new SegmentTree.FlatSegmentTree<SegmentTree.Data.RangeSumData<Integer>>(segments, 10);
 
             SegmentTree.Data.RangeSumData<Integer> query = tree.query(0, 8);
             assertTrue("Segment tree query error. query=0->8 result="+query, query.sum==21);
@@ -137,7 +134,7 @@ public class SegmentTreeTests {
             segments.add((new SegmentTree.Data.IntervalData<String>(8,  12, BLUE)));
             segments.add((new SegmentTree.Data.IntervalData<String>(9,  14, PURPLE)));
             segments.add((new SegmentTree.Data.IntervalData<String>(13, 15, BLACK)));
-            DynamicSegmentTree<SegmentTree.Data.IntervalData<String>> tree = new DynamicSegmentTree<SegmentTree.Data.IntervalData<String>>(segments);
+            SegmentTree.DynamicSegmentTree<SegmentTree.Data.IntervalData<String>> tree = new SegmentTree.DynamicSegmentTree<SegmentTree.Data.IntervalData<String>>(segments);
 
             SegmentTree.Data.IntervalData<String> query = tree.query(2); // Stabbing
             assertTrue("Segment tree query error. query=2 result="+query, collectionsEqual(query.getData(), Arrays.asList(RED)));
@@ -172,7 +169,7 @@ public class SegmentTreeTests {
             segments.add((new SegmentTree.Data.IntervalData<String>(1779, 1828, schubert)));
             segments.add((new SegmentTree.Data.IntervalData<String>(1756, 1791, mozart)));
             segments.add((new SegmentTree.Data.IntervalData<String>(1585, 1672, schuetz)));
-            DynamicSegmentTree<SegmentTree.Data.IntervalData<String>> tree = new DynamicSegmentTree<SegmentTree.Data.IntervalData<String>>(segments, 25);
+            SegmentTree.DynamicSegmentTree<SegmentTree.Data.IntervalData<String>> tree = new SegmentTree.DynamicSegmentTree<SegmentTree.Data.IntervalData<String>>(segments, 25);
 
             SegmentTree.Data.IntervalData<String> query = tree.query(1890); // Stabbing
             assertTrue("Segment tree query error. query=1890 result="+query, collectionsEqual(query.getData(), Arrays.asList(stravinsky, schoenberg, grieg)));

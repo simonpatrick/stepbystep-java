@@ -5,9 +5,9 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import com.hedwig.algorithm.dsimpl.KdTree;
 import org.junit.Test;
 
-import com.jwetherell.algorithms.data_structures.KdTree;
 
 public class KdTreeTests {
 

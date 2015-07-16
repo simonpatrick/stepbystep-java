@@ -1,7 +1,7 @@
 package com.hedwig.algorithm.dsimpl;
 
-import com.jwetherell.algorithms.data_structures.Trie.Node;
-import com.jwetherell.algorithms.data_structures.interfaces.IMap;
+
+import com.hedwig.algorithm.dsimpl.interfaces.IMap;
 
 /**
  * A trie used to store key->values pairs, this is an implementation of an
@@ -191,7 +191,7 @@ public class TrieMap<K extends CharSequence, V> implements Trie.INodeCreator, IM
         protected static <K extends CharSequence, V> String getString(Trie.Node node, String prefix, String previousString, boolean isTail) {
             StringBuilder builder = new StringBuilder();
             String string = null;
-            if (node.character != Node.SENTINAL) {
+            if (node.character != Trie.Node.SENTINAL) {
                 String temp = String.valueOf(node.character);
                 if (previousString != null) {
                     string = previousString + temp;

@@ -1,8 +1,9 @@
 package com.hedwig.algorithm.dsimpl;
 
+import com.hedwig.algorithm.dsimpl.interfaces.IStack;
+
 import java.util.Arrays;
 
-import com.jwetherell.algorithms.data_structures.interfaces.IStack;
 
 @SuppressWarnings("unchecked")
 public interface Stack<T> extends IStack<T> {

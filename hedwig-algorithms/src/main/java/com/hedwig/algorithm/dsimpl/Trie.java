@@ -1,8 +1,9 @@
 package com.hedwig.algorithm.dsimpl;
 
+import com.hedwig.algorithm.dsimpl.interfaces.ITree;
+
 import java.util.Arrays;
 
-import com.jwetherell.algorithms.data_structures.interfaces.ITree;
 
 /**
  * A trie, or prefix tree, is an ordered tree data structure that is used to

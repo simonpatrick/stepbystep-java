@@ -1,6 +1,6 @@
 package com.hedwig.algorithm.dsimpl.test.common;
 
-import com.jwetherell.algorithms.data_structures.test.common.Utils.Type;
+import com.hedwig.algorithm.dsimpl.test.common.Utils.Type;
 
 public class JavaMapTest {
 
@@ -21,7 +21,7 @@ public class JavaMapTest {
      * @param invalid Invalid data which isn't in the data-structure.
      * @return True if the map passes it's invariants tests.
      */
-    public static <K,V, T extends Comparable<T>> boolean testJavaMap(java.util.Map<K,V> map, Type type, String name,
+    public static <K,V, T extends Comparable<T>> boolean testJavaMap(java.util.Map<K,V> map, Utils.Type type, String name,
                                                                      T[] unsorted, T[] sorted, T invalid) {
         // Make sure the map is empty
         if (!map.isEmpty()) {

@@ -4,34 +4,32 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
 
+import com.hedwig.algorithm.dsimpl.Stack;
+import com.hedwig.algorithm.dsimpl.test.common.JavaCollectionTest;
+import com.hedwig.algorithm.dsimpl.test.common.StackTest;
+import com.hedwig.algorithm.dsimpl.test.common.Utils;
 import org.junit.Test;
 
-import com.jwetherell.algorithms.data_structures.Stack;
-import com.jwetherell.algorithms.data_structures.test.common.JavaCollectionTest;
-import com.jwetherell.algorithms.data_structures.test.common.StackTest;
-import com.jwetherell.algorithms.data_structures.test.common.Utils;
-import com.jwetherell.algorithms.data_structures.test.common.Utils.TestData;
-import com.jwetherell.algorithms.data_structures.test.common.Utils.Type;
 
 public class StackTests {
 
     @Test
     public void testArrayStack() {
-        TestData data = Utils.generateTestData(1000);
+        Utils.TestData data = Utils.generateTestData(1000);
 
         String aName = "Stack [array]";
         Stack.ArrayStack<Integer> aStack = new Stack.ArrayStack<Integer>();
         Collection<Integer> aCollection = aStack.toCollection();
 
         assertTrue(StackTest.testStack(aStack, aName,
-                                       data.unsorted, data.invalid));
-        assertTrue(JavaCollectionTest.testCollection(aCollection, Type.Integer, aName,
-                                                     data.unsorted, data.sorted, data.invalid));
+                data.unsorted, data.invalid));
+        assertTrue(JavaCollectionTest.testCollection(aCollection, Utils.Type.Integer, aName,
+                data.unsorted, data.sorted, data.invalid));
     }
 
     @Test
     public void testLinkedStack() {
-        TestData data = Utils.generateTestData(1000);
+        Utils.TestData data = Utils.generateTestData(1000);
 
         String lName = "Stack [linked]";
         Stack.LinkedStack<Integer> lStack = new Stack.LinkedStack<Integer>();
@@ -39,7 +37,7 @@ public class StackTests {
 
         assertTrue(StackTest.testStack(lStack, lName,
                                        data.unsorted, data.invalid));
-        assertTrue(JavaCollectionTest.testCollection(lCollection, Type.Integer, lName,
+        assertTrue(JavaCollectionTest.testCollection(lCollection, Utils.Type.Integer, lName,
                                                      data.unsorted, data.sorted, data.invalid));
     }
 }

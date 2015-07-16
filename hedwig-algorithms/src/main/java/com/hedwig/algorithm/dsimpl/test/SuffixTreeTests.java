@@ -2,10 +2,10 @@ package com.hedwig.algorithm.dsimpl.test;
 
 import static org.junit.Assert.assertTrue;
 
+import com.hedwig.algorithm.dsimpl.SuffixTree;
+import com.hedwig.algorithm.dsimpl.test.common.SuffixTreeTest;
 import org.junit.Test;
 
-import com.jwetherell.algorithms.data_structures.SuffixTree;
-import com.jwetherell.algorithms.data_structures.test.common.SuffixTreeTest;
 
 public class SuffixTreeTests {
 
