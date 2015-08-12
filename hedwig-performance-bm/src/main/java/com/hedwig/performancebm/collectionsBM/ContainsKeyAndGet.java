@@ -12,40 +12,43 @@ import java.util.Map;
  * @version $Id$
  */
 
-
+// 仔细研究，小心出错，源码一定要看的
 public class ContainsKeyAndGet {
 
     private Map map = Maps.newHashMap();
 
     @BeforeClass
-    public void setUp(){
+    public void setUp() {
         for (int i = 0; i < 1000000; i++) {
-            map.put("test"+i,"test"+i);
+            map.put("test" + i, "test" + i);
         }
     }
 
-    @Test
-    public void test_containsKey(){
+    @Test(dependsOnMethods = "test_get")
+    public void test_containsKey() {
 
         long start = System.currentTimeMillis();
-        for (long i = 0; i <1000000000 ; i++) {
-            if(map.containsKey("test")) System.out.println("true");
-        }
+        for (int j = 10; j > 0; j--) {
+            for (long i = 0; i < 1000000000; i++) {
+                if (map.containsKey("test")) System.out.println("true");
+            }
 
+        }
         long end = System.currentTimeMillis();
-        System.out.println(end-start);
+        System.out.println((end - start) / 10);
+
     }
 
-
     @Test
-    public void test_get(){
+    public void test_get() {
 
         long start = System.currentTimeMillis();
-        for (long i = 0; i <1000000000 ; i++) {
-            if(map.get("test")!=null) System.out.println("true");
+        for (int j = 10; j < 0; j--) {
+            for (long i = 0; i < 1000000000; i++) {
+                if (map.get("test") != null) System.out.println("true");
+            }
         }
-
         long end = System.currentTimeMillis();
-        System.out.println(end-start);
+        System.out.println((end - start) / 10);
     }
 }
