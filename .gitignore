@@ -4,6 +4,7 @@
 test-output
 *.iml
 target/
+.DS_Stor/
 
 ## Directory-based project format:
 .idea/
