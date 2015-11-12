@@ -13,10 +13,10 @@
         <module>hedwig-designpattern</module>
         <module>hedwig-algorithms</module>
         <module>hedwig-functionaljava</module>
-        <module>hedwig-data-examples</module>
         <module>hedwig-performance-bm</module>
         <module>dropwizards-samples</module>
         <module>hedwig-ut</module>
+        <module>basicjava</module>
     </modules>
 
     <properties>

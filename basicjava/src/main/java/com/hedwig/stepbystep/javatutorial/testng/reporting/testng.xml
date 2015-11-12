@@ -1,0 +1,12 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="Simple Logger Suite">
+    <listeners>
+    </listeners>
+    <parameter name="priority" value="smoketesting"></parameter>
+    <test name="Simple Logger test">
+        <parameter name="test" value="1234"></parameter>
+        <classes>
+            <class name="com.hedwig.stepbystep.javatutorial.testng.experiement.TestSample" />
+        </classes>
+    </test>
+</suite>

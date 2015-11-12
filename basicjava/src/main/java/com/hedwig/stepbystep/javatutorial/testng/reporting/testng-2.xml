@@ -1,0 +1,11 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="suite2">
+    <listeners>
+    </listeners>
+
+    <test name="Simple Logger test">
+        <classes>
+            <class name="com.hedwig.stepbystep.javatutorial.testng.experiement.TestSample" />
+        </classes>
+    </test>
+</suite>
