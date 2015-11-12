@@ -15,6 +15,7 @@ public class ApacheCommonsEncodeDecode {
         final Base64 base64= new Base64();
         final String encodingString = new String(base64.encode(originalInput.getBytes()));
         System.out.println(encodingString);
+        System.out.println(new String(base64.decode(encodingString.getBytes())));
         assertNotNull(encodingString);
         assertNotEquals(encodingString, originalInput);
     }

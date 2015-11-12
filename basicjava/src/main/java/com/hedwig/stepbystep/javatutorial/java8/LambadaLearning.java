@@ -40,19 +40,23 @@ public class LambadaLearning {
 
     public static void covertStreamS(){
         List<String> names = Lists.newArrayList("ABCd","ddnDDKK");
-        System.out.println(names.stream().map(name->{return name.toUpperCase();}).collect(Collectors.toList()));
+        System.out.println(names.stream().map(name->name.toUpperCase())
+                .collect(Collectors.toList()));
     }
 
     //Method Reference
     public static void covertMethodReference(){
         List<String> names = Lists.newArrayList("ABCd","ddnDDKK");
-        System.out.println(names.stream().map(String::toUpperCase).collect(Collectors.toList()));
+        System.out.println(names.stream().map(String::toUpperCase)
+                .collect(Collectors.toList()));
     }
 
     public static void guavaSample(){
         List<String> names = Lists.newArrayList("ABCd","ddnDDKK");
         // map means every iterator
-        List<String> lowercaseName = FluentIterable.from(names).transform(new Function<String, String>() {
+        List<String> lowercaseName = FluentIterable
+                .from(names)
+                .transform(new Function<String, String>() {
             @Override
             public String apply(String s) {
                 return s.toUpperCase();
