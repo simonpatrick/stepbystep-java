@@ -16,5 +16,6 @@ git commit -m "$comment"
 
 echo "start push changes"
 git push
+git push github master
 
 echo "Done.........."
