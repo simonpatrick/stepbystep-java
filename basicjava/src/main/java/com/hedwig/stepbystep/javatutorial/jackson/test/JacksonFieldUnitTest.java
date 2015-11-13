@@ -8,9 +8,9 @@ import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 
-import org.baeldung.jackson.field.MyDtoAccessLevel;
-import org.baeldung.jackson.field.MyDtoWithSetter;
-import org.baeldung.jackson.field.MyDtoWithGetter;
+import com.hedwig.stepbystep.javatutorial.jackson.field.MyDtoAccessLevel;
+import com.hedwig.stepbystep.javatutorial.jackson.field.MyDtoWithGetter;
+import com.hedwig.stepbystep.javatutorial.jackson.field.MyDtoWithSetter;
 import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;

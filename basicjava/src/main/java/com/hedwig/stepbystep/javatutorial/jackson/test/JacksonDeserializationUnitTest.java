@@ -7,11 +7,10 @@ import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 
-import org.baeldung.jackson.deserialization.ItemDeserializer;
-import org.baeldung.jackson.dtos.Item;
-import org.baeldung.jackson.dtos.ItemWithSerializer;
-import org.baeldung.jackson.dtos.MyDto;
-import org.baeldung.jackson.dtos.ignore.MyDtoIgnoreUnknown;
+import com.hedwig.stepbystep.javatutorial.jackson.deserialization.ItemDeserializer;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.ItemWithSerializer;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.*;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.ignore.MyDtoIgnoreUnknown;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -150,7 +149,7 @@ public class JacksonDeserializationUnitTest {
         final ObjectMapper mapper = new ObjectMapper();
 
         final SimpleModule module = new SimpleModule();
-        module.addDeserializer(Item.class, new ItemDeserializer());
+        //module.addDeserializer(Item.class, new ItemDeserializer());
         mapper.registerModule(module);
 
         final Item readValue = mapper.readValue(json, Item.class);

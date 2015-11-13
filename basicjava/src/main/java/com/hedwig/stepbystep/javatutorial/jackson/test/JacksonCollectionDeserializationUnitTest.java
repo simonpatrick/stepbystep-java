@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import org.baeldung.jackson.dtos.MyDto;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.MyDto;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonParseException;

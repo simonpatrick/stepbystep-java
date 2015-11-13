@@ -2,12 +2,12 @@ package com.hedwig.stepbystep.javatutorial.jackson.serialization;
 
 import java.io.IOException;
 
-import org.baeldung.jackson.dtos.ItemWithSerializer;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.ItemWithSerializer;
 
 public class ItemSerializerOnClass extends JsonSerializer<ItemWithSerializer> {
 

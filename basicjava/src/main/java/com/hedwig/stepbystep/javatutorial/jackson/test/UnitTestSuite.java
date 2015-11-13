@@ -1,7 +1,7 @@
 package com.hedwig.stepbystep.javatutorial.jackson.test;
 
-import org.baeldung.jackson.sandbox.JacksonPrettyPrintUnitTest;
-import org.baeldung.jackson.sandbox.SandboxTest;
+import com.hedwig.stepbystep.javatutorial.jackson.sandbox.JacksonPrettyPrintUnitTest;
+import com.hedwig.stepbystep.javatutorial.jackson.sandbox.SandboxTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 

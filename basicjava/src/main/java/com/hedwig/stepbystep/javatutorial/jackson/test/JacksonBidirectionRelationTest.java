@@ -7,19 +7,19 @@ import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 
-import org.baeldung.jackson.bidirection.Item;
-import org.baeldung.jackson.bidirection.ItemWithIdentity;
-import org.baeldung.jackson.bidirection.ItemWithIgnore;
-import org.baeldung.jackson.bidirection.ItemWithRef;
-import org.baeldung.jackson.bidirection.ItemWithSerializer;
-import org.baeldung.jackson.bidirection.ItemWithView;
-import org.baeldung.jackson.bidirection.User;
-import org.baeldung.jackson.bidirection.UserWithIdentity;
-import org.baeldung.jackson.bidirection.UserWithIgnore;
-import org.baeldung.jackson.bidirection.UserWithRef;
-import org.baeldung.jackson.bidirection.UserWithSerializer;
-import org.baeldung.jackson.bidirection.UserWithView;
-import org.baeldung.jackson.jsonview.Views;
+import com.hedwig.stepbystep.javatutorial.jackson.bidirection.Item;
+import com.hedwig.stepbystep.javatutorial.jackson.bidirection.ItemWithIdentity;
+import com.hedwig.stepbystep.javatutorial.jackson.bidirection.ItemWithIgnore;
+import com.hedwig.stepbystep.javatutorial.jackson.bidirection.ItemWithRef;
+import com.hedwig.stepbystep.javatutorial.jackson.bidirection.ItemWithSerializer;
+import com.hedwig.stepbystep.javatutorial.jackson.bidirection.ItemWithView;
+import com.hedwig.stepbystep.javatutorial.jackson.bidirection.User;
+import com.hedwig.stepbystep.javatutorial.jackson.bidirection.UserWithIdentity;
+import com.hedwig.stepbystep.javatutorial.jackson.bidirection.UserWithIgnore;
+import com.hedwig.stepbystep.javatutorial.jackson.bidirection.UserWithRef;
+import com.hedwig.stepbystep.javatutorial.jackson.bidirection.UserWithSerializer;
+import com.hedwig.stepbystep.javatutorial.jackson.bidirection.UserWithView;
+import com.hedwig.stepbystep.javatutorial.jackson.jsonview.Views;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

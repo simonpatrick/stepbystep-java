@@ -6,12 +6,12 @@ import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 
-import org.baeldung.jackson.dtos.withEnum.MyDtoWithEnum;
-import org.baeldung.jackson.dtos.withEnum.MyDtoWithEnumCustom;
-import org.baeldung.jackson.dtos.withEnum.TypeEnum;
-import org.baeldung.jackson.dtos.withEnum.TypeEnumSimple;
-import org.baeldung.jackson.dtos.withEnum.TypeEnumWithCustomSerializer;
-import org.baeldung.jackson.dtos.withEnum.TypeEnumWithValue;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.withEnum.MyDtoWithEnum;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.withEnum.MyDtoWithEnumCustom;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.withEnum.TypeEnum;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.withEnum.TypeEnumSimple;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.withEnum.TypeEnumWithCustomSerializer;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.withEnum.TypeEnumWithValue;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonParseException;

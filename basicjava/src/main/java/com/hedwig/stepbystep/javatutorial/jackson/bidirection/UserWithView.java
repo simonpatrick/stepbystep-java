@@ -3,7 +3,7 @@ package com.hedwig.stepbystep.javatutorial.jackson.bidirection;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.baeldung.jackson.jsonview.Views;
+import com.hedwig.stepbystep.javatutorial.jackson.jsonview.Views;
 
 import com.fasterxml.jackson.annotation.JsonView;
 

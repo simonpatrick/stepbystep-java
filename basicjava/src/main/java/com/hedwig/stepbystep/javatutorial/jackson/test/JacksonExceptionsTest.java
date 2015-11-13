@@ -7,11 +7,7 @@ import static org.junit.Assert.assertThat;
 import java.io.IOException;
 import java.util.List;
 
-import org.baeldung.jackson.dtos.User;
-import org.baeldung.jackson.exception.UserWithPrivateFields;
-import org.baeldung.jackson.exception.UserWithRoot;
-import org.baeldung.jackson.exception.Zoo;
-import org.baeldung.jackson.exception.ZooConfigured;
+import com.hedwig.stepbystep.javatutorial.jackson.exception.*;
 import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -71,7 +67,7 @@ public class JacksonExceptionsTest {
         final String json = "{\"id\":1,\"name\":\"John\"}";
         final ObjectMapper mapper = new ObjectMapper();
 
-        mapper.reader().withType(org.baeldung.jackson.exception.User.class).readValue(json);
+        mapper.reader().withType(User.class).readValue(json);
     }
 
     @Test

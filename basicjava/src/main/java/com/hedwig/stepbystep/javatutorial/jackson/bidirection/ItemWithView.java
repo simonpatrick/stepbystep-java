@@ -1,6 +1,6 @@
 package com.hedwig.stepbystep.javatutorial.jackson.bidirection;
 
-import org.baeldung.jackson.jsonview.Views;
+import com.hedwig.stepbystep.javatutorial.jackson.jsonview.Views;
 
 import com.fasterxml.jackson.annotation.JsonView;
 

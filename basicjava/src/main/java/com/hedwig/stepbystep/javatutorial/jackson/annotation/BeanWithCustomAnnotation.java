@@ -4,7 +4,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Date;
 
-import org.baeldung.jackson.annotation.BeanWithCustomAnnotation.CustomAnnotation;
+import com.hedwig.stepbystep.javatutorial.jackson.annotation.BeanWithCustomAnnotation.CustomAnnotation;
 
 import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
 import com.fasterxml.jackson.annotation.JsonInclude;

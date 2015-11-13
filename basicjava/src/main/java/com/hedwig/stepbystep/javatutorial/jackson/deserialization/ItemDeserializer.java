@@ -2,8 +2,8 @@ package com.hedwig.stepbystep.javatutorial.jackson.deserialization;
 
 import java.io.IOException;
 
-import org.baeldung.jackson.dtos.Item;
-import org.baeldung.jackson.dtos.User;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.Item;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.User;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;

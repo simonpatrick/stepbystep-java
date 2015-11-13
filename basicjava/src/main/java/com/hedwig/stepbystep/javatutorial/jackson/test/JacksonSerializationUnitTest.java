@@ -8,14 +8,14 @@ import static org.junit.Assert.assertThat;
 import java.io.IOException;
 import java.util.List;
 
-import org.baeldung.jackson.dtos.Item;
-import org.baeldung.jackson.dtos.ItemWithSerializer;
-import org.baeldung.jackson.dtos.MyDto;
-import org.baeldung.jackson.dtos.MyDtoFieldNameChanged;
-import org.baeldung.jackson.dtos.MyDtoNoAccessors;
-import org.baeldung.jackson.dtos.MyDtoNoAccessorsAndFieldVisibility;
-import org.baeldung.jackson.dtos.User;
-import org.baeldung.jackson.serialization.ItemSerializer;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.Item;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.ItemWithSerializer;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.MyDto;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.MyDtoFieldNameChanged;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.MyDtoNoAccessors;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.MyDtoNoAccessorsAndFieldVisibility;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.User;
+import com.hedwig.stepbystep.javatutorial.jackson.serialization.ItemSerializer;
 import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;

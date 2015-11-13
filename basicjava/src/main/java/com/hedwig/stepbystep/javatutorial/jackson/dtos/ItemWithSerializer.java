@@ -1,10 +1,10 @@
 package com.hedwig.stepbystep.javatutorial.jackson.dtos;
 
-import org.baeldung.jackson.deserialization.ItemDeserializerOnClass;
-import org.baeldung.jackson.serialization.ItemSerializerOnClass;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.hedwig.stepbystep.javatutorial.jackson.deserialization.ItemDeserializerOnClass;
+import com.hedwig.stepbystep.javatutorial.jackson.serialization.ItemSerializerOnClass;
 
 @JsonSerialize(using = ItemSerializerOnClass.class)
 @JsonDeserialize(using = ItemDeserializerOnClass.class)

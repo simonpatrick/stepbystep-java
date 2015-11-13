@@ -5,7 +5,7 @@ import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 
-import org.baeldung.jackson.dtos.ItemWithSerializer;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.ItemWithSerializer;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonParseException;

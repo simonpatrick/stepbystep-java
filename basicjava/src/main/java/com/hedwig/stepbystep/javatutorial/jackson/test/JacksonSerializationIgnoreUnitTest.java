@@ -8,14 +8,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.baeldung.jackson.dtos.MyDto;
-import org.baeldung.jackson.dtos.MyDtoIncludeNonDefault;
-import org.baeldung.jackson.dtos.MyDtoWithFilter;
-import org.baeldung.jackson.dtos.MyMixInForString;
-import org.baeldung.jackson.dtos.ignore.MyDtoIgnoreField;
-import org.baeldung.jackson.dtos.ignore.MyDtoIgnoreFieldByName;
-import org.baeldung.jackson.dtos.ignore.MyDtoIgnoreNull;
-import org.baeldung.jackson.serialization.MyDtoNullKeySerializer;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.*;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.ignore.MyDtoIgnoreField;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.ignore.MyDtoIgnoreFieldByName;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.ignore.MyDtoIgnoreNull;
+import com.hedwig.stepbystep.javatutorial.jackson.serialization.MyDtoNullKeySerializer;
 import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;

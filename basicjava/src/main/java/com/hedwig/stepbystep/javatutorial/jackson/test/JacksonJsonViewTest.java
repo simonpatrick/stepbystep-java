@@ -7,10 +7,10 @@ import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 
-import org.baeldung.jackson.jsonview.Item;
-import org.baeldung.jackson.jsonview.MyBeanSerializerModifier;
-import org.baeldung.jackson.jsonview.User;
-import org.baeldung.jackson.jsonview.Views;
+import com.hedwig.stepbystep.javatutorial.jackson.dtos.User;
+import com.hedwig.stepbystep.javatutorial.jackson.jsonview.Item;
+import com.hedwig.stepbystep.javatutorial.jackson.jsonview.MyBeanSerializerModifier;
+import com.hedwig.stepbystep.javatutorial.jackson.jsonview.Views;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
