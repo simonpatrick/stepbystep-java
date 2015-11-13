@@ -1,4 +1,4 @@
-//package com.hedwig.stepbystep.javatutorial.core.java8;
+package com.hedwig.stepbystep.javatutorial.core.java8;//package com.hedwig.stepbystep.javatutorial.core.java8;
 //
 //import com.google.common.collect.Lists;
 //import org.junit.Test;

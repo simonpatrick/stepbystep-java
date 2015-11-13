@@ -51,14 +51,14 @@ public class GithubBasicLiveTest {
     @Test
     public void givenUserExists_whenUserInformationIsRetrieved_thenRetrievedResourceIsCorrect() throws ClientProtocolException, IOException {
         // Given
-        final HttpUriRequest request = new HttpGet("https://api.github.com/users/eugenp");
+        final HttpUriRequest request = new HttpGet("https://api.github.com/users/testless");
 
         // When
         final HttpResponse response = HttpClientBuilder.create().build().execute(request);
 
         // Then
         final GitHubUser resource = RetrieveUtil.retrieveResourceFromResponse(response, GitHubUser.class);
-        assertThat("eugenp", Matchers.is(resource.getLogin()));
+        assertThat("testless", Matchers.is(resource.getLogin()));
     }
 
 }

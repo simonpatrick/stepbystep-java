@@ -1,4 +1,4 @@
-//package com.hedwig.stepbystep.javatutorial.corejava;
+package com.hedwig.stepbystep.javatutorial.corejava;//package com.hedwig.stepbystep.javatutorial.corejava;
 //
 //import java.util.ArrayList;
 //import java.util.Arrays;

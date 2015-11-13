@@ -1,4 +1,4 @@
-//package com.hedwig.stepbystep.javatutorial.corejava;
+package com.hedwig.stepbystep.javatutorial.corejava;//package com.hedwig.stepbystep.javatutorial.corejava;
 //
 //import static org.hamcrest.Matchers.hasSize;
 //import static org.junit.Assert.assertThat;

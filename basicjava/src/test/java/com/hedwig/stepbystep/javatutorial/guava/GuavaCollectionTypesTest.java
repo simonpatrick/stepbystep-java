@@ -1,4 +1,4 @@
-//package com.hedwig.stepbystep.javatutorial.guava;
+package com.hedwig.stepbystep.javatutorial.guava;//package com.hedwig.stepbystep.javatutorial.guava;
 //
 //import static org.hamcrest.Matchers.*;
 //import static org.junit.Assert.assertEquals;
