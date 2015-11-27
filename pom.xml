@@ -17,6 +17,7 @@
         <module>dropwizards-samples</module>
         <module>hedwig-ut</module>
         <module>basicjava</module>
+        <module>hedwig-concunrrent</module>
     </modules>
 
     <properties>
