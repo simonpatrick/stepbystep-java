@@ -16,6 +16,7 @@
         <module>hedwig-ut</module>
         <module>basicjava</module>
         <module>hedwig-concurrent</module>
+        <module>dategenerator</module>
     </modules>
 
     <properties>

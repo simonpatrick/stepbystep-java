@@ -11,7 +11,7 @@
     <loggers>
         <root level="info">
             <appender-ref ref="consolePrint" />
-            <appender-ref ref="File" />
+            <!--<appender-ref ref="File" />-->
         </root>
     </loggers>
 </configuration>

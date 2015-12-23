@@ -1,0 +1,8 @@
+<suite name="Simple Test" parallel="methods" thread-count="2">
+    <test verbose="1" name="baidu search" >
+        <classes>
+            <class name="com.hedwig.testng.SimpleTest"></class>
+        </classes>
+    </test>
+
+</suite>
