@@ -17,6 +17,7 @@
         <module>basicjava</module>
         <module>hedwig-concurrent</module>
         <module>dategenerator</module>
+        <module>dsl-samples</module>
     </modules>
 
     <properties>
