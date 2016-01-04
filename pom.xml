@@ -21,6 +21,7 @@
         <module>toolkit</module>
         <module>ruby4j</module>
         <module>java8samples</module>
+        <module>algo</module>
     </modules>
 
     <properties>
