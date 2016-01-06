@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+            PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+            "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PictureCategory">
+	<typeAlias alias="pictureCategory" type="com.dooioo.portal.model.PictureCategory"/>
+
+    <cacheModel id="cateLruCache" type="LRU" serialize="true" readOnly="false">
+        <property name="reference-type" value="WEAK"/>
+        <flushInterval hours ="24" /> 
+    </cacheModel>
+
+    <select id="queryEstate" parameterClass="hashMap" resultClass="pictureCategory">
+        select ec.id, ec.name from pictureCategory ec with(nolock)
+        where type = 1 and ec.id in
+        <isEqual property="id" compareValue="0">
+            (select distinct(cateId1) from estatePicture where status = 1 and estateId = #estateId#)
+        </isEqual>
+        <isNotEqual property="id" compareValue="0">
+             (#id#)
+        </isNotEqual>
+    </select>
+
+    <select id="get" parameterClass="pictureCategory" resultClass="pictureCategory">
+        select * from pictureCategory with(nolock) where status != -1 and
+        levelNum = #levelNum# and
+        parentId = #parentId# and
+        type = #type#
+        order by sortOrder asc, createdAt desc
+    </select>
+
+    <select id="query" parameterClass="pictureCategory" resultClass="pictureCategory" cacheModel="cateLruCache">
+        select * from pictureCategory with(nolock) where status = 1 and type = 2 and flag != -1
+        order by sortOrder asc
+    </select>
+    
+    <select id="findPicAll" parameterClass="pictureCategory" resultClass="pictureCategory" cacheModel="cateLruCache">
+        select * from pictureCategory with(nolock) where status = 1 and flag != -1
+        order by sortOrder asc
+    </select>
+    
+
+    <select id="findById" parameterClass="integer" resultClass="pictureCategory" cacheModel="cateLruCache">
+        select * from pictureCategory  with(nolock) where status != -1 and id = #id#
+    </select>
+    
+    <statement id="queryForMark" resultClass="pictureCategory" cacheModel="cateLruCache" > 
+		SELECT * FROM dbo.PictureCategory  with(nolock)
+			WHERE levelNum = 0 AND type = 2 AND status = 1
+		ORDER BY sortOrder 
+	</statement >
+	
+</sqlMap>

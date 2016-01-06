@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="OtherCompanyPropertyInfoMapper">
+
+    <select id="queryByPropertyIdAndSource" resultType="OtherCompanyPropertyInfo">
+        SELECT * FROM  OtherCompanyPropertyInfo with(nolock) WHERE propertyId=#{propertyId}
+         and source=#{source}
+    </select>
+
+	<insert id="insert" parameterType="OtherCompanyPropertyInfo">
+        insert into OtherCompanyPropertyInfo
+        (
+			propertyId,
+			officeArea,
+			recordNo,
+			floorHeight,
+			propertyRightInfo,
+			propertyDirection,
+			parkingInfo,
+			propertyLoan,
+			cellar,
+			cellarSquare,
+			electricPower,
+			roomLayout,
+			managementFee,
+			gardenToward,
+			gardenSquare,
+			officeGrade,
+			completeYear,
+			parlor,
+			blankArea,
+			airConditionCosts,
+			propertySource,
+			propertyUsage,
+			waterToward,
+			floor,
+			billPrice,
+			buyinDate,
+			square,
+			totalArea,
+			facility,
+			realRate,
+			isOnlyOne,
+			shopLocation,
+			transferFee,
+			propertyDecoration,
+			depth,
+			currentStatus,
+			priceMemo,
+			lookHouseStatus,
+			ownerInfo,
+			entrustInfo,
+			remark,
+			source)
+        values
+        (
+	        #{propertyId},
+			#{officeArea},
+			#{recordNo},
+			#{floorHeight},
+			#{propertyRightInfo},
+			#{propertyDirection},
+			#{parkingInfo},
+			#{propertyLoan},
+			#{cellar},
+			#{cellarSquare},
+			#{electricPower},
+			#{roomLayout},
+			#{managementFee},
+			#{gardenToward},
+			#{gardenSquare},
+			#{officeGrade},
+			#{completeYear},
+			#{parlor},
+			#{blankArea},
+			#{airConditionCosts},
+			#{propertySource},
+			#{propertyUsage},
+			#{waterToward},
+			#{floor},
+			#{billPrice},
+			#{buyinDate},
+			#{square},
+			#{totalArea},
+			#{facility},
+			#{realRate},
+			#{isOnlyOne},
+			#{shopLocation},
+			#{transferFee},
+			#{propertyDecoration},
+			#{depth},
+			#{currentStatus},
+			#{priceMemo},
+			#{lookHouseStatus},
+			#{ownerInfo},
+			#{entrustInfo},
+			#{remark},
+			#{source}
+        )
+    </insert>
+    
+ <delete id="deleteAll">
+    	DELETE FROM OtherCompanyPropertyInfo where source=#{source}
+    </delete>
+</mapper>

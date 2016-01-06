@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="OtherCompanyPropertyMapper">
+
+    <select id="queryByPropertyIdAndSource" resultType="OtherCompanyProperty">
+        SELECT * FROM  OtherCompanyProperty WHERE propertyId=#{propertyId}
+         and source=#{source}
+    </select>
+
+	<insert id="insert" parameterType="OtherCompanyProperty">
+        insert into OtherCompanyProperty
+        (
+			propertyId,
+			source,
+			propertyNo,
+			status,
+			price,
+			handPrice,
+			rentPrice,
+			deptEmpNo,
+			deptEmpDate,
+			saleDeptEmpNo,
+			saleDeptEmpDate,
+			rentDeptEmpNo,
+			rentDeptEmpDate,
+			sellEntrustEmpNo,
+			sellEntrustEmpDate,
+			rentEntrustEmpNo,
+			rentEntrustEmpDate,
+			exclusiveSellEntrustEmpNo,
+			exclusiveSellEntrustEmpDate,
+			exclusiveRentEntrustEmpNo,
+			exclusiveRentEntrustEmpDate,
+			limitSellEntrustEmpNo,
+			limitSellEntrustEmpDate,
+			jpsEmpNo,
+			jpsEmpDate,
+			jpzEmpNo,
+			jpzEmpDate,
+			keyEmpNo,
+			keyEmpDate,
+			descEmpNo,
+			descEmpDate
+	   )
+        values
+        (
+			#{propertyId},
+			#{source},
+			#{propertyNo},
+			#{status},
+			#{price},
+			#{handPrice},
+			#{rentPrice},
+			#{deptEmpNo},
+			#{deptEmpDate},
+			#{saleDeptEmpNo},
+			#{saleDeptEmpDate},
+			#{rentDeptEmpNo},
+			#{rentDeptEmpDate},
+			#{sellEntrustEmpNo},
+			#{sellEntrustEmpDate},
+			#{rentEntrustEmpNo},
+			#{rentEntrustEmpDate},
+			#{exclusiveSellEntrustEmpNo},
+			#{exclusiveSellEntrustEmpDate},
+			#{exclusiveRentEntrustEmpNo},
+			#{exclusiveRentEntrustEmpDate},
+			#{limitSellEntrustEmpNo},
+			#{limitSellEntrustEmpDate},
+			#{jpsEmpNo},
+			#{jpsEmpDate},
+			#{jpzEmpNo},
+			#{jpzEmpDate},
+			#{keyEmpNo},
+			#{keyEmpDate},
+			#{descEmpNo},
+			#{descEmpDate}
+	  )
+    </insert>
+    
+ <delete id="deleteAll">
+    	DELETE FROM OtherCompanyProperty where source=#{source}
+    </delete>
+</mapper>

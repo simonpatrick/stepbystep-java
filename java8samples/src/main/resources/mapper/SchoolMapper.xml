@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="SchoolMapper">
+    <select id="queryByPropertyId" parameterType="hashMap" resultType="com.dooioo.school.model.School">
+        SELECT
+          DISTINCT
+          *
+        FROM (
+            SELECT
+                scl.id id,
+                scl.name  schoolName,
+                scl.type  schoolType,
+                scl.level level
+            FROM    dbo.Property p WITH (NOLOCK)
+                    INNER JOIN dbo.Estate e WITH (NOLOCK) ON p.EstateID = e.EstateID
+                    INNER JOIN dbo.Committee ct WITH (NOLOCK) ON e.committeeId = ct.id
+                    INNER JOIN dbo.SchoolMatchedCommittee sc WITH (NOLOCK) ON sc.committeeId = ct.id
+                    INNER JOIN dbo.School scl WITH (NOLOCK) ON scl.id = sc.schoolId
+            WHERE scl.status = 0 AND ct.status =0 AND p.PropertyID = #{propertyId}
+            AND e.FlagDeleted=0
+            AND e.FlagTrashed=0
+            AND e.IsHidden=0
+            <if test="type!= null and type!=''">
+                        AND scl.type = #{type}
+            </if>
+
+            UNION
+            SELECT
+                scl.id id,
+                scl.name  schoolName,
+                scl.type  schoolType,
+                scl.level level
+            FROM    dbo.Property p WITH (NOLOCK)
+            INNER JOIN dbo.Estate e WITH (NOLOCK) ON p.EstateID = e.EstateID
+            INNER JOIN dbo.SchoolEstates se WITH (NOLOCK) on se.estateId = e.estateId
+            INNER JOIN dbo.School scl WITH (NOLOCK) ON scl.id = se.schoolId
+            WHERE scl.status = 0 AND p.PropertyID = #{propertyId}
+            AND e.FlagDeleted=0
+            AND e.FlagTrashed=0
+            AND e.IsHidden=0
+            <if test="type!= null and type!=''">
+                AND scl.type = #{type}
+            </if>
+        ) tbl
+        ORDER BY tbl.schoolType
+    </select>
+
+    <select id="findSchool" parameterType="hashMap" resultType="com.dooioo.school.model.view.SchoolView">
+           SELECT  l.id,
+                    l.name schoolName,
+                    l.type schoolType,
+                    l.level level,
+                    l.phone phone,
+                    l.address address,
+                    l.policy,
+                    l.description
+            FROM    dbo.School l WITH (NOLOCK)
+            WHERE  1=1 AND  l.status = 0
+        <if test="schoolName!= null and schoolName!=''">
+            and l.name = #{schoolName}
+        </if>
+        <if test="schoolId!= null and schoolId!=''">
+            and l.id = #{schoolId}
+        </if>
+    </select>
+
+    <select id="findPriceRange" parameterType="java.lang.Integer" resultType="hashMap">
+            SELECT  ROUND(MAX(CASE p.Price
+                      WHEN 0 THEN PI.handprice
+                      ELSE p.Price
+                    END),2) maxPrice ,
+                ROUND(MIN(CASE p.Price
+                      WHEN 0 THEN PI.handprice
+                      ELSE p.Price
+                    END),2) lowestPrice
+        FROM    dbo.Property p WITH ( NOLOCK )
+                INNER JOIN dbo.Estate e WITH ( NOLOCK ) ON p.EstateID = e.EstateID
+                INNER JOIN dbo.PropertyInfo pi WITH ( NOLOCK ) ON pi.propertyId = p.PropertyID
+                INNER JOIN dbo.Committee ct WITH ( NOLOCK ) ON e.committeeId = ct.id
+                INNER JOIN dbo.SchoolMatchedCommittee sc WITH ( NOLOCK ) ON sc.committeeId = ct.id
+                INNER JOIN dbo.School scl WITH ( NOLOCK ) ON scl.id = sc.schoolId
+        WHERE   scl.id = #{schoolId}
+                AND scl.status = 0
+                AND ct.status = 0
+                AND e.FlagDeleted=0
+                AND e.FlagTrashed=0
+                AND e.IsHidden=0
+                AND NOT ( ISNULL(p.Price, 0) = 0
+                          AND ISNULL(pi.handprice, 0) = 0
+                        )
+                AND ISNULL(p.saleStatus, '') = '出售'
+    </select>
+
+    <select id="countPropertyForSchool" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        SELECT  COUNT(1)
+        FROM    dbo.Property p WITH ( NOLOCK )
+                INNER JOIN dbo.Estate e WITH ( NOLOCK ) ON p.EstateID = e.EstateID
+                INNER JOIN dbo.PropertyInfo pi WITH ( NOLOCK ) ON pi.propertyId = p.PropertyID
+                INNER JOIN dbo.Committee ct WITH ( NOLOCK ) ON e.committeeId = ct.id
+                INNER JOIN dbo.SchoolMatchedCommittee sc WITH ( NOLOCK ) ON sc.committeeId = ct.id
+                INNER JOIN dbo.School scl WITH ( NOLOCK ) ON scl.id = sc.schoolId
+        WHERE   scl.id = #{schoolId}
+                AND scl.status = 0
+                AND ct.status = 0
+                AND e.FlagDeleted=0
+                AND e.FlagTrashed=0
+                AND e.IsHidden=0
+                AND ISNULL(p.saleStatus, '') = '出售'
+                AND p.FlagDeleted = 0
+                AND p.Status !='错盘'
+    </select>
+
+    <select id="countEstateForSchool" parameterType="hashMap" resultType="java.lang.Integer">
+        SELECT  COUNT(1)
+        FROM    dbo.School scl  WITH (NOLOCK)
+                INNER JOIN dbo.SchoolMatchedCommittee scm ON scl.id = scm.schoolId
+                INNER JOIN dbo.Committee ct ON ct.id = scm.committeeId
+                INNER JOIN dbo.Estate e ON e.committeeId = scm.committeeId
+        WHERE   scl.id = #{schoolId}
+        AND scl.status = 0
+        AND ct.status = 0
+        AND e.FlagDeleted=0
+        AND e.FlagTrashed=0
+        AND e.IsHidden=0
+    </select>
+
+    <select id="queryEstateList" resultType="com.dooioo.school.model.EstateInfo" parameterType="hashMap">
+         SELECT    *
+                FROM      ( SELECT    ROW_NUMBER() OVER ( ORDER BY e.saleProperties DESC, e.EstateID DESC ) AS rownumber ,
+                e.EstateID estateId ,
+                e.EstateName estateName ,
+                e.saleProperties propertyCount ,
+                ei.avgPrice avgPrice ,
+                e.PropertyType ,
+                e.TotalRooms as Households
+                FROM      dbo.Estate e  WITH (NOLOCK)
+                INNER JOIN dbo.SchoolMatchedCommittee sc ON e.committeeId = sc.committeeId
+                INNER JOIN dbo.School scl ON scl.id = sc.schoolId
+                INNER JOIN dbo.Committee ct ON ct.id = sc.committeeId
+                LEFT JOIN dbo.EstateInfo ei ON e.EstateID = ei.EstateId
+                WHERE     scl.status = 0
+                AND ct.status = 0
+                AND sc.schoolId = #{schoolId}
+                ) aa
+                WHERE    1=1
+        <if test="startIndex!= null and startIndex!=''">
+              AND  aa.rownumber <![CDATA[ > ]]> #{startIndex}
+        </if>
+        <if test="endIndex!= null and endIndex!=''">
+                AND aa.rownumber <![CDATA[ <= ]]>  #{endIndex}
+        </if>
+    </select>
+
+    <select id="query" parameterType="hashMap" resultType="com.dooioo.school.model.School">
+        SELECT * FROM (SELECT scl.id,
+        scl.name schoolName,
+        scl.address,
+        scl.type schoolType ,
+        scl.level ,
+        scl.areaName,
+        scl.districtName,
+        scl.x,
+        scl.y,
+        ROW_NUMBER() OVER ( ORDER BY scl.districtName,scl.areaName, scl.id) AS rownumber
+        FROM dbo.School scl WITH (NOLOCK) left join area a on scl.areaId = a.areaid
+        WHERE scl.status = 0
+        AND a.cityName = #{cityName}
+        AND (scl.level = '区重点' OR scl.level = '市重点')
+        <if test="districtNo!=null and districtNo!=''">
+            AND scl.districtNo =  #{districtNo}
+        </if>
+        <if test="areaId!=null and areaId!=''">
+            AND scl.areaId = #{areaId}
+        </if>
+        <if test="schoolName!=null and schoolName!=''">
+            AND scl.name LIKE '%'+#{schoolName}+'%'
+        </if>
+        <if test = "address!=null and address!=''">
+             AND scl.address LIKE '%'+ #{address}+'%'
+        </if>
+        <if test="type!=null and type!=''">
+              AND scl.type = #{type}
+         </if>
+         <if test="level!=null and level!=''">
+                AND scl.level = #{level}
+          </if> ) aa WHERE aa.rownumber  <![CDATA[ > ]]> #{startIndex}
+             AND aa.rownumber <![CDATA[ <= ]]>  #{endIndex}
+    </select>
+    
+    <select id="querySchoolNames" parameterType="hashMap" resultType="String">
+        SELECT 
+				  scl.name
+				  FROM dbo.School scl WITH (NOLOCK) left join area a on scl.areaId = a.areaid
+				  WHERE scl.status = 0
+				  AND a.cityName = #{cityName}
+				  AND (scl.level = '区重点' OR scl.level = '市重点')
+				  <if test="districtNames.size()>0">
+				    AND scl.districtName in
+				    <foreach item="item" index="index" collection="districtNames" open="(" separator="," close=")">  
+                #{item}  
+            </foreach>  
+				  </if>
+				  <if test="areaNames.size()>0">
+				    AND scl.areaName in
+				    <foreach item="item" index="index" collection="areaNames" open="(" separator="," close=")">  
+                #{item}  
+            </foreach> 
+				  </if>
+				  <if test="type!=null and type!=''">
+				    AND scl.type = #{type}
+				  </if>
+				  <if test="level!=null and level!=''">
+				    AND scl.level = #{level}
+				  </if> 
+				ORDER BY scl.districtName,scl.areaName, scl.id
+    </select>
+
+    <select id="countSchools" parameterType="hashMap" resultType="java.lang.Integer">
+      SELECT count(*)
+        FROM dbo.School scl WITH (NOLOCK) left join area a on scl.areaId = a.areaid
+        WHERE scl.status = 0
+        AND a.cityName = #{cityName}
+        AND (scl.level = '区重点' OR scl.level = '市重点')
+        <if test="districtNo!=null and districtNo!=''">
+            AND scl.districtNo =  #{districtNo}
+        </if>
+        <if test="areaId!=null and areaId!=''">
+            AND scl.areaId = #{areaId}
+        </if>
+        <if test="schoolName!=null and schoolName!=''">
+            AND scl.name LIKE '%'+#{schoolName}+'%'
+        </if>
+        <if test = "address!=null and address!=''">
+            AND scl.address LIKE '%'+ #{address}+'%'
+        </if>
+        <if test="type!=null and type!=''">
+            AND scl.type = #{type}
+        </if>
+        <if test="level!=null and level!=''">
+            AND scl.level = #{level}
+        </if>
+    </select>
+
+    <select id="queryEstateListForCompleteYear" resultType="com.dooioo.school.model.EstateInfo">
+        SELECT * FROM dbo.EstateCompleteYear ey WITH (NOLOCK) where ey.estateId IN
+        <foreach item="item" index="index" collection="list"
+                     open="(" separator="," close=")">
+                #{item.estateId}
+         </foreach>
+    </select>
+</mapper>

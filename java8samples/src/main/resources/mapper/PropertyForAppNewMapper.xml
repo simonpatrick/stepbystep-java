@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyForAppNewMapper">
+
+	<!-- 查询移动房源 -->
+	<select id="queryPropertyForApp" resultType="com.dooioo.fy.model.PropertyMobileData">
+		<include refid="CommonMapper.Pagination_Head" />
+		select temp.* from (
+		select * from PropertyMobileData with (nolock) where empNo = #{empNo} and type = #{type}
+		) temp left join Property p with (nolock) on temp.propertyId = p.propertyId
+		where p.saleStatus = '出售' and p.FlagTrashed = 0 AND p.FlagDeleted = 0
+		<include refid="CommonMapper.Pagination_Foot" />
+	</select>
+
+	<select id="countPropertyForApp" resultType="int">
+		select COUNT(1) from (
+		select propertyId from PropertyMobileData with (nolock) where empNo = #{empNo} and type = #{type}
+		) temp left join Property p with (nolock) on temp.propertyId = p.propertyId
+		where p.saleStatus = '出售' and p.FlagTrashed = 0 AND p.FlagDeleted = 0
+	</select>
+    
+</mapper>

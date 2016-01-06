@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyMaintainWarnMapper">
+	<insert id="insertMaintainWarn">
+		insert into propertyMaintainWarn (empNo,operEmpNo,status,propertyId,content) values (#{empNo},#{operEmpNo},#{status},#{propertyId},#{content})
+	</insert>
+	
+	<update id="cancelMaintainWarn">
+		update propertyMaintainWarn set status = -1 where empNo = #{empNo}
+	</update>
+	
+	<select id="countMaintainWarn" resultType="int">
+		SELECT COUNT(1) FROM propertyMaintainWarn with(nolock) WHERE empNo=#{empNo}
+		 <if test="status != null">
+		 	AND STATUS=#{status}
+		 </if>
+	</select>
+	
+	
+	<select id="queryPageMaintainWarn" resultType="PropertyMaintainWarn">
+		select * from (
+			select *,Row_number() OVER(ORDER BY id DESC ) AS RowId 
+				from propertyMaintainWarn with(nolock) WHERE empNo=#{empNo}
+				<if test="status != null">
+		 			AND STATUS=#{status}
+				</if>
+		) temp WHERE
+					 RowId >= #{beginNum}
+				AND  RowId &lt; #{endNum}
+	</select>
+	
+</mapper>

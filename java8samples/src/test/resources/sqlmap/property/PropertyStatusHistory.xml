@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+            PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+            "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PropertyStatusHistory">
+	<typeAlias alias="propertyStatusHistory" type="com.dooioo.property.model.PropertyStatusHistory"/>
+	
+	<select id="query" parameterClass="string" resultClass="propertyStatusHistory">
+		select 
+			psh.*,fromEmp.user_name_cn AS fromEmpName,fromOrg.org_name AS fromBranchName,toEmp.user_name_cn AS toEmpName 
+		from 
+			PropertyStatusHistory psh with(nolock)
+			left join oms.dbo.V_OMS_EMPLOYEE_BASEINFOR fromEmp with(nolock) on  fromEmp.user_code = psh.fromEmpNo
+			left join oms.dbo.V_OMS_ORGANIZATION fromOrg with(nolock) on fromOrg.id = fromEmp.org_id
+			left join oms.dbo.V_OMS_EMPLOYEE_BASEINFOR toEmp with(nolock) on  toEmp.user_code = psh.toEmpNo
+		where psh.status in (0, 1)
+			  and propertyId = #propertyId# 
+		order by psh.id
+	</select>
+
+    <select id="queryByPropertyId" parameterClass="string" resultClass="propertyStatusHistory">
+		select
+			psh.*,fromEmp.user_name_cn AS fromEmpName,fromOrg.org_name AS fromBranchName,
+			saleEmp.user_code as saleEmpNo , saleEmp.user_name_cn as saleEmpName , soleOrg.org_name as saleOrgName ,
+			rentEmp.user_code as rentEmpNo , rentEmp.user_name_cn as rentEmpName , rentOrg.org_name as rentOrgName
+		from
+			PropertyStatusHistory psh with(nolock)
+			inner join Property p with(nolock)  on  p.propertyId = psh.propertyId
+
+			left join oms.dbo.V_OMS_EMPLOYEE_BASEINFOR fromEmp with(nolock) on  fromEmp.user_code = psh.fromEmpNo
+			left join oms.dbo.V_OMS_ORGANIZATION fromOrg with(nolock) on fromOrg.id = fromEmp.org_id
+
+			left join oms.dbo.V_OMS_EMPLOYEE_BASEINFOR saleEmp with(nolock) on  saleEmp.user_code = p.saleEmpNo
+			left join oms.dbo.V_OMS_ORGANIZATION soleOrg with(nolock) on  soleOrg.id = p.saleOrgId
+
+            left join oms.dbo.V_OMS_EMPLOYEE_BASEINFOR rentEmp with(nolock) on  rentEmp.user_code = p.rentEmpNo
+			left join oms.dbo.V_OMS_ORGANIZATION rentOrg with(nolock) on  rentOrg.id = p.rentOrgId
+
+		where psh.status in (0, 1) and  psh.completedAt is null
+        and psh.propertyId = #id#
+		order by psh.id
+	</select>
+
+    <select id="queryNoFollow" parameterClass="string" resultClass="propertyStatusHistory">
+      select * from propertyStatusHistory with(nolock)  where propertyId = #id# and followId is null and status != -1
+      order by id asc;
+    </select>
+
+    <select id="queryFirstByPropertyAndType" parameterClass="propertyStatusHistory" resultClass="propertyStatusHistory">
+        select top 1 * from propertyStatusHistory with(nolock)  where propertyId = #propertyId# and type = #type#
+        and status in (0, 1)
+    </select>
+
+    <insert id="insert" parameterClass="propertyStatusHistory">
+        insert into propertyStatusHistory
+        (propertyId, fromEmpNo, toEmpNo, fromStatus, toStatus, type  <isNotNull property="startHandleAt" prepend=",">startHandleAt</isNotNull>)
+        values
+        (#propertyId#, #fromEmpNo#, #toEmpNo#, #fromStatus#, #toStatus#, #type# <isNotNull property="startHandleAt" prepend=",">#startHandleAt#</isNotNull>)
+	</insert>
+    
+    <update id="clearHistoryByPropertyIdAndType" parameterClass="propertyStatusHistory">
+        update propertyStatusHistory set status = 2, completedAt = getdate(),handledResult=#handledResult# where propertyId = #propertyId# and type = #type# and status != 2
+    </update>
+
+    <update id="updateStatusHistory" parameterClass="hashMap">
+        update
+        psh
+        set
+        startHandleAt = getDate(),updatedAt=getdate()
+        from
+        propertyStatusHistory psh inner join Property p on psh.propertyId = p.propertyId
+        where
+        p.propertyId in ($propertyIds$)  and psh.startHandleAt is null and psh.status = 0 and psh.type = #type#
+        <isEqual property="type" compareValue="sale" prepend="and">
+            p.saleEmpNo in ($empNos$)
+        </isEqual>
+        <isEqual property="type" compareValue="rent" prepend="and">
+            p.rentEmpNo in ($empNos$)
+        </isEqual>
+    </update>
+
+    <select id="queryFirstHistory" parameterClass="propertyStatusHistory" resultClass="propertyStatusHistory">
+        select  top 1  * from propertyStatusHistory with(nolock)  where propertyId = #propertyId# and type = #type# and startHandleAt is not null
+        and status != -1 and  status != 2  order by startHandleAt asc
+    </select>
+
+    <select id="queryLastHistory" parameterClass="propertyStatusHistory" resultClass="propertyStatusHistory">
+        select  top 1  * from propertyStatusHistory with(nolock)
+        where propertyId = #propertyId#
+        and type = #type#
+        and startHandleAt is not null
+        and status != -1 and  status != 2  order by createdAt desc
+    </select>
+
+    <update id="updateFollowId" parameterClass="propertyStatusHistory">
+        update propertyStatusHistory set followId = #followId# where id = #id#
+    </update>
+
+    <select id="hasStatusNotice" parameterClass="string" resultClass="int">
+        select count(1) from propertyStatusHistory with(nolock) where propertyId = #id# and status = 0
+    </select>
+</sqlMap>

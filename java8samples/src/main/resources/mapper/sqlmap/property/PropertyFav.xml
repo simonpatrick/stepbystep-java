@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+            PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+            "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PropertyFav">
+	<typeAlias alias="fav" type="com.dooioo.property.model.PropertyFav"/>
+	
+	<insert id="insert" parameterClass="fav">
+		INSERT INTO PropertyFav(PropertyId, Employees) VALUES (#relationId#, #employees#)
+	</insert>
+	
+	<select id="findById" parameterClass="string" resultClass="fav">
+		select top 1 propertyId AS relationId,employees from PropertyFav with(nolock) where propertyId = #id#
+	</select>
+	
+	<select id="count" parameterClass="string" resultClass="integer">
+		select count(propertyId) from PropertyFav with(nolock) where propertyId = #id#
+	</select>
+	
+	<update id="update" parameterClass="fav">
+		update PropertyFav set employees = #employees#,updatedAt = getDate() where propertyId = #relationId#
+	</update>
+	
+	<delete id="delete" parameterClass="string">
+		delete from PropertyFav where propertyId = #id#
+	</delete>
+	
+</sqlMap>

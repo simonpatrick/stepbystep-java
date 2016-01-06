@@ -1,0 +1,165 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="VipMsgMapper">
+	<!--根据电话查询指定手机今天已经发送的短信数：从今日凌晨到现在-->
+	<select id="selectCountByPhoneNumber" resultType="int">
+		select
+			count(0)
+		from VipMsg a with(nolock)
+		where
+			phoneNumber = #{phoneNumber}
+		AND
+			status = 1
+		AND sendAt >= CONVERT(varchar(100), GETDATE(),23)
+
+	</select>
+	<!--根据短信id查询短信-->
+	<select id="selectVipMsgById" resultType="com.dooioo.vip.model.VipMsg">
+		select
+		    *
+		from VipMsg a with(nolock)
+		where id = #{id}
+	</select>
+
+	<!--查询短信总量-->
+	<select id="queryVipMsgListCount" resultType="int">
+		select count(1) from VipMsg a with(nolock)
+		where 1 = 1
+		<if test="batchName != null">
+			and batchName = #{batchName}
+		</if>
+		<if test="msgType != null">
+			AND msgType = #{msgType}
+		</if>
+		<if test="manualConfirm != null">
+			AND manualConfirm = #{manualConfirm}
+		</if>
+		<if test="beginTime != null">
+			AND createdAt >= #{beginTime}
+		</if>
+		<if test="endTime != null">
+			AND createdAt &lt;= #{endTime}
+		</if>
+		<if test="status != null">
+			AND status = #{status}
+		</if>
+		<if test="beginSendTime != null">
+			AND sendAt >= #{beginSendTime}
+		</if>
+		<if test="endSendTime != null">
+			AND sendAt &lt;= #{endSendTime}
+		</if>
+		<if test="propertyNo != null">
+			AND propertyNo = #{propertyNo}
+		</if>
+		<if test="phoneNumber != null">
+			AND phoneNumber = #{phoneNumber}
+		</if>
+	</select>
+
+	<!--查询短信列表-->
+	<select id="queryVipMsgList" resultType="com.dooioo.vip.model.VipMsg">
+		SELECT
+			*
+		FROM (
+			select
+				vm.*,
+		        Row_number() OVER(ORDER BY vm.createdAt DESC ) AS RowId
+			from VipMsg vm with(nolock)
+		    where 1=1
+			<if test="batchName != null">
+				and batchName = #{batchName}
+			</if>
+			<if test="msgType != null">
+				AND msgType = #{msgType}
+			</if>
+			<if test="manualConfirm != null">
+				AND manualConfirm = #{manualConfirm}
+			</if>
+			<if test="beginTime != null">
+				AND createdAt >= #{beginTime}
+			</if>
+			<if test="endTime != null">
+				AND createdAt &lt;= #{endTime}
+			</if>
+			<if test="status != null">
+				AND status = #{status}
+			</if>
+			<if test="beginSendTime != null">
+				AND sendAt >= #{beginSendTime}
+			</if>
+			<if test="endSendTime != null">
+				AND sendAt &lt;= #{endSendTime}
+			</if>
+			<if test="propertyNo != null">
+				AND propertyNo = #{propertyNo}
+			</if>
+			<if test="phoneNumber != null">
+				AND phoneNumber = #{phoneNumber}
+			</if>
+		) vmRs
+			<if test="beginNum != null">
+				WHERE
+					 RowId >= #{beginNum}
+				AND  RowId &lt; #{endNum}
+			</if>
+			order by id desc
+	</select>
+	
+	<!--插入短信-->
+	<insert id="insertVipMsg" useGeneratedKeys="true" keyProperty="id">
+		insert into VipMsg (name,propertyId,propertyNo,phoneNumber,password,msg,msgType,createdAt,status,failReason,batchName,sendAt,updatedAt,manualConfirm)
+		values (#{name},#{propertyId},#{propertyNo},#{phoneNumber},#{password},#{msg},#{msgType},GETDATE(),#{status},#{failReason},#{batchName},#{sendAt},GETDATE(),1)
+	</insert>
+
+	<!--更新短信状态-->
+	<update id="updateVipMsg">
+		UPDATE VipMsg
+		SET
+		   status = #{status},
+		   updatedAt = GETDATE()
+			<if test="status == 1 or status == -1 ">
+				,sendAt = GETDATE()
+				,sendCount = sendCount +1
+			</if>
+		   <if test="failReason != null">
+			   ,failReason = #{failReason}
+		   </if>
+		WHERE id = #{id}
+	</update>
+
+	<!--更新非指定id的其它待发送短信状态-->
+	<update id="updateVipMsgs">
+		UPDATE VipMsg
+		SET
+		status = #{status},
+		updatedAt = GETDATE()
+		<if test="status == 1 or status == -1 ">
+			,sendAt = GETDATE()
+			,sendCount = sendCount +1
+		</if>
+		<if test="failReason != null">
+			,failReason = #{failReason}
+		</if>
+		WHERE id != #{id}
+			and phoneNumber = #{phoneNumber}
+		    and status = -1
+			<if test="createBeginTime != null">
+				AND createdAt >= #{createBeginTime}
+			</if>
+			<if test="createEndTime != null">
+				AND createdAt &lt;= #{createEndTime}
+			</if>
+	</update>
+
+	<!--更新短信人工确认状态-->
+	<update id="updateVipMsgManualConfirm">
+		UPDATE VipMsg
+		SET
+			manualConfirm = 1,
+			updatedAt = GETDATE()
+		WHERE id = #{id}
+	</update>
+</mapper>

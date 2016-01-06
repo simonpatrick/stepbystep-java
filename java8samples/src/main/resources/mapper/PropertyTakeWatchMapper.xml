@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="PropertyTakeWatchMapper">
+
+	<select id="queryTakeWatchProperty" resultType="PropertyTakeWatch">
+		<include refid="CommonMapper.Pagination_Head" />
+			select * from PropertyTakeWatch with(nolock) where propertyId= #{propertyId}
+		<include refid="CommonMapper.Pagination_Foot" />
+		<if test="orderby !=null">
+			order by ${orderby}
+		</if>
+	</select>
+	
+	<select id="queryTakeWatchPropertyCount" resultType="int">
+		select count(1) from PropertyTakeWatch with(nolock) where propertyId= #{propertyId}
+	</select>
+	
+	<!-- 查询一个月内带看的经纪人 -->
+	<select id="queryAgentsForTakeWatchOneMonth" resultType="int">
+		select distinct it.empNo from keyuan.dbo.v_InquiryTakeWatch it with(nolock) where propertyId = #{propertyId} 
+		and createdAt &gt;= DateAdd(Month,-1,getdate())
+	</select>
+
+	<delete id="truncatePropertyTakeWatch">
+		truncate table PropertyTakeWatch
+	</delete>
+	
+	<insert id="addPropertyTakeWatch">
+		insert into PropertyTakeWatch (propertyId,recommendPropertyId,estateName,building,roomNo,countF,countT,countW,square,price,handprice,createdAt,takeWatchNum,mainPicturePath)
+        <![CDATA[
+              SELECT  result.propertyId ,
+                        result.recommendPropertyId ,
+                        result.EstateName ,
+                        result.Building ,
+                        result.roomNo ,
+                        result.CountF ,
+                        result.CountT ,
+                        result.CountW ,
+                        result.Square ,
+                        result.Price ,
+                        result.handprice ,
+                        result.createdAt ,
+                        result.num ,
+                        result.mainPicturePath
+                FROM    ( SELECT    takeWatch.propertyId ,
+                                    takeWatch.recommendPropertyId ,
+                                    takeWatch.num ,
+                                    est.EstateName AS estateName ,
+                                    v.Address AS building ,
+                                    v.roomNo ,
+                                    v.CountF AS countF ,
+                                    v.CountT ,
+                                    v.CountW AS countW ,
+                                    v.Square ,
+                                    v.Price ,
+                                    pi.handPrice ,
+                                    ps.mainPicturePath ,
+                                    takeWatch.createdAt ,
+                                    ROW_NUMBER() OVER ( PARTITION BY takeWatch.propertyId ORDER BY takeWatch.createdAt DESC ) AS row_id
+                          FROM      property v WITH(NOLOCK)
+                                    LEFT JOIN dbo.PropertyInfo pi WITH(NOLOCK) ON v.propertyId = PI.propertyId
+                                    LEFT JOIN dbo.PropertyStat ps WITH(NOLOCK) ON v.PropertyID = ps.propertyId
+                                    INNER JOIN dbo.v_fy_estate est ON v.EstateID = est.EstateID
+                                    INNER JOIN ( SELECT T.propertyId ,
+                                                        T.recommendPropertyId ,
+                                                        T.createdAt ,
+                                                        T.num
+                                                 FROM   ( SELECT    temp.propertyId ,
+                                                                    temp.recommendPropertyId ,
+                                                                    temp.createdAt ,
+                                                                    temp.num
+                                                          FROM      ( SELECT  iqw.propertyId AS propertyId ,
+                                                                              iqw1.propertyId AS recommendPropertyId ,
+                                                                              MAX(iqw1.id) AS id ,
+                                                                              MAX(tk1.createdAt) AS createdAt ,
+                                                                              COUNT(1) AS num
+                                                                      FROM    keyuan.dbo.inquiryWatchProperty iqw
+                                                                              WITH ( NOLOCK )
+                                                                              INNER JOIN keyuan.dbo.inquiryTakeWatch tk
+                                                                              WITH ( NOLOCK ) ON iqw.takeWatchId = tk.id
+                                                                              INNER JOIN keyuan.dbo.inquiryTakeWatch tk1
+                                                                              WITH ( NOLOCK ) ON tk.inquiryId = tk1.inquiryId
+                                                                              INNER JOIN keyuan.dbo.inquiryWatchProperty iqw1
+                                                                              WITH ( NOLOCK ) ON iqw1.takeWatchId = tk1.id
+                                                                      WHERE   tk.createdAt >= DATEADD(Month,
+                                                                              -3, GETDATE())
+                                                                              AND tk1.createdAt >= DATEADD(Month,
+                                                                              -3, GETDATE())
+                                                                      GROUP BY iqw.propertyId ,
+                                                                              iqw1.propertyId
+                                                                    ) temp
+                                                        ) T
+                                               ) takeWatch ON v.PropertyID = takeWatch.recommendPropertyId
+                                                              AND v.saleStatus = '出售'
+                                                              AND takeWatch.recommendPropertyId != takeWatch.propertyId
+                        ) result
+                WHERE   row_id <= 50
+        ]]>
+	</insert>
+	
+	<!-- 查询房源昨天带看信息 -->
+	<select id="queryTakeWatchYesterday" resultType="int">
+		select COUNT(*) as num from keyuan.dbo.v_InquiryTakeWatch with (nolock) where propertyId = #{propertyId} and createdAt &gt;= DateAdd(Day,-1,getdate())
+	</select>
+	
+	
+	<!-- 本房源3个月内带看前三名 -->  
+	<select id="quertyTopNByPropertyIdRecent" resultType="int">
+	select empNo from (
+		SELECT top ${topN} empNo,COUNT(1) takeWatchTimes FROM keyuan.dbo.V_InquiryTakeWatch  with (nolock)
+			WHERE propertyId =#{propertyId}
+			AND createdAt >=DateAdd(Month,#{recentMonth},getdate())
+ 			GROUP BY empNo ORDER BY takeWatchTimes DESC
+ 			) temp
+	</select>
+	
+ 	<!-- 前3个月带看过该楼盘数量前三 -->  
+	<select id="quertyTopNByEstateIdRecent" resultType="int">
+	select empNo from (
+		SELECT top ${topN} vit.empNo,COUNT(1) takeWatchTimes FROM keyuan.dbo.V_InquiryTakeWatch  vit with (nolock)
+ 		INNER JOIN v_property vp with (nolock) ON vit.propertyId = vp.PropertyID AND vp.EstateID = #{estateId}
+ 		WHERE vit.createdAt >=DateAdd(Month,#{recentMonth},getdate())
+ 		GROUP BY vit.empNo ORDER BY  takeWatchTimes DESC
+ 		) temp
+	</select>
+</mapper>

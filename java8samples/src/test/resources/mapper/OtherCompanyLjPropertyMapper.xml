@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="OtherCompanyLjPropertyMapper">
+
+    <select id="queryPropertyById" resultType="OtherCompanyLjProperty">
+        SELECT * FROM  LjProperty WHERE propertyNo=#{propertyNo}
+    </select>
+    
+ <insert id="insert" parameterType="OtherCompanyLjProperty">
+        insert into LjProperty
+        (propertyNo,
+	  trustType ,
+	  estateName ,
+	  address ,
+	  buildingNo ,
+	  unitNo ,
+	  floorNo ,
+	  roomNo ,
+	  price ,
+	  rentPrice ,
+	  regEmp ,
+	  regEmpNo ,
+	  regDate ,
+	  belongEmp ,
+	  belongEmpNo ,
+	  descEmp ,
+	  descEmpNo ,
+	  keyEmp ,
+	  keyEmpNo ,
+	  keyCreateAt ,
+	  keyProtocolNo ,
+	  keyCount ,
+	  keyLocation ,
+	  speedSaleEmp ,
+	  speedSaleEmpNo ,
+	  speedSaleLoadNo ,
+	  speedSaleBeginAt ,
+	  speedSaleEndAt ,
+	  xqje )
+        values
+        (#{propertyNo} , 
+        #{trustType} ,
+	  #{estateName} ,
+	  #{address} ,
+	  #{buildingNo} ,
+	  #{unitNo} ,
+	  #{floorNo} ,
+	  #{roomNo} ,
+	  #{price} ,
+	  #{rentPrice} ,
+	  #{regEmp} ,
+	  #{regEmpNo} ,
+	  #{regDate} ,
+	  #{belongEmp} ,
+	  #{belongEmpNo} ,
+	  #{descEmp} ,
+	  #{descEmpNo} ,
+	  #{keyEmp} ,
+	  #{keyEmpNo} ,
+	  #{keyCreateAt} ,
+	  #{keyProtocolNo} ,
+	  #{keyCount} ,
+	  #{keyLocation} ,
+	  #{speedSaleEmp} ,
+	  #{speedSaleEmpNo} ,
+	  #{speedSaleLoadNo} ,
+	  #{speedSaleBeginAt} ,
+	  #{speedSaleEndAt} ,
+	  #{xqje})
+    </insert>
+    
+    <delete id="deleteAll">
+    	DELETE FROM ljproperty
+	</delete>
+</mapper>

@@ -1,0 +1,13 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 丁丁租房要的楼盘照片MAPPER，用V4是因为没有底层可用 -->        
+<mapper namespace="DingdingOwnerV4">
+	<!-- 根据房源ID获得所有的联系人 -->
+    <select id="queryListByPropertyId" resultType="DingdingOwnerV4" >
+    	select * from 
+    	V_Dingding_PropertyContact
+    	where propertyId = #{propertyId}
+    </select>
+
+</mapper>

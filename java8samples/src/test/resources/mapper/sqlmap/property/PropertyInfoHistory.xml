@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+            PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+            "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PropertyInfoHistory">
+	<typeAlias alias="propertyInfoHistory" type="com.dooioo.property.model.PropertyInfoHistory"/>
+	
+	<insert id="insert" parameterClass="propertyInfoHistory">
+		INSERT INTO PropertyInfoHistory
+           (propertyId
+           ,employeeId
+           <isNotNull property="orgId" prepend=",">
+               orgId
+           </isNotNull>
+           ,fieldName
+           <isNotNull property="beforeValue" prepend=",">
+           		beforeValue
+           </isNotNull>
+           <isNotNull property="afterValue" prepend=",">
+           		afterValue
+           </isNotNull>
+           ,status
+           ,createdAt)
+	     VALUES
+	           (#propertyId#
+	           ,$employeeId$
+                <isNotNull property="orgId" prepend=",">
+                    #orgId#
+                </isNotNull>
+	           ,#fieldName#
+	           <isNotNull property="beforeValue" prepend=",">
+           			#beforeValue#
+	           </isNotNull>
+	           <isNotNull property="afterValue" prepend=",">
+	           		#afterValue#
+	           </isNotNull>
+	           ,1
+	           ,getDate())
+	</insert>
+	
+	<select id="query" parameterClass="propertyInfoHistory" resultClass="propertyInfoHistory">
+		select h.propertyId,h.employeeId,h.fieldName,h.beforeValue,h.afterValue,h.createdAt,e.user_name_cn as employeeNameCn
+		from propertyInfoHistory h with(nolock)
+			left join  oms.dbo.V_OMS_EMPLOYEE_BASEINFOR e with(nolock) on e.user_code = h.employeeId
+		where h.status = 1 and h.propertyId = #propertyId# AND fieldName = #fieldName#
+			order by h.fieldName,h.createdAt DESC
+	</select>
+	
+	<select id="getLastEmployeeId" parameterClass="propertyInfoHistory" resultClass="string">
+		SELECT TOP 1 employeeId FROM dbo.PropertyInfoHistory  with(nolock) 
+			WHERE propertyId = #propertyId# AND fieldName = #fieldName#
+		ORDER BY id DESC
+	</select>
+	
+	<select id="queryLastModifyEmployee" parameterClass="string" resultClass="propertyInfoHistory">
+		select 
+			ae.user_name_cn as employeeNameCn,ph.fieldName,ph.createdAt,ph.employeeId 
+		from 
+			PropertyInfoHistory ph with(nolock)
+			inner join oms.dbo.V_OMS_EMPLOYEE_BASEINFOR ae with(nolock) on ph.employeeId=ae.user_code 
+		where propertyId= CAST(#value# AS char(32))	 and ph.id in
+			(Select MAX(id) from PropertyInfoHistory with(nolock)  where propertyId= CAST(#value# AS char(32)) group by fieldName)
+	</select>
+
+	<select id="getLastModifyStatus" parameterClass="string" resultClass="string">
+		SELECT TOP 1 beforeValue FROM dbo.PropertyInfoHistory  with(nolock) 
+		WHERE propertyId = #id#
+			AND status = 1
+			AND fieldName in ('status3', 'status')
+		ORDER BY id DESC
+	</select>
+
+	<select id="getLastModifyBookingStatus" parameterClass="string" resultClass="propertyInfoHistory">
+		SELECT TOP 1 pinfo.beforeValue,pinfo.employeeId,pinfo.orgId,pinfo.createdAt FROM dbo.PropertyInfoHistory pinfo with(nolock) 
+		WHERE pinfo.propertyId = #propertyId#
+			AND pinfo.status = 1
+			AND pinfo.fieldName in ('status3', 'status')
+			AND convert(nvarchar(255),pinfo.afterValue) = '预定'
+		ORDER BY id DESC
+	</select>
+
+	<select id="queryLastModifyStatusWithOutLock" parameterClass="string" resultClass="string">
+		SELECT TOP 1 beforeValue FROM dbo.PropertyInfoHistory  with(nolock) 
+		WHERE propertyId = #id#
+			AND status = 1
+			AND fieldName in ('status3', 'status')
+			and  convert(nvarchar(255),beforeValue) != '预定' 
+			and   convert(nvarchar(255),beforeValue) != '我售'
+		ORDER BY id DESC
+	</select>
+
+	<select id="queryLastModifyStatusByIdAndEmpNo" parameterClass="propertyInfoHistory" resultClass="propertyInfoHistory">
+		SELECT beforeValue,afterValue,employeeId,createdAt FROM dbo.PropertyInfoHistory with(nolock) 
+		WHERE propertyId = #propertyId#
+			AND status = 1
+			AND fieldName in ('status3', 'status')
+			and DATEADD(hour,24,createdAt) > GETDATE()
+			and employeeId = #employeeId#
+		ORDER BY id DESC
+	</select>
+
+	<select id="queryLastModifyStatusByIdAndOrgId" parameterClass="propertyInfoHistory" resultClass="propertyInfoHistory">
+		SELECT beforeValue,afterValue,employeeId,createdAt FROM dbo.PropertyInfoHistory
+		WHERE propertyId = #propertyId#
+			AND status = 1
+			AND fieldName in ('status3', 'status')
+			and DATEADD(hour,24,createdAt) > GETDATE()
+			and employeeId in (SELECT USER_CODE FROM oms.dbo.v_oms_employee_baseinfor with(nolock)  WHERE ORG_ID = #orgId#)
+		ORDER BY id DESC
+	</select>
+
+
+    <select id="getQueryPrice"   parameterClass="string" resultClass="propertyInfoHistory">
+        select top 5 pih.*,ae.user_name_cn as employeeNameCn from PropertyInfoHistory pih
+        with(nolock) inner join oms.dbo.V_OMS_EMPLOYEE_BASEINFOR ae with(nolock) on pih.employeeId=ae.user_code
+         where pih.propertyId=#id#  and pih.fieldName='price'  order by createdAt desc
+    </select>
+
+    <select id="count2" parameterClass="propertyInfoHistory" resultClass="int">
+		sp_pagecount '$table$','$where$'
+	</select>
+
+    <select id="queryForPaginate2" parameterClass="propertyInfoHistory" resultClass="propertyInfoHistory">
+		mst_sp_pageshowex4 ' $columns$ ','$table$','$where$','$orderBy$',$pageSize$,$pageNo$
+	</select>
+
+    <select id="queryWaitToCheck" resultClass="propertyInfoHistory">
+        SELECT pinfo.id ,
+                pinfo.fieldName ,
+                pinfo.beforeValue ,
+                pinfo.afterValue ,
+                pinfo.employeeId ,
+                pinfo.createdAt ,
+                pinfo.propertyId
+         FROM   dbo.PropertyInfoHistory pinfo with(nolock) 
+                LEFT JOIN oms.dbo.T_OMS_EMPLOYEE_BASEINFOR e ON pinfo.employeeId = e.userCode
+         WHERE  checkStatus = '待审核'
+                AND fieldName IN ( 'price',
+                                   'rentPrice' )
+                AND e.orgId IN (
+                SELECT  relationId
+                FROM    dbo.PreviewUser with(nolock) 
+                WHERE   authType = '修改记录匹配录音'
+                        AND relationType = 2
+                        and status = 0)
+    </select>
+
+    <update id="updateCheckStatusFinishById">
+        update PropertyInfoHistory set checkStatus = '已发送'
+        where id = #id#
+    </update>
+    
+     <select id="findListByParams" resultClass="propertyInfoHistory">
+    	select * from PropertyInfoHistory with(nolock) 
+		where 1=1
+			<isNotEmpty property="fieldName">
+				and fieldName = #fieldName#
+			</isNotEmpty>
+		
+			<isNotEmpty property="startTime">
+				and createdAt > #startTime#
+			</isNotEmpty> 
+			<isNotEmpty property="endTime">
+				<![CDATA[ and createdAt < #endTime#	 ]]>
+			</isNotEmpty>
+			<isNotEmpty property="propertyId">
+				 and propertyId = #propertyId#
+			</isNotEmpty>
+			<isNotEmpty property="empNo">
+				 and employeeId = #empNo#
+			</isNotEmpty>
+	</select>
+	
+	
+	<select id="count" resultClass="Integer">
+    	select count(1) from PropertyInfoHistory with(nolock) 
+		where 1=1
+			<isNotEmpty property="fieldName">
+				and fieldName = #fieldName#
+			</isNotEmpty>
+			<isNotEmpty property="startTime">
+				and createdAt > #startTime#
+			</isNotEmpty> 
+			<isNotEmpty property="endTime">
+				<![CDATA[ and createdAt < #endTime#	 ]]>
+			</isNotEmpty>
+			<isNotEmpty property="propertyId">
+				 and propertyId = #propertyId#
+			</isNotEmpty>
+			<isNotEmpty property="empNo">
+				 and employeeId = #empNo#
+			</isNotEmpty>
+	</select>
+    
+    <select id="findOneLastByParams" resultClass="propertyInfoHistory">
+    	select top 1 * from PropertyInfoHistory with(nolock) 
+		where 1=1
+			and fieldName = 'status3'
+			<isNotEmpty property="startTime">
+				and createdAt > #startTime#
+			</isNotEmpty> 
+			<isNotEmpty property="endTime">
+				<![CDATA[ and createdAt < #endTime#	 ]]>
+			</isNotEmpty>
+			<isNotEmpty property="propertyId">
+				 and propertyId = #propertyId#
+			</isNotEmpty>
+			<isNotEmpty property="empNo">
+				 and employeeId = #empNo#
+			</isNotEmpty>
+		order by createdAt desc
+		
+	</select>
+</sqlMap>

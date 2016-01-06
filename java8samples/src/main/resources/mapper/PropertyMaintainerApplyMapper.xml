@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyMaintainerApplyMapper">
+
+   <select id="selectOne"  resultType="PropertyMaintainerApply">
+     	SELECT applyEmpNo , createdAt , status,houseType  FROM PropertyMaintainerApply WITH(NOLOCK) 
+		WHERE applyEmpNo = #{applyEmpNo}
+    </select>
+
+	<select id="getMaintainerEmpNoByStatus"  resultType="int">
+     	 SELECT pma.applyEmpNo  FROM PropertyMaintainerApply pma WITH(NOLOCK) 
+		 WHERE pma.status = #{status} order by createdAt asc
+    </select>
+    
+    <select id="getMaintainerEmpNoByStatusAndHouseType"  resultType="int">
+     	 SELECT pma.applyEmpNo  FROM PropertyMaintainerApply pma WITH(NOLOCK) 
+		 WHERE pma.status = #{status}  and pma.houseType = #{houseType}
+    </select>
+    
+    <select id="getHouseMaintainerStoreIdByStatus"  resultType="int">
+     	 SELECT emp.parentId FROM PropertyMaintainerApply pma WITH(NOLOCK) 
+		 LEFT JOIN oms.dbo.v_employee_final AS emp ON emp.userCode = pma.applyEmpNo 
+		 LEFT JOIN oms.dbo.T_OMS_ORGANIZATION org ON org.id = emp.parentId 
+		 WHERE pma.status = #{status} and pma.houseType = 0
+    </select>
+
+    <select id="getNotBrokerLeaveMaintainer"  resultType="PropertyMaintainerStatusOrgInfo">
+     	  SELECT * FROM 
+		 (
+		 SELECT pma.applyEmpNo,e.userName,e.orgName,e.positionName,e.status ,
+		 --e.leaveReason,e.leaveType,
+		 CASE WHEN e.orgLongCode LIKE '12020001/120720495/12020003%' THEN  1
+		 ELSE 0 END AS 'sjsyb'
+		 FROM dbo.PropertyMaintainerApply pma WITH(NOLOCK)
+		 INNER JOIN oms.dbo.v2_employee_final e with(nolock) ON pma.applyEmpNo = e.userCode AND pma.status =1
+		 )t
+		 where (  positionName != '经纪人' OR   status ='离职' OR  sjsyb=0 )
+    </select>
+    
+    <select id="querySameOrgMaintainApplyByOrgLongCode"  resultType="OrgMaintainersView">
+     	 SELECT pma.applyEmpNo,vef.userName,vef.orgId,vef.orgName,vef.orgLongCode FROM propertyMaintainerApply pma WITH(NOLOCK)
+		INNER JOIN oms.dbo.v2_employee_final vef WITH(NOLOCK) ON vef.userCode = pma.applyEmpNo AND pma.status =1
+		AND orgLongCode in
+		<foreach collection="lstOrgLongCode" index="index" item="item" open="(" separator="," close=")">  
+        	#{item}  
+   	 	</foreach> 
+		ORDER BY vef.userName
+    </select>
+    
+    <!-- 运营后台人员用 -->
+	<insert id="insertMaintainApply">
+		insert into PropertyMaintainerApply (applyEmpNo,status,source,houseType) values (#{applyEmpNo},#{status},#{source},#{houseType})
+	</insert>
+	
+	
+	<update id="updateMaintainApplyStatus">
+		update PropertyMaintainerApply set status = #{status},updatedAt = getDate() where applyEmpNo = #{applyEmpNo}
+	</update>
+	
+	<update id="updateMaintainApply">
+		update PropertyMaintainerApply set status = #{status},updatedAt = getDate(),houseType=#{houseType} where applyEmpNo = #{applyEmpNo}
+	</update>
+	
+</mapper>

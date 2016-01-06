@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyContactMapper">
+
+	<!-- 20150729 Jail 获得正常的业主数据 -->
+    <select id="query" parameterType="string" resultType="PropertyContactView">
+        SELECT *
+		FROM propertyContact pc with (NOLOCK)
+		WHERE pc.propertyId = #{propertyId} and pc.status = 0 and type is null
+    </select>
+    
+    <!-- 20150806 Jail 获得正常的虚拟联系人数据 -->
+    <select id="queryAgent" parameterType="string" resultType="PropertyContactView">
+        SELECT *
+		FROM propertyContact pc with (NOLOCK)
+		WHERE pc.propertyId = #{propertyId} and pc.status = 0 and type is not null
+    </select>
+    
+    <insert id="insert" parameterType="PropertyContactParam">
+        <selectKey keyProperty="id" resultType="int" order="AFTER">
+            select @@IDENTITY
+        </selectKey>
+        insert into PropertyContact
+        (
+            propertyId,
+            contactName,
+            createEmpNo,
+            residence,
+            relationship,
+            type
+        )
+        select propertyId,
+        contactName,
+        createEmpNo,
+        residence,
+        relationship,
+        type from (
+        select #{propertyId} as  propertyId,
+        #{contactName} as contactName,
+        #{createEmpNo} as createEmpNo,
+        #{residence} as residence,
+        #{relationship} as relationship,
+        #{type} as type
+        ) as a
+        where (type is null) or (
+        type is not null and not exists
+        (select 1 from PropertyContact as b
+        where a.propertyId = b.propertyId and a.contactName = b.contactName
+        and a.createEmpNo = b.createEmpNo and a.type = b.type and b.status = 0)
+        )
+    </insert>
+
+    <update id="update" parameterType="PropertyContactParam">
+        update a set contactName = #{contactName},
+            relationship = #{relationship},
+            residence = #{residence},
+            updatedAt = getDate()
+        from propertyContact a
+        where a.id = #{id}
+    </update>
+
+    <!--用户查询需要过滤的德佑经纪人号码列表 -->
+    <select id="selectFilterContact" resultType="PropertyContactView" >
+        SELECT  a.*
+        FROM    ( SELECT    *
+                  FROM      ( SELECT    a.id ,
+                                        a.propertyId ,
+                                        a.residence ,
+                                        c.type AS relationship ,
+                                        CASE WHEN c.userName IS NULL
+                                             THEN contactName
+                                             ELSE c.userName
+                                        END AS contactName ,
+                                        ROW_NUMBER() OVER ( PARTITION BY a.id ORDER BY c.type DESC ) AS num
+                              FROM      dbo.PropertyContact a WITH ( NOLOCK )
+                                        INNER JOIN dbo.PropertyPhone b WITH ( NOLOCK ) ON a.id = b.propertyContactId AND a.status !=-2 and a.type is null
+                                        INNER JOIN dbo.filterPhone c WITH ( NOLOCK ) ON b.phoneNumber = c.jiamiPhone
+                              WHERE     c.phoneSource = 2
+                                        AND b.status = 0
+                            ) a
+                  WHERE     num = 1
+                ) a
+                INNER JOIN PropertyContact b WITH ( NOLOCK ) ON a.id = b.id
+                                                AND (a.relationship != ISNULL(b.relationship,'') or a.contactName != b.contactName ) AND b.status !=-2 AND b.type is null
+    </select>
+    
+    
+    <!--用户查询需要过滤的黑名单号码列表 -->
+    <select id="selectBlacklistContact" resultType="PropertyContactView" >
+        SELECT  a.*
+        FROM    ( SELECT    *
+                  FROM      ( SELECT    a.id ,
+                                        a.propertyId ,
+                                        a.residence ,
+                                        c.type AS relationship ,
+                                        CASE WHEN c.userName IS NULL
+                                             THEN contactName
+                                             ELSE c.userName
+                                        END AS contactName ,
+                                        ROW_NUMBER() OVER ( PARTITION BY a.id ORDER BY c.type DESC ) AS num
+                              FROM      dbo.PropertyContact a WITH ( NOLOCK )
+                                        INNER JOIN dbo.PropertyPhone b WITH ( NOLOCK ) ON a.id = b.propertyContactId AND a.status !=-2 AND a.type is null
+                                        INNER JOIN dbo.filterPhone c WITH ( NOLOCK ) ON b.phoneNumber = c.jiamiPhone and c.type !='房产中介'
+                              WHERE     c.phoneSource = 1
+                                        AND b.status = 0
+                            ) a
+                  WHERE     num = 1
+                ) a
+                INNER JOIN PropertyContact b WITH ( NOLOCK ) ON a.id = b.id
+                                                AND (a.relationship != ISNULL(b.relationship,'') or a.contactName != b.contactName ) AND b.status !=-2 AND b.type is null
+    </select>
+
+
+	<!-- 根据分机号查询业主联系人 -->
+	<select id="selectContactByPhoneId" resultType="PropertyContactView">
+		select top 1 pc.* from 
+		(select * from PropertyPhone with (nolock) 
+			where id = #{id}) pp
+		left join propertyContact pc with (nolock) on pc.id = pp.propertyContactId
+	</select>
+	
+	<!-- 新增根据 phoneNumber 与 propertyId 获得Phone，20150624增加-2状态，同时查询一下后台人员的
+		 20150713 这个接口暂时保留，回头删除 -->
+	<select id="selectContactByPhoneNumberAndPropertyId" resultType="PropertyContactView" parameterType="Map">
+		select top 1 pc.* from 
+		(select * from PropertyPhone with (nolock) 
+			where propertyId = #{propertyId} and phoneNumber = #{phoneNumber} and status in (0,-2)) pp
+		left join propertyContact pc with (nolock) on pc.id = pp.propertyContactId
+	</select>
+	
+	<!-- 根据手机号查询业主联系人 -->
+	<select id="selectContactByPhoneNumber" resultType="PropertyContactView" >
+		select top 1 pc.* from 
+		(select * from PropertyPhone with (nolock) where phoneNumber = #{phoneNumber} and status = 0) pp
+		left join propertyContact pc with (nolock) on pc.id = pp.propertyContactId
+	</select>
+	
+	
+	<!-- 根据转接号查询业主联系人, 20150603 修改为新的业务，因为废弃了原分机表，所以采用 phoneNumber 与 propertyid 来获得 phone，希望不要有意外 
+		   根据phoneId查询业主联系人，20150713 新版
+		   去除电话状态的过滤,20150810 Jail-->
+	 <select id="selectContactByExtNumber" parameterType="Map" resultType="PropertyContactNumberView">
+        SELECT top 1 cont.*,phone.maskedNumber
+        FROM  dbo.PropertyPhone phone with(nolock)
+        	inner join dbo.PropertyContact cont with(nolock) on phone.propertyContactId = cont.id 
+        where phone.id = #{phoneId} 
+   	</select>
+   	
+   	<!-- 清除不合法的虚拟联系人数据 - 用于初始化，matchContactList 即为房源的全部虚拟联系人，会清除list之外的所有不合法的虚拟联系人 -->
+   	<update id="clearNoneMatchVirtualContact" parameterType="map">
+   		update a set status = -1,updatedAt = getDate()
+   		from propertyContact as a
+   		where a.propertyId = #{propertyId} and a.type is not null and a.status = 0 and not exists (
+	   		select 1 from 
+	   		<foreach collection="matchContactList" item="contact" separator=" union all " open="(" close=")">
+	   			select #{contact.propertyId} as propertyId, #{contact.createEmpNo} as createEmpNo, #{contact.type} as type
+	   		</foreach>
+	   		as b where a.propertyId = b.propertyId and a.createEmpNo = b.createEmpNo and a.type = b.type
+   		)
+   	</update>
+   	
+   	<!-- 判断房源的虚拟联系人是否存在 -->
+   	<select id="checkPropertyRoleExist" parameterType="PropertyContactParam" resultType="int">
+		select count(1) from propertyContact
+		where propertyId = #{propertyId} and status = 0 
+			  and createEmpNo = #{createEmpNo} and type = #{type} and type is not null
+   	</select>
+   	
+   	<!-- 清除指定角色的虚拟联系人数据 -->
+   	<update id="clearVirtualContact" parameterType="map">
+   		update a set status = -1,updatedAt = getDate()
+   		from propertyContact as a
+   		where a.propertyId = #{propertyId} and a.type is not null and a.status = 0 and exists (
+	   		select 1 from 
+	   		<foreach collection="contactList" item="contact" separator=" union all " open="(" close=")">
+	   			select #{contact.propertyId} as propertyId, #{contact.type} as type
+	   		</foreach>
+	   		as b where a.propertyId = b.propertyId and a.type = b.type
+   		)
+   	</update>
+   	
+   	<!-- 清除非正常的虚拟联系人数据，根据角色与联系人工号，不匹配的才删除，至多判断contactList集合的角色（实在不知道怎么命名了） -->
+   	<update id="clearNoneMatchVirtualContact2" parameterType="map">
+   		update a set status = -1,updatedAt = getDate()
+   		from propertyContact as a
+   		where a.propertyId = #{propertyId} and a.type is not null and a.status = 0 
+   		and exists (
+	   		select 1 from 
+	   		<foreach collection="contactList" item="contact" separator=" union all " open="(" close=")">
+	   			select #{contact.propertyId} as propertyId,  #{contact.type} as type
+	   		</foreach>
+	   		as b where a.propertyId = b.propertyId and a.type = b.type
+   		) 
+   		and not exists (
+	   		select 1 from 
+	   		<foreach collection="contactList" item="contact" separator=" union all " open="(" close=")">
+	   			select #{contact.propertyId} as propertyId, #{contact.createEmpNo} as createEmpNo, #{contact.type} as type
+	   		</foreach>
+	   		as b where a.propertyId = b.propertyId and a.createEmpNo = b.createEmpNo and a.type = b.type
+   		)
+   	</update>
+   	
+   	<!-- 根据楼盘ID与加密的电话号码获得业主列表 -->
+   	<select id="selectContactListByEstateIdAndPhoneNumber" parameterType="map" resultType="PropertyContact">
+   		select * from propertyContact as a with(nolock)
+   		where status = 0 and type is null and exists (
+   			select 1 from propertyPhone as pp with(nolock)
+   			where pp.phoneNumber = #{phoneNumber} and a.id = pp.propertyContactId
+   		) and exists ( 
+   			select 1 from property as p with(nolock)
+   			where p.estateId = #{estateId} and a.propertyId = p.propertyId and p.FlagDeleted=0 and p.FlagTrashed=0
+   		)
+   	</select>
+</mapper>

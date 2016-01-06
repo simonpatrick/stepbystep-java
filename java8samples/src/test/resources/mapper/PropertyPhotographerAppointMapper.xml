@@ -1,0 +1,88 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyPhotographerAppointMapper">
+    <insert id="insert" parameterType="PropertyPhotographerAppointModel">
+        <selectKey keyProperty="id" resultType="int" order="AFTER">
+            select @@IDENTITY
+        </selectKey>
+
+        insert into dbo.PropertyPhotographerAppoint(propertyId,employeeId,status,appointDate,createdAt,updatedAt)
+        values (#{propertyId}, #{employeeId}, #{status, typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler}, GETDATE(),GETDATE(),GETDATE())
+    </insert>
+
+    <update id="updateStatus" parameterType="PropertyPhotographerAppointModel">
+        update dbo.PropertyPhotographerAppoint
+        set status = #{status, typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
+        <if test="uploadedDate != null">
+            uploadedDate = #{uploadedDate},
+        </if>
+        <if test="photographerEmpNo != null">
+            photographerEmpNo = #{photographerEmpNo},
+        </if>
+            updatedAt = GETDATE()
+        where id = #{id}
+    </update>
+
+    <select id="findAppointRecord" parameterType="PropertyPhotographerAppointModel" resultMap="photographerAppointResultMap">
+        select top 1
+               p.id,
+               p.propertyId,
+               p.employeeId,
+               p.status,
+               p.appointDate,
+               p.uploadedDate,
+               p.photographerEmpNo,
+               p.createdAt,
+               p.updatedAt
+          from dbo.PropertyPhotographerAppoint p with(noLock)
+         where p.propertyId = #{propertyId}
+         <if test="employeeId != null and employeeId > 0">
+           and p.employeeId = #{employeeId}
+         </if>
+         <if test="status != null">
+           and p.status = #{status, typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler}
+         </if>
+    </select>
+
+    <select id="findNonCancelAppointRecord" parameterType="map" resultMap="photographerAppointResultMap">
+        select top 1
+               p.id,
+               p.propertyId,
+               p.employeeId,
+               p.status,
+               p.appointDate,
+               p.uploadedDate,
+               p.photographerEmpNo,
+               p.createdAt,
+               p.updatedAt
+          from dbo.PropertyPhotographerAppoint p with(noLock)
+         where p.propertyId = #{propertyId}
+           and p.status != 3
+    </select>
+
+    <resultMap type="PropertyPhotographerAppointModel" id="photographerAppointResultMap">
+        <id column="id" property="id"/>
+        <result column="propertyId" property="propertyId"/>
+        <result column="employeeId" property="employeeId"/>
+        <result column="status" property="status" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
+        <result column="createdAt" property="createdAt"/>
+        <result column="updatedAt" property="updatedAt"/>
+        <result column="appointDate" property="appointDate"/>
+        <result column="uploadedDate" property="uploadedDate"/>
+        <result column="photographerEmpNo" property="photographerEmpNo"/>
+    </resultMap>
+
+    <select id="findPhotoUploadedRows" resultType="PropertyPhotographerAppointModel">
+        select c.id as id,
+               a.PropertyID as propertyId,
+               c.employeeId as employeeId,--经纪人id
+               c.uploadedDate as uploadedDate,--摄影师照片上传时间
+               c.photographerEmpNo as photographerEmpNo
+        from dbo.property a with(noLock)
+        inner join dbo.Estate b with(noLock) on a.EstateID = b.EstateID
+        inner join dbo.PropertyPhotographerAppoint c with(noLock) on a.propertyID = c.propertyId and c.status = 4
+        inner join dbo.Area d with(noLock) on b.AreaID = d.AreaID and d.newPhotoPlatformFlag = '1' and d.newPhotoPlatformDate &lt; c.appointDate
+    </select>
+</mapper>

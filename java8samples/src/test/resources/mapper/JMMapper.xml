@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="JMMapper">
+
+    <select id="jiami" parameterType="string" resultType="string">
+		sp_EncryptOwnerTel #{phoneNumber}
+	</select>
+
+    <select id="jiemi"  parameterType="string" resultType="string">
+		sp_DecryptOwnerTel  #{phoneNumber}
+	</select>
+
+    <select id="ownerTel2InquiryTel"  parameterType="string" resultType="string">
+		exec dbo.sp_OwnerTel2InquiryTel #{phoneNumber}
+	</select>
+
+</mapper>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+            PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+            "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PropertyRecordListenFinish">
+	<typeAlias alias="propertyRecordListenFinish" type="com.dooioo.property.model.PropertyRecordListenFinish"/>
+    <insert id="insert" parameterClass="propertyRecordListenFinish">
+        insert into propertyRecordListenFinish(empNo,telPostHistoryId,followId)
+        values (#empNo#,#telPostHistoryId#,#followId#)
+    </insert>
+
+</sqlMap>
+

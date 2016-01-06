@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE sqlMap
+                PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+                "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Building">
+<typeAlias alias="building" type="com.dooioo.estate.model.Building"/>
+<sql id="selectWhere">
+    <dynamic prepend="and">
+        <isNotNull property="estateId" prepend="AND">
+            estateId = #estateId#
+        </isNotNull>
+        <isNotNull property="buildingId" prepend="AND">
+            buildingId = #buildingId#
+        </isNotNull>
+        <isNotNull property="buildingName" prepend="AND">
+            buildingName = #buildingName#
+        </isNotNull>
+    </dynamic>
+</sql>
+
+<insert id="insert" parameterClass="building">
+       insert into building (buildingId,buildingName,estateId,flagDeleted,flagTrashed,exDate,modDate)
+       values(#buildingId#,#buildingName#,#estateId#,0,0,getdate(),getdate())
+    </insert>
+
+<select id="count" parameterClass="string" resultClass="int">
+        select count(*) from building  with(noLock) where flagDeleted = 0 and flagTrashed = 0 and estateId = #estateId#
+    </select>
+
+<select id="query" parameterClass="string" resultClass="building">
+        select * from building  with(noLock)
+        where flagDeleted = 0 and flagTrashed = 0
+        and estateId = #id#
+        order by buildingName asc
+    </select>
+
+<select id="queryByEstateId" parameterClass="string" resultClass="building">
+        select * from building  with(noLock)
+        where flagDeleted = 0 and flagTrashed = 0
+        and estateId = #id#
+        and buildingName != '车位'
+        order by buildingName asc
+    </select>
+
+<select id="queryAllByEstateId" parameterClass="string" resultClass="building">
+        select * from building with(noLock)
+        where flagDeleted = 0 and flagTrashed = 0
+        and estateId = #id#
+        order by buildingName asc
+    </select>
+
+<select id="findByBean" parameterClass="building" resultClass="building">
+    SELECT top 1 BuildingID ,EstateID ,BuildingName ,FloorAll
+    ,CountT ,CountH ,x ,y ,completionDate
+    ,usableRate
+    ,b_x ,b_y
+    ,x_2D,y_2D
+    ,ISNULL(pCounts.prpCount, 0) AS prpCount
+    FROM Building b with(noLock)
+    LEFT JOIN (
+            SELECT
+            p.Address, COUNT(p.PropertyID) AS prpCount FROM dbo.Property p WITH ( NOLOCK )
+            WHERE p.FlagDeleted = 0 AND p.Status != '错盘' AND p.EstateID = #estateId#
+            GROUP BY p.Address
+        ) AS pCounts ON pCounts.address = b.buildingName
+    where flagDeleted = 0 and flagTrashed = 0
+    <include refid="selectWhere"/>
+    order by buildingName ASC
+</select>
+
+<select id="findById" parameterClass="string" resultClass="building">
+        select * from building with(noLock) where buildingId = #id# and flagDeleted = 0 and flagTrashed = 0
+    </select>
+
+<select id="queryRoomlayoutUserfulPic" parameterClass="string" resultClass="string">
+        select top 1 picPath from buildingRoomLayoutPicture with(noLock)
+        where buildingRoomlayoutId in (
+            select id from buildingRoomlayout with(noLock)
+            where buildingId = #id# and name = '楼层平面图'
+        ) and status >= 0
+        order by vote desc , createdAt desc
+    </select>
+
+<select id="queryMainUserfulPic" parameterClass="string" resultClass="string">
+        select top 1 picPath with(noLock) from buildingRoomLayoutPicture
+        where buildingRoomlayoutId in (
+            select id from buildingRoomlayout
+            where buildingId = #id# and name != '楼层平面图'
+        ) and status >= 0
+        order by vote desc , createdAt desc
+    </select>
+
+    <update id="updateCoord" parameterClass="building">
+        update building set x = #x#, y = #y# where buildingId = #id#
+    </update>
+
+    <update id="initBuildingInfo" parameterClass="building">
+        exec sp_InitBuildingInfo
+    </update>
+
+<update id="initCoord" parameterClass="string">
+        update building
+            set
+            x = (e.x + floor((rand() - 0.5) * 20) * 0.0001),
+            y = (e.y + floor((rand() - 0.5) * 20) * 0.0001)
+            from estate e, building b
+            where e.estateId = b.estateId
+            and b.buildingId = #id#
+            and b.x is not null
+            and e.x is not null
+            and b.flagDeleted = 0
+            and b.flagTrashed = 0
+    </update>
+
+<select id="getMarked" parameterClass="string" resultClass="building">
+        select * from building with(noLock) where flagDeleted = 0 and flagTrashed = 0
+        and x is not null and y is not null
+        and estateId = #id#
+        order by buildingName asc
+    </select>
+
+<select id="hasBuildingRoomlayout" parameterClass="string" resultClass="integer">
+        select count(*) from buildingRoomlayout with(noLock)
+        where buildingId in
+        (select top 5 buildingId from building where estateId = #id#)
+    </select>
+
+<select id="getAllBySameName" parameterClass="string" resultClass="building">
+        select * from building with(noLock) where estateId in
+        (select estateId from Estate with(noLock) where estateName = #id# and flagTrashed = 0 and flagDeleted = 0)
+        and flagTrashed = 0 and flagDeleted = 0
+        order by buildingName asc
+    </select>
+
+<select id="queryTrustBuilings" parameterClass="hashmap" resultClass="building">
+    select b.* from  building b with(noLock)
+    <isEqual property="responseType" compareValue="2">
+        inner join ResponseEstate re on re.estateId = b.estateId
+        inner join ResponseEstatebuilding reb on reb.buildingId = b.buildingId  and  re.id = reb.responseEstateId
+    </isEqual>
+    where
+    b.flagTrashed = 0 and b.flagDeleted = 0 and b.estateId = #estateId# and rtrim(b.buildingName) != '车位' and rtrim(b.buildingName) != '地下室'
+    <isEqual property="responseType" compareValue="2" prepend="and">
+        re.status = 0 and re.empNo = #empNo#
+    </isEqual>
+    order by buildingName
+</select>
+
+<select id="isAuthBuilding" parameterClass="building" resultClass="int">
+        select count(1) from building b with(noLock) inner join buildingInfo bi with(noLock) on b.buildingId = bi.buildingId
+        where
+          b.flagTrashed = 0 and b.flagDeleted = 0 and b.estateId = #estateId# and b.buildingName = #buildingName#
+        and
+          CertificationStatus > 0
+    </select>
+
+<select id="queryTrustBuilings2" parameterClass="hashmap" resultClass="building">
+        select b.* from  building b with(noLock)
+            inner join ResponseEstate re on re.estateId = b.estateId
+            inner join ResponseEstatebuilding reb on reb.buildingId = b.buildingId  and  re.id = reb.responseEstateId
+        where
+        b.flagTrashed = 0 and b.flagDeleted = 0 and b.estateId = #estateId# and rtrim(b.buildingName) != '车位' and rtrim(b.buildingName) != '地下室'
+        and re.id in ($idWhere$)
+        order by re.id
+    </select>
+
+    <insert id="insertBuildingInfo" parameterClass="building">
+        INSERT INTO dbo.BuildingInfo(BuildingId ,estateId ,ApplyCertificationDate , PassCertificationDate ,CertificationStatus ,RoomNoRules)
+        VALUES  (#buildingId#,#estateId#,NULL, NULL,0 , 0)
+    </insert>
+
+    <select id="quertyBuildingInfo" parameterClass="hashMap" resultClass="building">
+        SELECT top 1 info.shape, info.onGroundFloor, info.underGroundFloor,b.completionDate FROM dbo.Building  b with(noLock)
+            LEFT JOIN dbo.BuildingInfo info ON info.BuildingId = b.BuildingID
+            LEFT JOIN dbo.Estate e ON e.EstateID = b.EstateID
+        WHERE e.FlagDeleted = 0 AND e.FlagTrashed = 0 AND e.EstateName = #estateName#  AND b.BuildingName = #building#
+    </select>
+    
+    
+    <insert id="insertBuildingAndInfo">
+	    INSERT INTO dbo.Building  ( BuildingID ,  EstateID , BuildingName , FloorAll ,CountT ,  CountH ,  usableRate 
+	        )VALUES  ( #buildingId# ,  #estateId# ,  #buildingName# ,   0 ,  '' ,   '' ,  0  )
+	        
+		INSERT INTO dbo.BuildingInfo ( BuildingId ,estateId,CertificationStatus ,RoomNoRules) 
+		VALUES ( #buildingId#, #estateId#, 0, 1)
+	    
+    </insert>
+
+    <select id="validateRoomNoRules" parameterClass="hashMap" resultClass="hashMap">
+        EXEC dbo.Estate_QueryRoomNoRules @estateId = #estateId#,@buildingName = #building#
+    </select>
+
+    <select id="queryForMapApp" resultClass="building" parameterClass="hashMap">
+        SELECT
+        TOP 1000
+        b.BuildingID, b.EstateID, e.EstateName, e.estateNo,
+        CASE WHEN b.b_x > 0 THEN b.b_x ELSE e.b_x END AS b_x,
+        CASE WHEN b.x_2D > 0 THEN b.x_2D WHEN b.b_x > 0 THEN b.b_x ELSE e.b_x END AS x_2D,
+        CASE WHEN b.b_y > 0 THEN b.b_y ELSE e.b_y END AS b_y,
+        CASE WHEN b.y_2D > 0 THEN b.y_2D WHEN b.b_y > 0 THEN b.b_y ELSE e.b_y END AS y_2D,
+         b.BuildingName
+        FROM dbo.Building b with(nolock)
+        LEFT JOIN dbo.Estate e WITH(nolock) on e.EstateID = b.EstateID
+        WHERE e.FlagDeleted = 0 AND e.FlagTrashed = 0 AND e.isHidden = 0
+        AND b.FlagDeleted = 0 and b.FlagTrashed = 0 AND b.BuildingName != '车位'
+        <isNotNull property="minX">
+            <![CDATA[
+					AND CASE WHEN b.b_x > 0 THEN b.b_x ELSE e.b_x END >= $minX$ AND CASE WHEN b.b_x > 0 THEN b.b_x ELSE e.b_x END <= $maxX$
+					AND CASE WHEN b.b_y > 0 THEN b.b_y ELSE e.b_y END >= $minY$ AND CASE WHEN b.b_y > 0 THEN b.b_y ELSE e.b_y END <= $maxY$
+				]]>
+        </isNotNull>
+    </select>
+</sqlMap>

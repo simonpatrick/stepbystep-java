@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+            PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+            "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PropertyPicture">
+	<typeAlias alias="propertyPicture" type="com.dooioo.property.model.PropertyPicture"/>
+
+    <select id="findById" parameterClass="int" resultClass="propertyPicture">
+        select e.user_name_cn as employeeNameCn ,org.org_name as branchName,p.* 
+        from  propertyPicture p with(nolock)
+        left join OMS.dbo.V_OMS_EMPLOYEE_BASEINFOR e with(nolock) on p.employeeId = e.user_code
+        left join OMS.DBO.V_OMS_ORGANIZATION org with(nolock) on org.id =e.org_id 
+        where p.id = #id# and  P.status != -1 
+    </select>
+
+    <select id="queryNotFill" parameterClass="propertyPicture" resultClass="propertyPicture">
+        select * from propertyPicture  with(nolock)  where status = 0 and employeeId = #employeeId# and propertyId = #propertyId#
+        order by id
+    </select>
+    
+    <select id="queryPictureList" parameterClass="java.util.HashMap" resultClass="propertyPicture">
+        SELECT   a.*,b.user_name_cn as username,c.org_name as orgname
+		FROM     PropertyPicture a  with(nolock) 
+		         left join oms.dbo.V_OMS_EMPLOYEE_BASEINFOR b with(nolock)  on a.employeeid = b.user_code 
+		         left join oms.dbo.V_OMS_ORGANIZATION  c with(nolock)  on b.org_id = c.id
+		WHERE    propertyid = #PROPERTYID# and a.status >-1
+		<isNotEmpty property="TYPE" prepend="AND">
+            cateid1 in( select id from dbo.PictureCategory where type = #TYPE#) order by a.createdat desc
+		</isNotEmpty>
+        <isNotEmpty property="bquery">
+            <isNotEmpty property="empNo" prepend="and">
+                a.employeeid = #empNo#
+            </isNotEmpty>
+             and  cateId1 in (58,59,60,73)  order by a.cateid1,a.createdat desc
+        </isNotEmpty>
+
+
+    </select>
+
+    <select id="query" parameterClass="propertyPicture" resultClass="propertyPicture">
+        select
+        <isNotEqual property="topCount" compareValue="0">
+            top $topCount$
+        </isNotEqual>
+        e.user_name_cn as employeeNameCn ,org.org_name as branchName, p.*   
+        from propertyPicture p with(nolock)
+        left join OMS.dbo.V_OMS_EMPLOYEE_BASEINFOR e with(nolock) on p.employeeId = e.user_code
+        left join OMS.DBO.V_OMS_ORGANIZATION org with(nolock) on org.id =e.org_id   
+        where p.status > 0
+        <isNotNull property="cateId1" prepend="and">
+            p.cateId1 = #cateId1#
+        </isNotNull>
+        <isNotNull property="cateId2" prepend="and">
+            p.cateId2 = #cateId2#
+        </isNotNull>
+        <isNotEmpty property="propertyId" prepend="and">
+            p.propertyId = #propertyId#
+        </isNotEmpty>
+        order by p.vote desc, p.createdAt desc
+    </select>
+
+    <select id="queryPics" parameterClass="propertyPicture" resultClass="propertyPicture">
+        select * from propertyPicture with(nolock) 
+        where status = 1
+        <isNotNull property="cateId1" prepend="and">
+            cateId1 = #cateId1#
+        </isNotNull>
+        <isNotNull property="cateId2" prepend="and">
+            cateId2 = #cateId2#
+        </isNotNull>
+        <isNotEmpty property="propertyId" prepend="and">
+            propertyId = #propertyId#
+        </isNotEmpty>
+        <isNotNull property="employeeId" prepend="and">
+            employeeId = #employeeId#
+        </isNotNull>
+    </select>
+    
+    <!--创建人:谢洋 获取本人今天在同一个房源里面上传过同一类型的图片的数量 -->
+    <!--修改zhxy:status =1 改为  status > -1；为了包含＝0的情况，因为上传页面经纪人可能不保存 -->
+    <select id="countEmpPic" parameterClass="propertyPicture" resultClass="int">
+    	select count(propertyId) from propertyPicture with(nolock)  where status > -1 and cateId1=#cateId1#
+    		and propertyId=#propertyId# and (datediff(dd, createdAt, getdate()) = 0) and employeeId = #employeeId#
+    </select>
+    
+    <select id="queryAll" parameterClass="propertyPicture" resultClass="propertyPicture">
+       select pic.*,p.address,p.roomno,e.estatename from propertyPicture pic with(nolock) 
+				left join property p with(nolock) on pic.propertyId = p.propertyId 
+				left join estate e with(nolock) on p.estateId = e.estateId
+			where pic.status = 1 and pic.employeeId=$employeeId$ and pic.propertyId=#propertyId#
+        order by pic.vote desc, pic.createdAt desc
+    </select>
+
+    <select id="countGroupByCate1" parameterClass="string" resultClass="propertyPicture">
+        select cateId1, count(*) as total from propertyPicture with(nolock)  where status > 0 and propertyId = #id#
+        group by cateId1
+    </select>
+
+    <insert id="insert" parameterClass="propertyPicture">
+        insert into propertyPicture(propertyId, employeeId, path, reference, originalFileName)
+        values
+        (#propertyId#, #employeeId#, #path#, #reference#, #originalFileName#)
+    </insert>
+
+    <insert id="insertRefer" parameterClass="propertyPicture">
+        insert into propertyPicture(propertyId, employeeId, path, cateId1, cateId2, remark, externalSource, externalId, title, status)
+        values
+        (#propertyId#, #employeeId#, #path#, #cateId1#, #cateId2#, #remark#, #externalSource#, #externalId#, #title#, #status#)
+        <selectKey resultClass="integer" keyProperty="id">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
+
+    <update id="update" parameterClass="propertyPicture">
+        update propertyPicture set status = 1, updatedAt = getdate()
+        <isNotNull property="remark" prepend=",">
+            remark = #remark#
+        </isNotNull>
+        <isNotEqual property="cateId1" compareValue="0" prepend=",">
+            cateId1 = #cateId1#
+        </isNotEqual>
+        <isNotEmpty property="cateId2" prepend=",">
+            cateId2 = #cateId2#
+        </isNotEmpty>
+        <isNotEmpty property="externalId" prepend=",">
+            externalId = #externalId#
+        </isNotEmpty>
+        <isNotEmpty property="externalSource" prepend=",">
+            externalSource = #externalSource#
+        </isNotEmpty>
+        where id = #id#
+    </update>
+
+    <update id="delete" parameterClass="propertyPicture">
+        update propertyPicture set status = -1, updatedAt = getdate()
+        where status != -1 and id = $id$
+        <isNotEmpty property="propertyId" prepend="and">
+            propertyId = #propertyId#
+        </isNotEmpty>
+        <isNotEqual property="employeeId" compareValue="0" prepend="and">
+        		employeeId = #employeeId#
+        </isNotEqual>
+    </update>
+    
+    <update id="reupload" parameterClass="propertyPicture">
+        update propertyPicture set status = -1
+        where status = 0 and propertyId = #propertyId# and employeeId = #employeeId#
+    </update>
+    
+    <select id="count" parameterClass="propertyPicture" resultClass="integer">
+    	select count(id) from propertypicture with(nolock)  where status > 0
+    		<isNotEmpty property="propertyId" prepend="and">
+    			propertyId = #propertyId#
+    		</isNotEmpty>
+    		<isNotEqual property="employeeId" prepend="and" compareValue="0">
+    			employeeId = $employeeId$
+    		</isNotEqual>
+    </select>
+    
+    <select id="queryByPropertyId" parameterClass="string" resultClass="propertyPicture">
+    	select * from propertypicture  with(nolock) where status>0 and propertyId=#propertyId#
+    </select>
+
+    
+</sqlMap>

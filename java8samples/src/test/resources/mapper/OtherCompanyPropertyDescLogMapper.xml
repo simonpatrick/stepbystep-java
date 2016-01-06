@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="OtherCompanyPropertyDescLogMapper">
+
+    <select id="queryDescLogByPropertyIdSource" resultType="OtherCompanyPropertyDescLog">
+          SELECT * FROM  OtherCompanyPropertyDescLog WHERE propertyId=#{propertyId}
+         and source=#{source}
+    </select>
+
+	<insert id="insert" parameterType="hashMap">
+        insert into OtherCompanyPropertyDescLog
+        (propertyId,
+	  source ,
+	  type ,
+	  status,
+	   message)
+        values
+        (#{propertyId} , 
+        #{source} , 
+        #{type} , 
+        #{status} ,
+	  #{message})
+    </insert>
+    
+    <update id = "update" parameterType="hashMap">
+    	update OtherCompanyPropertyDescLog
+    	set status = #{status},
+    			type = #{type},
+    			message=#{message},
+    		updatedAt = getdate()
+    	where propertyId = #{propertyId} and source =#{source}
+    </update>
+    
+ <delete id="deleteAll">
+    	DELETE FROM OtherCompanyPropertyDescLog where source=#{source}
+    </delete>
+    
+</mapper>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="OtherCompanyEstateInfoMapMapper">
+
+	<select id="queryBySourcePropertyId" resultType="OtherCompanyEstateInfoMap">
+		SELECT * FROM dbo.OtherCompanyEstateInfoMap vp WITH(NOLOCK) WHERE vp.PropertyID=#{propertyId} and vp.source =#{source}
+	</select>
+	
+	<select id="queryEstateInfoMap" resultType="OtherCompanyEstateInfoMap">
+		<include refid="CommonMapper.Pagination_Head"/>
+	        SELECT * FROM OtherCompanyEstateInfoMap with(nolock)
+	        WHERE source = #{source} 
+	        	        
+	        <if test="isMatched =='needMatch' ">
+				and isNull(matchInfo,'') ='' and status = 0
+			</if>
+			<if test="isMatched =='matched' ">
+				and isNull(matchInfo,'') !=''
+			</if>
+			
+	        <if test="status !=null">
+				and status =#{status}
+			</if>
+			<if test="type !=null">
+				and type =#{type}
+			</if>
+		
+			<if test="startTime !=null">
+				and updatedAt > #{startTime}
+			</if>
+			<if test="endTime !=null">
+				and updatedAt &lt; #{endTime}
+			</if>
+			
+        <include refid="CommonMapper.Pagination_Foot" />
+	</select>
+	
+	<select id="countEstateInfoMap" resultType="int">
+	        SELECT count(1) FROM OtherCompanyEstateInfoMap with(nolock)
+	        WHERE source = #{source} 
+	        
+	        <if test="isMatched =='needMatch' ">
+				and isNull(matchInfo,'') ='' and status = 0
+			</if>
+			<if test="isMatched =='matched' ">
+				and isNull(matchInfo,'') !=''
+			</if>
+			
+	        <if test="status !=null">
+				and status =#{status}
+			</if>
+			<if test="type !=null">
+				and type =#{type}
+			</if>
+			<if test="startTime !=null">
+				and updatedAt > #{startTime}
+			</if>
+			<if test="endTime !=null">
+				and updatedAt &lt; #{endTime}
+			</if>
+	</select>
+   
+    <select id="queryNeedProcessBuildEstateInfoMap" resultType="OtherCompanyEstateInfoMap">
+		<include refid="CommonMapper.Pagination_Head"/>
+	        SELECT  DISTINCT myEstateName ,myBuilding FROM OtherCompanyEstateInfoMap with(nolock)
+	        WHERE source = #{source} 
+	        and matchInfo ='需新增栋座'
+	        and isNull(myEstateName,'') !='' and isNull(myBuilding,'') !=''
+        <include refid="CommonMapper.Pagination_Foot" />
+	</select>
+	
+	 <select id="countNeedProcessBuildEstateInfoMap" resultType="int">
+	        SELECT count(1) FROM (
+	        	SELECT  DISTINCT myEstateName ,myBuilding FROM OtherCompanyEstateInfoMap with(nolock)
+	        	WHERE source = #{source} 
+	       		 and matchInfo ='需新增栋座'
+	        	and isNull(myEstateName,'') !='' and isNull(myBuilding,'') !=''
+	        ) a
+	</select>
+	
+   <update id="update">
+   	 UPDATE OtherCompanyEstateInfoMap SET status =#{status},type =#{type},matchInfo =#{matchInfo},myEstateName =#{myEstateName},
+	 myBuilding =#{myBuilding},myRoomNo =#{myRoomNo},myPropertyId =#{myPropertyId},updatedAt =getdate()
+	   WHERE  PropertyID=#{propertyId} and  source =#{source}
+   </update>
+   
+   <insert id="insert">
+   insert into OtherCompanyEstateInfoMap
+        (estateName,  building, roomNo, estateAddress, propertyId, type, matchInfo,
+	  myEstateName, myBuilding, myRoomNo, myPropertyId,source,propertyUsage,permitNo )
+        values
+        (#{estateName} , #{building}, #{roomNo} , #{estateAddress}, #{propertyId},#{type} , #{matchInfo}, 
+        #{myEstateName} , #{myBuilding}, #{myRoomNo},#{myPropertyId}, #{source},#{propertyUsage},#{permitNo} )
+   </insert>
+   
+   <delete id="deleteAll">
+    	DELETE FROM OtherCompanyEstateInfoMap where source=#{source}
+    </delete>
+    
+</mapper>

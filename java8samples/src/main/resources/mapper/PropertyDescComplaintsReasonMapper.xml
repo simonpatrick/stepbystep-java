@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyDescComplaintsReasonMapper">
+
+    <sql id="where_Clause">
+        <trim prefix="where" prefixOverrides="and|or">
+            <if test="complaintId != null">
+                and complaintId = #{complaintId, jdbcType=DECIMAL}
+            </if>
+            <if test="complaintIds != null">
+              	and complaintId in 
+				<foreach item="tempComplaintId" collection="complaintIds" open="(" separator=" , " close=")">
+					#{tempComplaintId}
+		        </foreach>
+            </if>
+        </trim>
+    </sql>
+
+    <select id="list" parameterType="Map" resultType="PropertyDescComplaintsReason">
+        SELECT *
+		FROM PropertyDescComplaintsReason with (NOLOCK)
+		<include refid="where_Clause"/>
+		ORDER BY createdAt
+    </select>
+
+    <insert id="insert" parameterType="PropertyDescComplaintsReason">
+        <selectKey keyProperty="id" resultType="int" order="AFTER">
+            select @@IDENTITY
+        </selectKey>
+        insert into PropertyDescComplaintsReason
+        (
+            complaintId,
+            reason
+        )
+        values
+        (
+            #{complaintId, jdbcType=DECIMAL},
+            #{reason, jdbcType=VARCHAR}
+        )
+    </insert>
+
+</mapper>

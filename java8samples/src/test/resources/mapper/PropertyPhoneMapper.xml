@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyPhoneMapper">
+
+    <insert id="insert" parameterType="PropertyPhoneParam">
+        <selectKey keyProperty="id" resultType="int" order="AFTER">
+            select @@IDENTITY
+        </selectKey>
+        insert into propertyPhone
+        (
+        propertyContactId,
+        phoneNumber,
+        phoneType,
+        maskedNumber,
+        createEmpNo,
+        propertyId,
+        province,
+        city,
+        netWork,
+        phoneStatus
+        <!-- -2表示彻底 删除；插入些记录用来 特别场景下使用；用完不必考虑 复杂的删除场景 -->
+        <if test="status!=null and status ==-2">
+				,status
+		</if>
+        )
+        values
+        (
+		#{propertyContactId},
+        #{phoneNumber},
+        #{phoneType},
+        #{maskedNumber},
+        #{createEmpNo},
+        #{propertyId},
+        #{province},
+        #{city},
+        #{netWork},
+        #{phoneStatus}
+        <if test="status!=null and status ==-2">
+				,-2
+		</if>
+        )
+    </insert>
+
+    <delete id="delete" parameterType="PropertyPhoneParam">
+        update pp set status = -1,updatedAt = getDate()
+        from propertyPhone pp
+        where pp.id = #{id} and status = 0
+    </delete>
+
+    <delete id="deleteComplete" parameterType="PropertyPhoneParam">
+        update pp set status = -2,updatedAt = getDate()
+        from propertyPhone pp
+        where pp.id = #{id} and status = -1
+    </delete>
+
+    <update id="recoveryPhone" parameterType="PropertyPhoneParam">
+        update pp set status = 0,
+        province = #{province},
+        city = #{city},
+        netWork = #{netWork},
+        phoneStatus = #{phoneStatus}
+        from propertyPhone pp
+        where status = -1
+        and pp.phoneNumber = #{phoneNumber}
+        and pp.propertyContactId = #{propertyContactId}
+    </update>
+
+    <update id="recoveryPhoneAndChangeContact" parameterType="PropertyPhoneParam">
+        update pp set status = 0,
+        propertyContactId = #{propertyContactId},
+        province = #{province},
+        city = #{city},
+        netWork = #{netWork},
+        phoneStatus = #{phoneStatus}
+        from propertyPhone pp
+        where status = -1
+        and pp.phoneNumber = #{phoneNumber}
+        and pp.propertyId = #{propertyId}
+    </update>
+
+	<!-- 20150713 改为phoneId来更新 -->
+    <update id="updateCallTotalAndConnectedTotal" parameterType="int">
+        update pp set callTotal = callTotal + 1,
+        connectedTotal = connectedTotal + 1,
+        callAll = isnull(callAll,0) + 1,
+        connectedAll = isNUll(connectedAll,0) + 1
+        from propertyPhone pp
+        where pp.id = #{phoneId}
+    </update>
+
+	<!-- 20150713 改为phoneId来更新 -->
+    <update id="updateCallTotal" parameterType="int">
+        update pp set callTotal = callTotal + 1,
+        callAll = isnull(callAll,0) + 1
+        from propertyPhone pp
+        where pp.id=#{phoneId}
+    </update>
+
+
+    <select id="queryByPropertyIds" parameterType="map" resultType="PropertyPhoneView">
+        select a.phoneNumber,a.city,a.sevencount,c.EstateName,b.Address,b.RoomNo
+        from PropertyPhone a WITH (NOLOCK) ,property b WITH (NOLOCK) ,Estate c  WITH (NOLOCK)
+        where
+        a.propertyId in 
+        <foreach collection="propertyIds" item="propertyId" open="(" close=")" separator=",">
+       		#{propertyId}
+        </foreach>
+        and a.propertyId=b.propertyId
+        and b.EstateID=c.EstateID
+        and a.status=0
+    </select>
+    
+    <update id="update" parameterType="PropertyPhoneParam">
+        update pp
+        <set>
+            <if test="phoneNumber != null">
+                phoneNumber = #{phoneNumber},
+            </if>
+            <if test="maskedNumber != null">
+                maskedNumber = #{maskedNumber},
+            </if>
+            <if test="phoneStatus != null">
+                phoneStatus = #{phoneStatus},
+            </if>
+            <if test="province != null">
+                province = #{province},
+            </if>
+            <if test="city != null">
+                city = #{city},
+            </if>
+            <if test="netWork != null">
+                netWork = #{netWork},
+            </if>
+        </set>
+        from propertyPhone pp
+        where pp.id = #{id}
+    </update>
+
+    <select id="queryByPropertyId" parameterType="string" resultType="PropertyPhoneView" >
+        SELECT *
+        FROM dbo.PropertyPhone WITH (NOLOCK)
+        WHERE propertyId = #{propertyId} and status != -2 and status != -3
+        order by id desc
+    </select>
+
+    <select id="queryEarliestOne" parameterType="hashMap" resultType="PropertyPhoneView">
+        SELECT top 1 *
+        FROM dbo.PropertyPhone WITH (NOLOCK)
+        WHERE propertyId = #{propertyId}
+        ORDER BY createdAt ASC 
+    </select>
+    
+    <select id="queryEffectivePhones" parameterType="string" resultType="PropertyPhoneView">
+        SELECT *
+        FROM dbo.PropertyPhone WITH (NOLOCK)
+        WHERE propertyId = #{propertyId} and status = 0
+        order by id desc
+    </select>
+    
+    <!-- 根据手机号查询房源 -->
+     <select id="queryPropertyByPhone" parameterType="string" resultType="PropertyPhoneView">
+        SELECT pc.contactName,pp.propertyId,pp.propertyContactId,pc.relationship
+        FROM agencyjizhong.dbo.PropertyPhone pp WITH (NOLOCK) inner join agencyjizhong.dbo.PropertyContact pc with (nolock)
+        on pp.propertyContactId = pc.id
+        WHERE pp.phoneNumber = #{phoneNumber} and pp.status = 0
+    </select>
+
+    <!-- 非业主 联系人 ，如 私盘、拍卖房 时  生成 公寓管理员，私盘方、拍卖行  转接号 逻辑; 只会有 一个 -->
+    <select id="querySpecifyPhone" parameterType="hashMap" resultType="PropertyPhoneView" >
+        SELECT top 1 *
+        FROM dbo.PropertyPhone WITH (NOLOCK)
+        WHERE propertyId = #{propertyId} and status = -2 and createEmpNo =#{empNo} and propertyContactId = #{propertyContactId}
+        order by id desc
+    </select>
+    
+    <select id="findById" resultType="PropertyPhoneView">
+        SELECT * FROM dbo.PropertyPhone WITH (NOLOCK) where id = #{id}
+    </select>
+    
+    
+    
+    <!-- 非业主 联系人 ，如 私盘、拍卖房 时  生成 公寓管理员，私盘方、拍卖行  电话删除；status 置为-3 -->
+    <delete id="deleteSpecifyPhone" parameterType="Integer">
+        update pp set status = -3,updatedAt = getDate()
+        from propertyPhone pp
+        where pp.id = #{id} and status = -2
+    </delete>
+
+    <!--删除冗余表propertyId数据，准备重新构造冗余表行数据-->
+    <delete id="deletePropertyPhonesByPropertyId" parameterType="string">
+        delete from propertyPhones where propertyId = #{propertyId}
+    </delete>
+
+    <insert id="insertPropertyPhones" parameterType="map">
+        INSERT INTO dbo.PropertyPhones( propertyId, Phones ,createdAt)
+        values(#{propertyId},#{phones},getdate())
+    </insert>
+
+    <!--&lt;!&ndash;临时 需要删除&ndash;&gt;-->
+    <!--<select id="listAllForOuyang" resultType="string">-->
+        <!--SELECT DISTINCT phoneNumber FROM dbo.PropertyPhone WITH (NOLOCK) WHERE phoneType = 'tel' AND status = 0-->
+    <!--</select>-->
+
+    <!--<select id="listAllForOuyangOther" resultType="string">-->
+        <!--SELECT DISTINCT phoneNumber FROM dbo.PropertyPhone WITH (NOLOCK) WHERE phoneType = 'tel' AND status = 0 and createdAt > getdate() - 6-->
+    <!--</select>-->
+
+    <!--<select id="listFyForOuyang" resultType="string">-->
+        <!--SELECT est.EstateName + '###' + p.Address + '###' + p.RoomNo-->
+        <!--FROM    property p WITH ( NOLOCK )-->
+                <!--LEFT JOIN dbo.v_fy_estate est ON p.EstateID = est.EstateID-->
+    <!--</select>-->
+
+    <!--<select id="listFyForOuyangOther" resultType="string">-->
+        <!--SELECT  EstateName,Address,RoomNo FROM dbo.v_viewProperty_v2 WITH (NOLOCK)  WHERE TrustDate > GETDATE() - 6-->
+    <!--</select>-->
+
+
+    <!--<select id="findByEBR" resultType="string">-->
+      <!--SELECT top 1 propertyid FROM dbo.v_viewProperty_v2 WHERE EstateName = #{estateName} AND Address = #{buildingName} AND RoomNo = #{roomNo}-->
+    <!--</select>-->
+
+	<!-- 根据加密的号码与房源ID与状态获得phoneId，20150624增加 -2状态查询（经纪人） -->
+	<select id="findPhoneId" resultType="integer">
+		select top 1 id from 
+		PropertyPhone with(nolock)
+		where phoneNumber = #{phoneNumber}
+			and propertyId = #{propertyId}
+	</select>
+	
+	<!-- 根据MD5加密的电话号码获得德佑加密的电话号码 20150703 jail-->
+	<select id="findPhoneNumberByPhoneMd5" resultType="string">
+		select top 1 pp.phoneNumber from PropertyPhoneMD5 ppMd5 
+		inner join PropertyPhone pp on ppMd5.id = pp.id where ppmd5.md5 = #{phoneMD5}
+	</select>
+	
+	<!-- 根据房源ID获得电话集合（包含正常与删除的业主电话以及正常的非业主电话） -->
+	<select id="queryListWithOutDeletedAgentPhoneByPropertyId" parameterType="string" resultType="PropertyPhoneView" >
+        SELECT *
+        FROM dbo.PropertyPhone WITH (NOLOCK)
+        WHERE propertyId = #{propertyId} and status in (0,-1,-2)
+        order by id desc
+    </select>
+    
+    	
+	<!-- 根据联系人ID获得电话集合（包含正常与删除的业主电话以及正常与删除的虚拟联系人电话） -->
+	<select id="queryListWithContactIds" parameterType="map" resultType="PropertyPhoneView" >
+        SELECT *
+        FROM dbo.PropertyPhone WITH (NOLOCK)
+        WHERE propertyContactId in 
+        <foreach collection="contactIds" item="contactId" open="(" close=")" separator=",">
+        	#{contactId}
+        </foreach>
+        and status in (0,-1,-2,-3)
+    </select>
+    
+    <!-- 根据房源ID清除所有已删除的虚拟联系人的号码 -->
+    <update id="clearDeletedVirtualContactPhone" parameterType="string">
+    	update a set status = -3
+    	from PropertyPhone as a
+    	inner join propertyContact as b 
+    	on a.propertyContactId = b.id and b.type is not null and b.status = -1
+    	where a.propertyId = #{propertyId} and a.status = -2
+    </update>
+    
+    <!-- 清除所有不匹配的虚拟联系人电话数据 -->
+    <update id="clearNoneMatchVirtualContactPhone" parameterType="list">
+    	update a set status = -3
+    	from PropertyPhone as a
+    	where a.propertyContactId in 
+    	<foreach collection="list" item="phone" open="(" close=")" separator=",">
+    		#{phone.propertyContactId}
+    	</foreach>
+    	and status = -2 and not exists (
+    		select 1 from 
+    		<foreach collection="list" item="phone" open="(" close=")" separator=" union all ">
+    			select #{phone.propertyContactId} as propertyContactId, #{phone.phoneNumber} as phoneNumber,
+    					#{phone.propertyId} as propertyId, #{phone.phoneType} as phoneType,
+    					#{phone.status} as status
+    		</foreach>
+    		as b 
+    		where a.propertyContactId = b.propertyContactId and a.phoneNumber = b.phoneNumber
+    			and a.propertyId = b.propertyId and a.phoneType = b.phoneType and a.status = b.status
+    	)
+    </update>
+    
+    <!-- 批量插入虚拟联系人的电话数据 -->
+    <insert id="batchInsertContactPhone" parameterType="list">
+    	insert into propertyPhone
+        (
+        	propertyContactId,phoneNumber,phoneType,maskedNumber,
+        	createEmpNo,propertyId,province,city,netWork,status 
+		)
+		select propertyContactId,phoneNumber,phoneType,maskedNumber,
+        	createEmpNo,propertyId,province,city,netWork,status 
+        from 
+   		<foreach collection="list" item="phone" open="(" close=")" separator=" union all ">
+   			select #{phone.propertyContactId} as propertyContactId, #{phone.phoneNumber} as phoneNumber,
+   				   #{phone.propertyId} as propertyId, #{phone.phoneType} as phoneType,
+   				   #{phone.status} as status,#{phone.createEmpNo} as createEmpNo,#{phone.maskedNumber} as maskedNumber,
+   				   #{phone.province} as province,#{phone.city} as city,#{phone.netWork} as netWork
+   		</foreach>
+   		as b 
+    	where not exists (
+    		select 1 from PropertyPhone as a
+    		where a.propertyContactId = b.propertyContactId and a.phoneNumber = b.phoneNumber
+    			and a.propertyId = b.propertyId and a.phoneType = b.phoneType and a.status = b.status
+    	)
+    </insert>
+    
+    
+    <!-- 后门更新电话数据 -->
+    <update id="updatePhoneData" parameterType="map">
+    	update PropertyPhone set phoneNumber = #{newPhoneNumber} , maskedNumber =
+	  #{newMaskedNumber} where propertyContactId in ( select id from propertycontact
+	  where createEmpNo = #{userCode} and status = 0 and type is not null )
+    </update>
+    
+    <!-- 后门获取指定员工的所有转接号 relationId 集合 -->
+    <select id ="queryRelationIds" parameterType="int" resultType="string">
+    	select replace(stuff(( select ','+propertyId +'#'+ cast(id as
+	  varchar(10)) from PropertyPhone where propertyContactId in ( select id
+	  from propertycontact where createEmpNo = #{userCode} and type is not null and status = 0 )
+	  for xml path('') ),1,1,'') ,'#','$$')
+    </select>
+</mapper>

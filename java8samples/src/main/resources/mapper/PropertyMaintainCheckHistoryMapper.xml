@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="PropertyMaintainCheckHistoryMapper" >
+
+  	
+  	<insert id="insert" >
+        <selectKey keyProperty="id" resultType="int" order="AFTER">
+            select
+            @@IDENTITY
+        </selectKey>
+        insert into PropertyMaintainCheckHistory (
+            propertyId,
+            checkStatus,
+            checkEmpNo,
+            checkTime,
+            reason,
+            type
+        )values (
+            #{propertyId},
+            #{checkStatus},
+            #{checkEmpNo},
+            #{checkTime},
+            #{reason},
+            #{type}
+        )
+    </insert>
+    
+    <update id="update" parameterType="PropertyMaintainCheckHistory">
+    	update PropertyMaintainCheckHistory 
+    	set checkStatus = #{checkStatus},
+    	checkEmpNo = #{checkEmpNo},
+    	checkTime = #{checkTime},
+    	reason = #{reason},
+    	updatedAt = getdate()
+    	where id = ${id}
+    </update>
+    
+    <insert id="insertBeforCheck" >
+        <selectKey keyProperty="id" resultType="int" order="AFTER">
+            select
+            @@IDENTITY
+        </selectKey>
+        insert into PropertyMaintainCheckHistory (
+            propertyId,
+            maintainer
+        )values (
+            #{propertyId},
+            #{maintainer}
+        )
+    </insert>
+    
+</mapper>

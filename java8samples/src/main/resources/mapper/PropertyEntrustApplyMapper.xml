@@ -1,0 +1,353 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyEntrustApplyMapper">
+
+<!--定义条件 -->
+	<sql id="where_Clause">
+		<where>
+			<if test="id != null">
+				and a.id = #{id}
+			</if>
+			<if test="propertyId != null">
+				and a.propertyId = #{propertyId}
+			</if>
+			<if test="empNo != null">
+				and a.empNo = #{empNo}
+			</if>
+			<if test="status != null">
+				and a.status = #{status}
+			</if>
+			<if test="checkState != null">
+				and a.checkState = #{checkState}
+			</if>
+			<if test="entrustType != null">
+				and a.entrustType = #{entrustType}
+			</if>
+			<if test="entrustEndType != null">
+				and a.entrustEndType = #{entrustEndType}
+			</if>
+			<if test="entrustEndDate != null">
+				and a.entrustEndDate = #{entrustEndDate}
+			</if>
+			<if test="checkEmpNo != null">
+				and a.checkEmpNo = #{checkEmpNo}
+			</if>
+			<if test="needNotice != null">
+				and a.needNotice = #{needNotice}
+			</if>
+			<if test="orgLongCode!=null">
+				and e.longCode like #{orgLongCode} + '%'              
+            </if>
+            <if test="empNo!=null">
+            	and a.empNo = #{empNo}
+            </if>
+            <if test="entrustTypes!=null">
+            	and entrustType in 
+            	<foreach item="tmpEntrustType" collection="entrustTypes" open="(" separator=" , " close=")">
+					#{tmpEntrustType}
+		        </foreach>
+            </if>
+            
+            <if test="checkState!=null">
+            	and a.checkState=#{checkState}
+            </if>
+            <if test="dayBegin!=null">
+            	and a.createdAt >= #{dayBegin} 
+            </if>
+            <if test="dayEnd!=null">
+            	<![CDATA[ 
+            		and a.createdAt <= #{dayEnd}  
+            	]]>    
+            </if>
+            <if test="authEmpNo!=null">
+            	and a.empNo = #{authEmpNo}  
+            </if>
+             <if test="orgIds!=null">
+            	and e.orgId in (${orgIds})
+            </if>
+		</where>
+	</sql>
+
+
+    <sql id="where_ClauseCount">
+        <where>
+            <if test="id != null">
+                and a.id = #{id}
+            </if>
+            <if test="propertyId != null">
+                and a.propertyId = #{propertyId}
+            </if>
+            <if test="empNo != null">
+                and a.empNo = #{empNo}
+            </if>
+            <if test="status != null">
+                and a.status = #{status}
+            </if>
+            <if test="checkState != null">
+                and a.checkState = #{checkState}
+            </if>
+            <if test="entrustType != null">
+                and a.entrustType = #{entrustType}
+            </if>
+            <if test="entrustEndType != null">
+                and a.entrustEndType = #{entrustEndType}
+            </if>
+            <if test="entrustEndDate != null">
+                and a.entrustEndDate = #{entrustEndDate}
+            </if>
+            <if test="checkEmpNo != null">
+                and a.checkEmpNo = #{checkEmpNo}
+            </if>
+            <if test="needNotice != null">
+                and a.needNotice = #{needNotice}
+            </if>
+            <if test="orgLongCode!=null">
+                and e.longCode like #{orgLongCode} + '%'
+            </if>
+            <if test="empNo!=null">
+                and a.empNo = #{empNo}
+            </if>
+            <if test="entrustTypes!=null">
+                and entrustType in
+                <foreach item="tmpEntrustType" collection="entrustTypes" open="(" separator=" , " close=")">
+                    #{tmpEntrustType}
+                </foreach>
+            </if>
+
+            <if test="checkState!=null">
+                and a.checkState=#{checkState}
+            </if>
+            <if test="dayBegin!=null">
+                and a.createdAt >= #{dayBegin}
+            </if>
+            <if test="dayEnd!=null">
+                <![CDATA[
+            		and a.createdAt <= #{dayEnd}
+            	]]>
+            </if>
+            <if test="authEmpNo!=null">
+                and a.empNo = #{authEmpNo}
+            </if>
+            <if test="orgIds!=null">
+                and e.orgId in (${orgIds})
+            </if>
+        </where>
+    </sql>
+
+	<!-- 添加委托 -->
+	<insert id="insert" parameterType="PropertyEntrustApply">
+		<selectKey keyProperty="id" resultType="int" order="AFTER">
+			select
+			@@IDENTITY
+		</selectKey>
+			insert into propertyEntrustApply (	
+				propertyId,
+				empNo,
+				createdAt,
+				updatedAt,
+				status,
+				entrustType,
+				entrustEndType,
+				entrustEndDate,
+				safePrivy,
+				limitPrice,
+				limitHandPrice,
+				limitMoney,
+				commission,
+				isNoReceivePay,
+				lastEditAt,
+				commissionStartAt,
+				applyEmpNo,
+				limitMoneyConfirmStatus
+			) values (
+				#{propertyId},
+				#{empNo},
+				getdate(),
+				getdate(),
+				0,
+				#{entrustType},
+				#{entrustEndType},
+				#{entrustEndDate},
+				#{safePrivy},
+				#{limitPrice , jdbcType = FLOAT},
+				#{limitHandPrice ,jdbcType = FLOAT},
+				#{limitMoney},
+				#{commission},
+				#{isNoReceivePay},
+				getdate(),
+				getdate(),
+				#{applyEmpNo},
+				#{limitMoneyConfirmStatus}
+			)
+	</insert>
+	
+	<select id="count"  resultType="Integer">
+		select count(1)  from  propertyEntrustApply a with(nolock) 
+		left join oms.dbo.v_employee_baseinfo e on e.userCode = a.empNo 
+		<include refid="where_ClauseCount"/>
+	</select>
+	
+	<select id="selectList" resultType="PropertyEntrustApplyView">
+		<include refid="CommonMapper.Pagination_Head" />
+		select a.* , p.Address , et.estateName  , p.RoomNo  from  propertyEntrustApply a with(nolock) 
+		left join property p with(nolock)  on a.propertyid = p.propertyid 
+		left join Estate et with(nolock)  on p.EstateID = et.EstateID
+		left join oms.dbo.v_employee_baseinfo e on e.userCode = a.empNo 
+		<include refid="where_Clause"/>
+		<include refid="CommonMapper.Pagination_Foot" />
+		<if test="orderby != null">
+			order by ${orderby}
+		</if>
+	</select>
+	
+	<update id="update" parameterType="PropertyEntrustApply">
+		update propertyEntrustApply 
+		<set>
+			updatedAt = getDate()
+			<if test="empNo != null">
+			 	,empNo = #{empNo}
+			</if>
+			<if test="entrustEndType != null">
+				,entrustEndType = #{entrustEndType}
+			</if>
+			<if test="entrustEndDate != null">
+				,entrustEndDate = #{entrustEndDate}
+			</if>
+			<if test="safePrivy != null">
+				,safePrivy = #{safePrivy}
+			</if>
+			<if test="limitPrice != null">
+				,limitPrice = #{limitPrice}
+			</if>
+			<if test="limitHandPrice != null">
+				,limitHandPrice = #{limitHandPrice}
+			</if>
+			<if test="limitMoney != null">
+				,limitMoney = #{limitMoney}
+			</if>
+			<if test="checkState != null">
+				,checkState = #{checkState}
+			</if>
+			<if test="checkTime != null">
+				,checkTime = #{checkTime}
+			</if>
+			<if test="checkEmpNo != null">
+				,checkEmpNo = #{checkEmpNo}
+			</if>
+			<if test="checkTime == null">
+				,checkTime = getDate()
+			</if>
+			<if test="status!=null">
+				,status = #{status}
+			</if>
+			<if test="lastEditAt!=null">
+				,lastEditAt = #{lastEditAt}
+			</if>
+			<if test="commissionStartAt!=null">
+				,commissionStartAt = #{commissionStartAt}
+			</if>
+				,commission = #{commission}
+			<if test="isNoReceivePay != null">
+				,isNoReceivePay = #{isNoReceivePay}
+			</if>
+			<if test="limitMoneyConfirmStatus != null">
+				,limitMoneyConfirmStatus = #{limitMoneyConfirmStatus}
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<!-- 修改检核结果 -->
+	<update id="updateCheckState" parameterType="PropertyEntrustApply">
+		update propertyEntrustApply set 
+			checkEmpNo = #{checkEmpNo},
+			checkTime = #{checkTime},
+			checkState = #{checkState},
+			status = #{status},
+			needNotice = #{needNotice},
+			reason = #{reason},
+			updatedAt = getdate()
+			where id = #{id}
+	</update>
+
+
+	<!--查询所有截止当前系统时间委托 -->
+	<select id="selectTimeOutEntrust" resultType="com.dooioo.fy.model.PropertyEntrustApply">
+		select * from propertyEntrustApply  with(noLock)
+		where
+			<![CDATA[
+			entrustEndDate <= GETDATE()-1
+			]]>
+		and entrustEndType = 1
+		and status =0
+		<if test="propertyId!=null">
+			and propertyId = #{propertyId}
+		</if>
+	</select>
+	
+    <select id="queryFailureLimitProperty" resultType="PropertyEntrustApply" parameterType="hashMap">
+        SELECT DISTINCT propertyId FROM dbo.propertyEntrustApply en WITH(nolock)
+        WHERE entrustType = 3 AND status = -1 AND checkState = 0
+        AND checkTime > #{checkTimeBeginDate}
+        AND <![CDATA[ checkTime < #{checkTimeEndDate} ]]>
+        AND <![CDATA[ createdAt < #{beginDate} ]]>
+        AND entrustEndDate > #{endDate}
+    </select>
+    
+    
+    
+    <select id="queryLastEntrustApplyByPropertyId" resultType="PropertyEntrustApply" parameterType="string">
+		select * from (
+			select ROW_NUMBER() over (PARTITION  by propertyId , entrustType order by createdAt desc) as rowid , *  
+			from propertyEntrustApply  with(noLock)   where propertyId = #{propertyId}
+		) t 
+		where rowid = 1
+    </select>
+    
+    
+    <select id="querylastEntrustByPropertyId" resultType="PropertyEntrustApply">
+    	select top 1 * from propertyEntrustApply with(noLock) where propertyId=#{propertyId} and entrustType=#{entrustType} order by id desc
+    </select>
+    
+    
+    <select id="selectById"  resultType="PropertyEntrustApplyView">
+		select * from propertyEntrustApply with(nolock) where id = #{id}
+    </select>
+    
+    
+    <update id="updateEntrust2Stop">
+    	update PropertyEntrustApply set checkState = 4 where id = #{id}
+    </update>
+
+    <!--修改状态-->
+    <update id="updateMakingsState" parameterType="map">
+        UPDATE a SET a.makingsState = #{makingsState}, a.makingsEmpNo = #{makingsEmpNo} , makingsTime=getdate()
+        FROM dbo.propertyEntrustApply  a
+        WHERE id = #{id}
+    </update>
+
+    <!--查询房源的所有委托-->
+    <select id="listByPropertyId" parameterType="map" resultType="com.dooioo.fy.model.PropertyEntrustApply">
+        SELECT *
+        FROM dbo.propertyEntrustApply with(nolock)
+        WHERE propertyId = #{propertyId} AND status = 0
+        ORDER BY id desc
+    </select>
+
+    <!--人员异动-->
+    <update id="updatePersonnelChange" parameterType="map">
+        UPDATE a SET empNo = #{afterEmpNo}, updatedAt = getDate()
+        FROM propertyEntrustApply a
+        WHERE empNo = #{beforeEmpNo} and entrustType = #{entrustType} and propertyId = #{propertyId}
+    </update>
+    
+    <!-- 查询三天前状态为未完成的速销委托 -->
+    <select id="listUncompleteLimitEntrust" resultType="PropertyEntrustApply">
+    	SELECT * FROM propertyEntrustApply with(noLock)
+		WHERE checkState = 6 AND status != -1 AND
+		( (updatedAt is null AND createdAt &lt;#{time}) OR updatedAt &lt;  #{time} )
+    </select>
+	
+</mapper>

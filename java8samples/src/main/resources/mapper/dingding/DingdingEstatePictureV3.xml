@@ -1,0 +1,27 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 丁丁租房要的楼盘照片MAPPER，用V3是因为没有底层可用 -->        
+<mapper namespace="DingdingEstatePictureV3">
+
+	<!-- 分页 -->
+    <select id="queryForPaginate" parameterType="pagination" resultType="DingdingEstatePictureV3" >
+    	select * from 
+    	( select ${rowNumberSql},${columns}
+    	  from V_Dingding_EstatePicture as t ${whereSql} ) 
+    	as tt ${pageSql}
+    </select>
+    
+    <!-- 分页统计 -->
+    <select id="countForPaginate" resultType="int" >
+        SELECT count(1) FROM V_Dingding_EstatePicture
+        ${whereSql}
+    </select>
+    
+	<!-- 根据链家楼盘ID获得楼盘照片 -->
+	<select id="queryListByLjResblockId" resultType="DingdingEstatePictureV3">
+		select * from 
+		V_Dingding_EstatePicture 
+		where ljResblockId = #{ljResblockId}
+	</select>
+</mapper>

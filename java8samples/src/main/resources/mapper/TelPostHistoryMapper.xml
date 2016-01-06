@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="TelPostHistoryMapper">
+    <sql id="where_Clause">
+        <trim prefix="where" prefixOverrides="and|or">
+            t.sysName = 'property'
+            <if test="relationId != null">
+                and t.relationId = cast(#{relationId, jdbcType=VARCHAR} as varchar(50))
+            </if>
+        </trim>
+    </sql>
+
+    <select id="queryWaitToMatch" resultType="TelPostHistory">
+		SELECT * FROM dianhua.dbo.TelPostHistory with(nolock)
+        WHERE sysName = 'property'
+            AND keepTime > 0
+            AND followLinked = 0
+            AND createdAt > DATEADD(HOUR,-1,GETDATE())
+            AND relationId = #{relationId}
+            AND empNo = #{empNo}
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+	</select>
+
+    <select id="queryTopOne" resultType="TelPostHistory">
+		SELECT top 1 id,action,phoneId FROM dianhua.dbo.TelPostHistory with(nolock)
+        WHERE sysName = 'property'
+            AND createdAt > DATEADD(HOUR,-1,GETDATE())
+            AND relationId = #{relationId}
+            AND empNo = #{empNo}
+            AND status = 2
+            order by createdAt desc
+	</select>
+
+    <update id="markedFollowLinked" parameterType="Integer">
+        update dianhua.dbo.telPostHistory set followLinked = 1
+        where id = #{id, jdbcType = DECIMAL}
+        and followLinked = 0
+    </update>
+
+    <select id="list" parameterType="TelPostHistory" resultType="TelPostHistory">
+        select top 1000 * from dianhua.dbo.TelPostHistory t with(nolock)
+        <include refid="where_Clause"/>
+        order by t.createdAt desc
+    </select>
+
+    <select id="queryMatchNoFollow" resultType="TelPostHistory">
+        SELECT  *
+        FROM    dianhua.dbo.TelPostHistory WITH ( NOLOCK )
+        WHERE   sysName = 'property'
+                AND followLinked = 0
+                AND keepTime > 0
+                AND createdAt > GETDATE() - 1
+                AND status = 2
+    </select>
+
+    <select id="queryMatchNoFollowHongMi" resultType="TelPostHistory">
+        SELECT  *
+        FROM    dianhua.dbo.TelPostHistory WITH ( NOLOCK )
+        WHERE   sysName = 'property'
+        AND followLinked = 0
+        AND keepTime > 0
+        AND createdAt > GETDATE() - 1
+        AND status = 3
+    </select>
+
+    <select id="listForXingCheng" parameterType="map" resultType="TelPostHistory">
+        select * from dianhua.dbo.telPostHistory with(nolock) where 1=1
+        and keepTime > 0
+        and sysName = 'property'
+        <if test="propertyId !=null and propertyId != ''">
+            and relationId = #{propertyId}
+        </if>
+        <if test="startTime !=null and startTime != ''">
+            and createdAt >= #{startTime}
+        </if>
+        <if test="endTime !=null and endTime != ''">
+            <![CDATA[  and createdAt <= #{endTime} ]]>
+        </if>
+    </select>
+
+</mapper>

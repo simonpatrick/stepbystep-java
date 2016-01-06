@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyRecoverLimitRateMapper">
+	<insert id="insert" parameterType="PropertyRecoverLimitRate">
+			<selectKey keyProperty="id" resultType="int" order="AFTER">
+				select
+				@@IDENTITY
+			</selectKey>
+		insert into PropertyRecoverLimitRate(
+		propertyId,limitSellEntrustApplyId,status,applyReason,hasRecord,empNo, applyEmpNo,createdAt,updatedAt
+		) values(#{propertyId},#{limitSellEntrustApplyId},0,#{applyReason},#{hasRecord}
+		,#{empNo},#{applyEmpNo},getDate(),getDate())
+	</insert>
+
+  <!--根据速销Id查询待审核的恢复分佣申请 -->
+  <select id="queryCheckingRecoverLimitRateBylimitId" resultType="PropertyRecoverLimitRate">
+    select top 1 * from PropertyRecoverLimitRate with(nolock) where limitSellEntrustApplyId=#{limitSellEntrustApplyId} and status =0 order by id desc
+  </select>
+  
+  <select id="queryListBylimitId" resultType="PropertyRecoverLimitRate">
+    select * from PropertyRecoverLimitRate with(nolock) where limitSellEntrustApplyId=#{limitSellEntrustApplyId} order by id asc
+  </select>
+  
+  <select id="selectById" resultType="PropertyRecoverLimitRate">
+    select top 1 * from PropertyRecoverLimitRate with(nolock) where id=#{id}
+  </select>
+  
+  <update id="updateRecoverLimitRateStatus">
+    update PropertyRecoverLimitRate set status =#{status},updatedAt=getDate() where id = #{id}
+  </update>
+  
+</mapper>

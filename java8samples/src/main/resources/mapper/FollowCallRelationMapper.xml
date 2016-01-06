@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="FollowCallRelationMapper">
+	
+	<select id="list" parameterType="FollowCallRelationParam" resultType="FollowCallRelationView" >
+		select fcr.id,fcr.followId,fcr.telPostHistoryId,fcr.recordFile,fcr.STATUS,fcr.createdAt,fcr.keepTime,fcr.phoneId,fcr.recordStatus,
+                pp.phoneNumber,pp.maskedNumber,pc.contactName
+        FROM    FollowCallRelation fcr WITH(NOLOCK)
+        LEFT JOIN dbo.PropertyPhone pp WITH(NOLOCK) ON fcr.phoneId = pp.id
+        LEFT JOIN dbo.PropertyContact pc WITH(NOLOCK) ON pp.propertyContactId = pc.id
+        where fcr.status = 0
+        and fcr.telPostHistoryId != 0
+        <if test = "followHistoryViewList != null">
+            and fcr.followId  in
+            <foreach item="item" index="index" collection="followHistoryViewList"
+                     open="(" separator="," close=")">
+                #{item.followId}
+            </foreach>
+        </if>
+        order by fcr.createdAt desc
+	</select>
+
+	<select id="recordListenList" parameterType="FollowCallRelationParam" resultType="FollowCallRelationView" >
+        SELECT fcr.*,prlf.id AS propertyRecordListenFinishId
+        FROM dbo.FollowCallRelation fcr WITH(NOLOCK)
+        LEFT JOIN dbo.PropertyRecordListenFinish prlf  WITH(NOLOCK)
+        ON fcr.FollowID = prlf.followId AND fcr.telPostHistoryId = prlf.telPostHistoryId and prlf.empNo = #{empNo,jdbcType = DECIMAL}
+        where fcr.status = 0
+		<if test = "followHistoryViewList != null">
+			and fcr.followId  in
+            <foreach item="item" index="index" collection="followHistoryViewList"
+                     open="(" separator="," close=")">
+                #{item.followId}
+            </foreach>
+		</if>
+	</select>
+
+    <insert id="insert" parameterType="FollowCallRelation">
+        <selectKey keyProperty="id" resultType="int" order="AFTER">
+            select @@IDENTITY
+        </selectKey>
+        insert into FollowCallRelation
+        (
+            followId,
+            telPostHistoryId,
+            recordFile,
+            keepTime,
+            phoneId
+        )
+        values
+        (
+            #{followId, jdbcType=VARCHAR},
+            #{telPostHistoryId, jdbcType=DECIMAL},
+            #{recordFile, jdbcType=VARCHAR},
+            #{keepTime, jdbcType=DECIMAL},
+            #{phoneId, jdbcType=DECIMAL}
+        )
+    </insert>
+    
+    
+    <update id="updateRecordStatus">
+        update FollowCallRelation set recordStatus = #{recordStatus} where telPostHistoryId = #{telPostHistoryId}
+    </update>
+
+    <update id="updateMatchFollow" parameterType="hashMap" >
+        update FollowCallRelation set telPostHistoryId = #{telPostHistoryId},phoneId = #{phoneId},recordFile=#{recordFile} where id = #{id}
+    </update>
+
+	<!-- 查询某房源是否有   有效录音 -->
+	<select id="countPropertyValidRecord" parameterType="hashMap" resultType="int">
+		select count(1) from FollowCallRelation fcr with(nolock)
+				inner join FollowHistory fh with(nolock) on fcr.followId = fh.FollowID
+						and fh.PropertyID =#{propertyId}
+				inner join dianhua.dbo.TelPostHistory tph with(nolock) on 
+					<if test="empNo !=null and mngEmpNo !=null">
+						tph.empNo in ( #{empNo},#{mngEmpNo} ) 
+					</if>
+				
+					<if test="empNo !=null and mngEmpNo ==null">
+						tph.empNo = #{mngEmpNo}
+					</if>
+					
+					<if test="empNo ==null and mngEmpNo !=null">
+						tph.empNo = #{mngEmpNo}
+					</if>
+				
+						and tph.id = fcr.telPostHistoryId
+						and fcr.createdAt > #{beginDate}
+						<![CDATA[
+							and fcr.createdAt < #{endDate}
+							]]>  
+						
+						and fcr.keepTime >#{recordSec}
+
+	</select>
+
+    <select id="listNoMatch" resultType="FollowCallRelationView">
+        select * from FollowCallRelation where telPostHistoryId = 0 and phoneId = 0 and createdAt > getdate() - 1
+    </select>
+
+    <select id="getPropertyFollowRecord" resultType="FollowCallRelationView">
+        SELECT fcr.* FROM dbo.FollowHistory fh 
+		LEFT JOIN FollowCallRelation fcr ON fcr.followId = fh.followId
+		WHERE fh.FollowType='电话' AND fh.PropertyID=#{propertyId}
+		AND fh.FollowDate > #{limitLowDate} AND fh.FollowDate &lt; #{limitHighDate} AND fcr.recordFile is NOT NULL AND fh.hidden =2
+    </select>
+    
+</mapper>

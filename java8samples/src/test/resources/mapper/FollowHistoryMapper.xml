@@ -1,0 +1,555 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="FollowHistoryMapper">
+
+    <sql id="where_case">
+            <if test="propertyId != null">
+                and f.propertyId = #{propertyId}
+            </if>
+            <if test="followDateLow != null and followDateLow != ''">
+                and f.followDate between '${followDateLow}'  and  '${followDateHight}'
+            </if>
+    </sql>
+
+    <!--${cityName} 因为数据量差距太多了 编译的语句会出现问题 -->
+    <sql id="list_where_case">
+        <trim prefix="where" prefixOverrides="and |or">
+           and f.followDate between '${followDateLow}'  and  '${followDateHight}'
+           and ar.cityName = '${cityName}'
+           <if test="flagDeleted == null or flagDeleted = ''">
+              and f.FlagDeleted = 0
+           </if>
+           <if test="flagDeleted != null">
+              and f.FlagDeleted = #{flagDeleted}
+           </if>
+           <if test="statusParamList != null and statusParamList.size()>0" >
+               <foreach item="item" index="index" collection="statusParamList"
+                        open="and p.status in (" separator="," close=")">
+                   #{item}
+               </foreach>
+           </if>
+
+			<if test="followType != null and followType != ''">
+                AND followType =#{followType}
+            </if>
+            <if test="followOrigin != null and followOrigin != ''">
+                AND followOrigin =#{followOrigin}
+            </if>
+            <!-- 是否普通跟进 -->
+            <if test="followCategory != null">
+                AND followCategory = #{followCategory}
+            </if>
+            <!-- 呼叫类型：主叫、被叫 -->
+            <if test="callType != null">
+                AND callType = #{callType}
+            </if>
+			<!-- 是否有效跟进 -->
+			<if test="isValid != null">
+				and f.isValid=#{isValid}
+			</if>
+			<!-- 查询隐藏跟进 -->
+           <if test="hidden ==2">
+               and f.hidden = #{hidden}
+           </if>
+
+            <if test="estateName != null and estateName != ''">
+                and est.estateName = #{estateName}
+            </if>
+			<if test="ntype !=null and ntype != ''">
+                <choose>
+                    <when test="selectOrgLongCode == null" >and f.empNo = #{deptID}</when>
+                    <otherwise>and oms.orgLongCode like #{selectOrgLongCode} + '%'</otherwise>
+                </choose>
+            </if>
+            <!-- 隐藏权限筛选 -->
+            
+           	<choose>
+           		<!-- 区域经理和分行经理看自己区域的 -->
+           		<when test="orgIds != null and authHiddenType == 'other'">
+           			and (f.hidden = 1 or (f.hidden = 2 and oms.orgId in (${orgIds})))
+           		</when>
+           		<!-- 自己看自己的 -->
+           		<when test="authHiddenType == 'self'">
+           			and ( f.hidden=1 or (f.hidden = 2 and f.empNo = #{empNo} ))
+           		</when>
+           	</choose>
+       </trim>
+    </sql>
+
+
+	<!--不限,出售,出租,暂缓出售,暂缓出租,我售,预定,我租,已售,已租,系统盘,资料盘,错盘 -->
+	<!--我售 预定 只有品管 和 经理才能查询 -->
+	<!--('出售','出售+出租','出售+已租','出售+暂缓出租','出租','错盘','我售','我租','系统盘','已售','已租','预定','暂缓出售','暂缓出售+出租','暂缓出售+已租','暂缓出售+暂缓出租','暂缓出租','资料盘') -->
+	<select id="list" resultType="FollowHistoryView" parameterType="FollowHistoryParam">
+        SELECT f.followId
+        ,f.propertyId
+        ,f.followDate
+        ,f.content
+        ,f.flagDeleted
+        ,f.modDate
+        ,f.followType
+        ,f.id
+        ,f.operIp
+        ,f.hidden
+        ,f.empNo
+        ,f.qualified
+        ,f.recordCount
+        ,f.hiddenReason
+        ,row_.empName
+        ,row_.orgName
+        ,row_.EstateName
+        ,row_.Address
+        ,row_.RoomNo
+        ,row_.status
+        FROM followHistory f with(nolock)
+        JOIN (
+        SELECT f.id
+        ,oms.userName AS empName
+        ,oms.orgName
+        ,est.EstateName
+        ,p.Address
+        ,p.RoomNo
+        ,p.status
+        ,row_number() over( order by followDate desc ) as rn
+        FROM followHistory f with(nolock)
+        LEFT JOIN property p with(nolock)
+        ON f.PropertyID = p.PropertyID
+        LEFT JOIN oms.dbo.v2_employee_final oms with(nolock)
+        ON f.empNo = oms.userCode
+        LEFT JOIN Estate est with(nolock)
+        ON p.EstateID = est.EstateID
+        left join area ar with(nolock) on est.AreaID = ar.AreaID
+        <include refid="list_where_case" />
+        ) row_
+        ON f.id = row_.id
+        <![CDATA[
+                WHERE    row_.rn >= #{beginNum}
+                AND      row_.rn < #{endNum}
+         ]]>
+        ORDER BY ${orderby}
+	</select>
+
+
+    <select id="listCount" resultType="int" parameterType="FollowHistoryParam" timeout="10">
+        SELECT count(f.id)  as sumcount
+        FROM followHistory f with(nolock)
+        LEFT JOIN property p with(nolock) ON f.PropertyID = p.PropertyID
+        LEFT JOIN oms.dbo.v2_employee_final oms with(nolock) ON f.empNo = oms.userCode
+        LEFT JOIN Estate est with(nolock) ON p.EstateID = est.EstateID
+        left join area ar with(nolock) on est.AreaID = ar.AreaID
+        <include refid="list_where_case"  />
+    </select>
+    
+    
+    
+        <sql id="list_where_case_his">
+        <trim prefix="where" prefixOverrides="and |or">
+           and f.followDate between '${followDateLow}'  and  '${followDateHight}'
+           <!--and ar.cityName = '${cityName}'-->
+           <if test="flagDeleted == null or flagDeleted = ''">
+              and f.FlagDeleted = 0
+           </if>
+           <if test="flagDeleted != null">
+              and f.FlagDeleted = #{flagDeleted}
+           </if>
+           <!-- 
+           <if test="statusParamList != null and statusParamList.size()>0" >
+               <foreach item="item" index="index" collection="statusParamList"
+                        open="and p.status in (" separator="," close=")">
+                   #{item}
+               </foreach>
+           </if>
+            -->
+			<if test="followType != null and followType != ''">
+                AND followType =#{followType}
+            </if>
+            <if test="followOrigin != null and followOrigin != ''">
+                AND followOrigin =#{followOrigin}
+            </if>
+            <!-- 是否普通跟进 -->
+            <if test="followCategory != null">
+                AND followCategory = #{followCategory}
+            </if>
+            <!-- 呼叫类型：主叫、被叫 -->
+            <if test="callType != null">
+                AND callType = #{callType}
+            </if>
+			<!-- 是否有效跟进 -->
+			<if test="isValid != null">
+				and f.isValid=#{isValid}
+			</if>
+			<!-- 查询隐藏跟进 -->
+           <if test="hidden ==2">
+               and f.hidden = #{hidden}
+           </if>
+
+           <!--
+            <if test="estateName != null and estateName != ''">
+                and est.estateName = #{estateName}
+            </if>
+            -->
+            <!-- 
+			<if test="ntype !=null and ntype != ''">
+                <choose>
+                    <when test="selectOrgLongCode == null" >and f.empNo = #{deptID}</when>
+                    <otherwise>and oms.orgLongCode like #{selectOrgLongCode} + '%'</otherwise>
+                </choose>
+            </if>
+            -->
+            <!-- 隐藏权限筛选 -->
+            
+           	<choose>
+           		<!-- 区域经理和分行经理看自己区域的
+           		<when test="orgIds != null and authHiddenType == 'other'">
+           			and (f.hidden = 1 or (f.hidden = 2 and oms.orgId in (${orgIds})))
+           		</when>
+               -->
+           		<!-- 自己看自己的 -->
+           		<when test="authHiddenType == 'self'">
+           			and ( f.hidden=1 or (f.hidden = 2 and f.empNo = #{empNo} ))
+           		</when>
+           	</choose>
+       </trim>
+    </sql>
+   <select id="listCountHis" resultType="int" parameterType="FollowHistoryParam" timeout="10">
+        SELECT count(f.id)  as sumcount
+        FROM followHistory f with(nolock)   
+        <include refid="list_where_case_his"  />
+    </select>
+    
+    <select id="listHis" resultType="FollowHistoryView" parameterType="FollowHistoryParam">
+       <!--   SELECT f.followId
+        ,f.propertyId
+        ,f.followDate
+        ,f.content
+        ,f.flagDeleted
+        ,f.modDate
+        ,f.followType
+        ,f.id
+        ,f.operIp
+        ,f.hidden
+        ,f.empNo
+        ,f.qualified
+        ,f.recordCount
+        ,f.hiddenReason
+       
+        ,row_.empName
+        ,row_.orgName
+        ,row_.EstateName
+        ,row_.Address
+        ,row_.RoomNo
+        ,row_.status
+        FROM followHistory f with(nolock)
+        JOIN (
+        SELECT f.id
+        ,oms.userName AS empName
+        ,oms.orgName
+        ,est.EstateName
+        ,p.Address
+        ,p.RoomNo
+        ,p.status
+        ,row_number() over( order by followDate desc ) as rn
+        FROM followHistory f with(nolock)
+        LEFT JOIN property p with(nolock)
+        ON f.PropertyID = p.PropertyID
+        LEFT JOIN oms.dbo.v2_employee_final oms with(nolock)
+        ON f.empNo = oms.userCode
+        LEFT JOIN Estate est with(nolock)
+        ON p.EstateID = est.EstateID
+        left join area ar with(nolock) on est.AreaID = ar.AreaID
+        <include refid="list_where_case_his" />
+        ) row_
+        ON f.id = row_.id
+         
+        <![CDATA[
+                WHERE    row_.rn >= #{beginNum}
+                AND      row_.rn < #{endNum}
+         ]]>
+        ORDER BY ${orderby}
+        -->
+        
+        SELECT   
+		f.followId
+        ,f.propertyId
+        ,f.followDate
+        ,f.content
+        ,f.flagDeleted
+        ,f.modDate
+        ,f.followType
+        ,f.id
+        ,f.operIp
+        ,f.hidden
+        ,f.empNo
+        ,f.qualified
+        ,f.recordCount
+        ,f.hiddenReason
+        FROM     followHistory f WITH(NOLOCK)
+        JOIN (
+            SELECT f.id ,row_number() over( order by followDate desc ) as rn FROM followHistory f with(nolock) 
+            <include refid="list_where_case_his" />
+             ) row_  ON f.id = row_.id
+        <![CDATA[
+                WHERE    row_.rn >= #{beginNum}
+                AND      row_.rn < #{endNum}
+         ]]>
+        ORDER BY ${orderby}
+	</select>
+    
+    
+    
+    <select id="queryByFollowId" resultType="FollowHistory" parameterType="string">
+		select * from followHistory WITH(NOLOCK) where followId = #{followId}
+	</select>
+
+    <update id="delete" parameterType="string" >
+        update followHistory set flagDeleted = 1 where followId = #{followId}
+    </update>
+
+	<!-- 取消判定品质管理 -->
+	<update id="cancelQualified" parameterType="string">
+		update followHistory set qualified = NULL where followId = #{followId}
+	</update>
+
+    <insert id="add" parameterType="FollowHistory">
+		INSERT INTO followHistory (FollowID, PropertyID, FollowDate, Content,
+		FlagDeleted, FollowType, operIp, hidden, empNo, qualified,
+		recordCount, followCategory, limitEmpFollow,isValid,hiddenReason,callType,pictureCount,followOrigin)
+		Values(#{followId}, #{propertyId},getdate(), #{content}, 0,
+		#{followType}, #{operIp}, #{hidden}, #{empNo},
+		#{qualified}, #{recordCount}, #{followCategory}, #{limitEmpFollow},#{isValid},#{hiddenReason},#{callType},#{pictureCount},#{followOrigin})
+	</insert>
+
+	<update id="update" parameterType="FollowHistory">
+		update followHistory set modDate = getdate()
+		<if test="content != null and content != ''">
+			,content = #{content}
+		</if>
+		<if test="hidden != null">
+			,hidden = #{hidden}
+		</if>
+		<if test="qualified != null">
+			,qualified = #{qualified}
+		</if>
+		<if test="recordCount != null">
+			,recordCount = #{recordCount}
+		</if>
+		where followId = #{followId}
+	</update>
+
+	<!--根据房源id寻找跟进列表 -->
+	<select id="listByPropertyId" resultType="FollowHistoryView">
+        SELECT   fh.*
+        FROM     followHistory fh WITH(NOLOCK)
+        JOIN (
+            SELECT id,row_number() OVER ( ORDER BY followDate DESC ) AS rn
+            FROM followHistory WITH ( NOLOCK )
+            WHERE propertyId = #{propertyId} AND FlagDeleted = 0 AND hidden != 2
+            <if test="followType != null and followType != ''">
+                AND followType =#{followType}
+            </if>
+             <if test="followCategory != null">
+                AND followCategory =#{followCategory}
+            </if>
+             ) row_ ON fh.id = row_.id
+        <![CDATA[
+                WHERE    row_.rn >= #{beginNum}
+                AND      row_.rn < #{endNum}
+         ]]>
+        ORDER BY ${orderBy}
+	</select>
+
+    <select id="listCountByPropertyId" resultType="int">
+        select count(1) as num
+        from followHistory with(nolock)
+        where propertyId = #{propertyId}
+        and  FlagDeleted = 0
+        and hidden != 2
+          <if test="followType != null and followType != ''">
+                AND followType =#{followType}
+          </if>
+          <if test="followCategory != null">
+                AND followCategory =#{followCategory}
+          </if>
+    </select>
+
+	<!-- 20150805 Jail 防骚扰数据排除虚拟联系人的电话跟进 -->
+    <select id="preventHarassFollowList" parameterType="String" resultType="FollowHistoryView">
+        select f.*
+        from dbo.followHistory f with(nolock)
+		WHERE f.propertyId = #{propertyId}
+		and followDate > cast(getdate() as date)
+		and recordCount > 0
+		and hidden != 2
+		and exists (
+			select 1 from FollowCallRelation fcr WITH(NOLOCK)
+       		INNER JOIN dbo.PropertyPhone pp WITH(NOLOCK) ON fcr.phoneId = pp.id
+       		where fcr.followId = f.followId and pp.status  in (0,-1)
+		)
+    </select>
+
+    <select id="queryLastCanMergeModifyFollow" resultType="FollowHistory">
+    	select top 1 * from followHistory with(nolock)
+    	where flagDeleted = 0 
+    		and propertyId = #{propertyId}
+    		and followDate >= DATEADD(MINUTE,-30,GETDATE())
+    		and followType = '修改'
+    		and hidden != 2
+        order by followDate desc
+    </select>
+
+
+    <select id="countFollowByDay" resultType="int">
+        select count(1) as num from FollowHistory with(nolock) where propertyId=#{propertyId} 
+        and  FlagDeleted = 0 and followdate > getdate() - #{day}
+    </select>
+	<!-- 统计速销跟进数量 -->
+    <select id="countLimitEntrustFollow" parameterType="FollowHistoryParam" resultType="Integer">
+        SELECT COUNT(1)
+        FROM dbo.Followhistory f WITH(nolock)
+        where f.limitEmpFollow = 1 and f.FlagDeleted = 0
+        <include refid="where_case"  />
+    </select>
+    <!-- 统计录音跟进数量 -->
+    <select id="countRecordFollow" parameterType="FollowHistoryParam" resultType="Integer">
+        SELECT COUNT(1)
+        FROM dbo.Followhistory f WITH(nolock)
+        where f.recordCount > 0
+         	and hidden=1
+         	<if test="empNos != null">
+                and f.empNo in
+                <foreach collection="empNos" item="item" index="index" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <include refid="where_case"  />
+    </select>
+    <!-- 统计图片附件跟进数量 -->
+    <select id="countPictureFollow" parameterType="FollowHistoryParam" resultType="Integer">
+        SELECT COUNT(1)
+        FROM dbo.Followhistory f WITH(nolock)
+        where followType = '有图片附件'
+         	<if test="empNos != null">
+                and f.empNo in
+                <foreach collection="empNos" item="item" index="index" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <include refid="where_case"  />
+    </select>
+
+    <select id="queryTopOneClearToSystemPropertyFollow" parameterType="hashMap" resultType="FollowHistoryView">
+        SELECT TOP 1 content FROM dbo.FollowHistory WITH(nolock)
+        WHERE empNo = 80001
+        AND FollowType = '修改'
+        AND PropertyID = #{propertyId}
+        and Content LIKE '(联系不上房源%'
+        ORDER BY id desc
+    </select>
+    
+    <!-- 随机查询昨天隐藏的电话跟进(去除破录音) -->
+    <select id="queryHiddenFollow" resultType="FollowHistoryView">
+    	select top ${topN} a.*,newid() as random from (select  * from FollowHistory with(nolock) where FollowType='电话' and hidden=2 
+			and (FollowDate between convert(nvarchar,getdate()-1,23) and  convert(nvarchar,getdate(),23)))
+			as a,FollowCallRelation b with(nolock) where a.FollowID=b.followId and b.recordStatus=0 order by random
+    </select>
+
+    <!--kongrui-->
+	<!-- a） 普通跟进；b） 时间超过20s；c） 非隐藏跟进；d） 非有效速销跟进 -->
+    <!-- a） 职位为初级物业顾问、物业顾问、高级物业顾问、客户主管、客户经理、高级客户经理、营业主任、高级营业主任，状态为在职的经纪人；-->
+    <!-- b） 中介部、租赁部下状态为正常的分行；-->
+	<!--2015年2月3日：zhxy: 1.隶属于三级事业部下 2.时间超过60s；3.固定电话拨打的；4.主营出售房源中产生的 5.非隐藏跟进；6. 非有效速销跟进-->
+	<!-- 20150805 Jail 排除虚拟联系人的电话跟进,根据 propertyPhone 的 status 来判断 -->
+	<!-- 20150826 添加商用频道-->
+    <!--小石 20150928-->
+    <select id="queryNoHiddenFollowNeedToCheckYesterday" resultType="FollowHistoryView" timeout="900">
+	--存放筛出的需要推送检核的经纪人工号
+	--CREATE TABLE #tempEmp(
+	--empNo int
+	--PRIMARY KEY (empNo)
+	--);
+    --
+	--存放两周内公开跟进推过检核的empNo集
+	--CREATE TABLE #tempEmp2(
+	--empNo int
+	--PRIMARY KEY (empNo)
+	--);
+    --
+	--存放昨天有跟进的empNo集
+	--CREATE TABLE #tempEmp3(
+	--empNo int
+	--PRIMARY KEY (empNo)
+	--);
+
+	--获取Not in 的empNo集
+	SELECT DISTINCT empNo INTO #tempEmp2 FROM propertyFollowCheckHistory pfh
+	WITH(NOLOCK)
+	WHERE createdAt BETWEEN CONVERT(NVARCHAR, GETDATE()-13, 23) AND
+	CONVERT(NVARCHAR, GETDATE(), 23)
+
+	--获取昨天有跟进的empNo集
+	SELECT DISTINCT empNo INTO #tempEmp3 FROM FollowHistory
+	WHERE FollowDate BETWEEN CONVERT(NVARCHAR, GETDATE()-1, 23) AND
+	CONVERT(NVARCHAR, GETDATE(), 23)
+	--获取14天内没有推过检核的经纪人工号
+	SELECT DISTINCT empNo INTO #tempEmp FROM
+	(SELECT tEmp3.empNo FROM
+	#tempEmp3 tEmp3 WITH(NOLOCK)
+	INNER JOIN oms.dbo.v2_employee_final e with(nolock) ON tEmp3.empNo =
+	e.userCode AND positionName = '经纪人' AND e.status IN ('正式', '试用期')
+	INNER JOIN oms.dbo.v2_organization_final org WITH(NOLOCK) ON e.orgId =
+	org.id AND org.status = 1
+	AND ( org.orgLongCode LIKE '12020001/120720495/12020003%' OR
+	org.orgLongCode LIKE '150629104637/150630000615/150630000708%' OR
+	org.orgLongCode LIKE '12020001/120720495/130614162756%')
+	LEFT JOIN #tempEmp2 tEmp2 ON tEmp3.empNo = tEmp2.empNo WHERE
+	tEmp2.empNo IS
+	NULL
+	)t
+
+
+
+	SELECT r.FollowID, r.propertyId, r.empNo, r.content, r.followDate
+	FROM ( SELECT a.FollowID ,
+	a.propertyId ,
+	a.content ,
+	a.empNo ,
+	a.followDate,
+	ROW_NUMBER() OVER ( PARTITION BY a.empNo ORDER BY NEWID() ) AS row
+	FROM ( SELECT fh.FollowID ,
+	fh.propertyId ,
+	fh.content ,
+	fh.empNo ,
+	fh.followDate
+	FROM FollowHistory fh with(nolock)
+	INNER JOIN FollowCallRelation fcr with(nolock) ON fh.FollowType = '电话'
+	AND fh.hidden = 1
+	AND fh.FollowID = fcr.followId
+	AND ISNULL(fh.limitEmpFollow, 0) != 1
+	AND ( FollowDate BETWEEN CONVERT(NVARCHAR, GETDATE()-1, 23)
+	AND CONVERT(NVARCHAR, GETDATE(), 23) )
+	AND exists (select 1 from dbo.PropertyPhone pp WITH(NOLOCK)
+	where fcr.phoneId = pp.id and pp.status in (0,-1))
+	INNER JOIN dianhua.dbo.TelPostHistory tph WITH(NOLOCK) ON tph.id =
+	fcr.telPostHistoryId AND tph.keepTime >60 AND LEN(tph.phoneCome)=8
+	INNER JOIN property p WITH (NOLOCK) ON p.PropertyID = fh.PropertyID AND
+	p.saleStatus = '出售'
+	INNER JOIN v_fy_estate e WITH(NOLOCK) ON p.EstateID = e.estateId AND
+	e.responsibility = 1
+	INNER JOIN #tempEmp tEmp ON fh.empNo = tEmp.empNo
+	) AS a
+	INNER JOIN propertyInfo pinfo WITH(nolock) ON pinfo.propertyId =
+	a.PropertyID
+	LEFT JOIN dbo.propertyEntrustApply limit WITH(nolock) ON limit.id =
+	pinfo.limitSellEntrustApplyId
+	WHERE ISNULL(limit.empNo, 0) != a.empNo
+	) r
+	WHERE r.row = 1;
+	DROP TABLE #tempEmp;
+	DROP TABLE #tempEmp2;
+	DROP TABLE #tempEmp3;
+    </select>
+	
+</mapper>

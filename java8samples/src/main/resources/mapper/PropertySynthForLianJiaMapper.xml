@@ -1,0 +1,68 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertySynthForLianJiaMapper">
+    <!--插入到缓冲表-->
+    <insert id="insertPropertyChange" parameterType="string">
+        INSERT INTO propertySynthForLianJia(
+            propertyId,--德佑id
+            hdicCityId,--城市编号 必填
+            hdicBuildingId,--楼栋编号
+            hdicUnitId,--单元编号
+            hdicFloorId,--楼层编号
+            hdicHouseId,--房源编号
+            status --操作状态（1：有效 0：无效即删除）
+        )VALUES (
+            #{propertyId},--德佑id
+            '',
+            '',
+            '',
+            '',
+            '',
+            1
+        )
+    </insert>
+
+    <!--当图片变更：插入到缓冲表-->
+    <insert id="insertPictureChange" parameterType="map">
+        INSERT INTO propertySynthForLianJia(
+            propertyId,--德佑id
+            hdicCityId,--城市编号 必填
+            hdicBuildingId,--楼栋编号
+            hdicUnitId,--单元编号
+            hdicFloorId,--楼层编号
+            hdicHouseId,--房源编号
+            status --操作状态（1：有效 0：无效即删除）
+        )VALUES (
+            #{propertyId},--德佑id
+            '',
+            '',
+            '',
+            '',
+            '',
+            2
+        )
+    </insert>
+
+    <!--插入到缓冲表：当调价变更-->
+    <insert id="insertPriceChange" parameterType="map">
+        INSERT INTO propertySynthForLianJia(
+            propertyId,--德佑id
+            hdicCityId,--城市编号 必填
+            hdicBuildingId,--楼栋编号
+            hdicUnitId,--单元编号
+            hdicFloorId,--楼层编号
+            hdicHouseId,--房源编号
+            status --操作状态（1：有效 0：无效即删除）
+        )VALUES (
+            #{propertyId},--德佑id
+            '',
+            '',
+            '',
+            '',
+            '',
+            3
+        )
+    </insert>
+</mapper>

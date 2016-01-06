@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="CompanyConfigMapper">
+
+    <insert id="insert" >
+        insert into CompanyConfig
+        	(cngKey,
+			companyId,
+			cngValue,
+			cngDesc,
+			operEmpNo)
+        values
+        	(#{cngKey},
+			#{companyId},
+			#{cngValue},
+			#{cngDesc},
+			#{operEmpNo} )
+    </insert>
+
+
+    <select id="selectByConfigKey"  resultType="CompanyConfig">
+     	select * 
+        from CompanyConfig WITH (NOLOCK)
+       	where cngKey = #{cngKey} and companyId = #{companyId}
+    </select>
+    
+    <select id="listCount"  resultType="Integer">
+     	select count(1)
+        from CompanyConfig WITH (NOLOCK)
+       	where 1=1 
+       	<if test="cngKey !=null ">
+       		and cngKey = #{cngKey}
+       	</if>
+       	<if test="companyId !=null ">
+       		and companyId = #{companyId}
+       	</if>
+       	<if test="cngDesc !=null ">
+       		and (cngDesc like #{cngDesc} Or cngKey like #{cngDesc})
+       	</if>
+       	<if test="status !=null ">
+       		and status = #{status}
+       	</if>
+    </select>
+    
+    <select id="list"  resultType="CompanyConfig">
+     select * from ( 
+			select row_.*, row_number() over(  order by  cngKey  ) as  rn from (
+     	select * 
+        from CompanyConfig WITH (NOLOCK)
+       	where 1=1 
+       	<if test="cngKey !=null ">
+       		and cngKey = #{cngKey}
+       	</if>
+       	<if test="companyId !=null ">
+       		and companyId = #{companyId}
+       	</if>
+       	<if test="cngDesc !=null ">
+       		and (cngDesc like #{cngDesc} Or cngKey like #{cngDesc})
+       	</if>
+       	<if test="status !=null ">
+       		and status = #{status}
+       	</if>
+       	) row_ ) as t where t.rn >= #{beginNum}  and t.rn &lt; #{endNum}
+    </select>
+    
+    <update id = "update">
+    	update CompanyConfig
+    	set cngKey = #{cngKey},
+    		companyId = #{companyId},
+    		cngValue=#{cngValue},
+    		cngDesc=#{cngDesc},
+    		operEmpNo=#{operEmpNo},
+    		updatedAt=getdate()
+    	where id = #{id}
+    </update>
+
+	<delete id="delete">
+    	update CompanyConfig set status =-1 , updatedAt=getdate() where cngKey = #{cngKey} and companyId = #{companyId}
+    </delete>
+    
+    <update id = "active">
+    	update CompanyConfig
+    	set status=0,
+    		updatedAt=getdate()
+    	where cngKey = #{cngKey} and companyId = #{companyId} and status =-1
+    </update>
+</mapper>

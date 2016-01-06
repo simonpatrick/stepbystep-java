@@ -1,0 +1,473 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyDescVoteMapper">
+
+	
+	<sql id="propertyDescVote_where">
+		<trim prefix="where" prefixOverrides="and|or">
+			1=1
+			<if test="empNo != null">
+				and empNo = #{empNo}
+			</if>
+			<if test="propertyId !=null">
+				and propertyId = #{propertyId}
+			</if>
+			<if test="completedAtEnd !=null">
+				<![CDATA[ 
+					and a.completedAt <= #{completedAtEnd}	
+				]]>
+			</if>
+			<if test="waitCheck !=null">
+				and completedAt is not null
+				and a.status in (0 ,1)
+			</if>
+			<if test="status==null">
+				and a.status != '-1'
+			</if>
+		</trim>
+	</sql>
+	
+	
+	<update id="update" parameterType="PropertyDescVote">
+		update  PropertyDescVote 
+		<set>
+			<if test="empNo!=null">
+				empNo= #{empNo} , 
+			</if>	     
+			<if test="score!=null">
+				score= #{score},
+			</if>
+			<if test="voteEmpNo!=null">
+				voteEmpNo= #{voteEmpNo},
+			</if>
+			<if test="status!=null">
+				status= #{status},
+			</if>
+			<if test="flag!=null">
+				flag= #{flag},
+			</if>
+			<if test="remark!=null">
+				remark= #{remark},
+			</if>
+			<if test="votedAt!=null">
+				votedAt= #{votedAt},
+			</if>
+			<if test="completedAt!=null">
+				completedAt= #{completedAt},
+			</if>
+			<if test="votingEmpNo!=null">
+				votingEmpNo= #{votingEmpNo},
+			</if>
+			<if test="isPhotographer!=null">
+				isPhotographer= #{isPhotographer},
+			</if>
+			updatedAt= getDate(),
+		</set>
+		where  id = #{id}
+	</update>
+	
+	
+	
+	<update id="updateNoIf" parameterType="PropertyDescVote">
+		update  PropertyDescVote  set
+				editedAt = #{editedAt},
+				voteEmpNo= #{voteEmpNo},
+				remark= #{remark , jdbcType=VARCHAR},
+				status = #{status},
+				updatedAt= getDate(),
+				votedAt= #{votedAt},
+				completedAt= #{completedAt},
+				qualifiedAt=#{qualifiedAt}
+		where  id = #{id}
+	</update>
+	
+	
+	<update id="updateQualifiedInfo" parameterType="Map">
+		update  PropertyDescVote  set
+				voteEmpNo= #{voteEmpNo},
+				status = #{status},
+				updatedAt= getDate(),
+				votedAt= #{votedAt},
+				qualifiedAt= #{qualifiedAt}
+		where  id = #{id}
+	</update>
+	
+	<update id="delete" parameterType="Integer">
+		update  PropertyDescVote  set
+			status = '-1' , updatedAt = getDate()
+		where  id = #{id}
+	</update>
+
+	<insert id="insert" parameterType="PropertyDescVote">
+		insert into PropertyDescVote (propertyId , empNo , score , status , flag , createdAt , updatedAt , editedAt , isPhotographer)
+		values ( #{propertyId} , #{empNo} , 0 , 0 , 0 , getDate() , getDate() , getDate() , #{isPhotographer})
+		<selectKey resultType="Integer" keyProperty="id" order="AFTER" >
+			SELECT @@IDENTITY  AS id
+		</selectKey>  
+	</insert>
+	
+	<select id="list" resultType="PropertyDescVoteView" parameterType="Map" >
+		select a.*
+		from PropertyDescVote a  with(nolock) 
+		<include refid="propertyDescVote_where"/>
+		<if test="orderby!=null">
+			order by ${orderby}
+		</if>
+	</select>
+	
+	<select id="selectOne" resultType="PropertyDescVoteView" parameterType="Map" >
+		select top 1 a.* from PropertyDescVote a  with(nolock) 
+		<include refid="propertyDescVote_where"/>
+		<if test="orderby!=null">
+			order by ${orderby}
+		</if>
+	</select>
+	
+	<select id="selectById" resultType="PropertyDescVoteView">
+		select a.* 
+		from PropertyDescVote a  with(nolock) 
+		where a.id = #{id}
+	</select>
+
+	<select id="count" resultType="int">
+		select count(1) from PropertyDescVote a with(nolock)
+		<include refid="propertyDescVote_where"/>
+	</select>
+
+<!-- 描述规则变更后，查合格描述           用这个-->
+	<select id="selectNewQualifiedPropertyDesc" resultType="PropertyDescVoteView">
+		select
+		<if test="top!=null">
+			top ${top}
+		</if>
+		 * from PropertyDescVote a with(nolock) 
+		<include refid="propertyDescVote_where"/>
+		and status = 2
+		and qualifiedAt is not null 
+		and not exists (select 1 from PropertyDescVoteLine line where propertyDescVoteId = a.id 
+				and score =0 
+				and line.status != -1
+				and cateId1 in  
+				<foreach item="needFinishCateId" collection="needFinishCateIds" open="(" separator=" , " close=")">
+					#{needFinishCateId}
+		        </foreach>
+			)
+		order by a.qualifiedAt
+	</select>
+	
+
+<!-- 描述规则变更后，不要用这个了；会有问题； 不应该用 completedAt ，应该用 qualifiedAt-->
+	<select id="selectQualifiedPropertyDesc" resultType="PropertyDescVoteView">
+		select
+		 * from PropertyDescVote a with(nolock) 
+		<include refid="propertyDescVote_where"/>
+		and status = 2
+		and completedAt is not null 
+		and not exists (select 1 from PropertyDescVoteLine line where propertyDescVoteId = a.id 
+				and score =0 
+				and line.status != -1
+				and cateId1 in  
+				<foreach item="needFinishCateId" collection="needFinishCateIds" open="(" separator=" , " close=")">
+					#{needFinishCateId}
+		        </foreach>
+			)
+		order by a.completedAt
+	</select>
+
+<select id="selectQualifiedDescForSpecialProperty" resultType="PropertyDescVoteView">
+		select
+		 * from PropertyDescVote a with(nolock) 
+		 where 1=1
+			<if test="status==null">
+				and a.status != '-1'
+			</if>
+			<!-- 可能会有status不是2，但是也合格的 -->
+			<if test="status!=null">
+				and a.status = #{status}
+			</if>
+			
+			<if test="empNo != null">
+				and empNo = #{empNo}
+			</if>
+		<!-- and completedAt is not null  -->
+		and not exists (select 1 from PropertyDescVoteLine line where propertyDescVoteId = a.id 
+				and score =0 
+				and line.status != -1
+				and cateId1 in  
+				<foreach item="needFinishCateId" collection="needFinishCateIds" open="(" separator=" , " close=")">
+					#{needFinishCateId}
+		        </foreach>
+			)
+		order by a.completedAt
+	</select>
+
+
+
+<!--   以下为人员异动代码 -->
+
+	<!--根据房源Id查询工号  -->
+	<select id="findByEmpNo" resultType="Integer" parameterType="string">
+	   select empNo from PropertyDescVote  a with(nolock)
+	   where 1=1
+	    <if test="propertyId!=null"> 
+			   and a.propertyId= #{propertyId,jdbcType=VARCHAR} and a.status != '-1'
+		</if>
+		 <if test="empNo!=null"> 
+			   and a.empNo = #{empNo,jdbcType=DECIMAL} 
+		</if>
+	</select>
+	
+	
+	<update id="updateEmpNo">
+		update  PropertyDescVote 
+		<set>
+			<if test="set_empNo!=null">
+				empNo= #{set_empNo}
+			</if>	     
+		</set>
+		where  1=1
+		<if test="propertyId!=null"> 
+			and propertyId= #{propertyId,jdbcType=VARCHAR} 
+		</if>
+		and	 empNo=#{empNo}  
+<!-- 		and  propertyId not in (select propertyId from PropertyDescVote where empNo = #{set_empNo} ) -->
+	</update>
+	
+	<update id="updateReview">
+		update  Review
+		<set>
+			<if test="set_empNo!=null">
+				employeeId= #{set_empNo}
+			</if>	     
+		</set>
+		where  1=1 
+		<if test="propertyId!=null"> 
+			   and relationId= #{propertyId,jdbcType=VARCHAR} 
+		</if>
+		and  employeeId=#{empNo} 
+<!-- 		and  relationId not in (select propertyId from PropertyDescVote where empNo = #{set_empNo} )		 -->
+	</update>
+	
+	<update id="updatePicture">
+		update  PropertyPicture
+		<set>
+			<if test="set_empNo!=null">
+				employeeId= #{set_empNo}
+			</if>	     
+		</set>
+		
+		where  1=1  
+		<if test="propertyId!=null"> 
+			   and propertyId= #{propertyId,jdbcType=VARCHAR} 
+		</if>
+		and employeeId=#{empNo} 
+		and  cateId2 in (select id from PictureCategory with(nolock) where id not in ( 58 , 59  , 60 , 73) )
+<!-- 		and  propertyId not in (select propertyId from PropertyDescVote where empNo = #{set_empNo} )		 -->
+	</update>
+
+    <select id="getPhotographerPropertyDescVote" parameterType="hashmap" resultType="PropertyDescVoteView">
+         SELECT TOP 1 *
+            FROM    dbo.PropertyDescVote v with(nolock)
+            WHERE   v.status = 0
+                    AND v.isPhotographer = 1
+                    AND v.propertyId = #{propertyId}
+                    ORDER BY v.empNo DESC
+    </select>
+
+
+	<select id="queryRepeatPictureDescVote" parameterType="hashMap" resultType="PropertyDescVoteView">
+        SELECT *
+        FROM dbo.PropertyDescVote vv
+        WHERE vv.id IN (
+        SELECT DISTINCT
+        v.id
+        FROM dbo.PropertyDescVote v with(nolock),
+        dbo.PropertyPicture pp with(nolock)
+        WHERE v.status!= -1 AND pp.status=1 AND v.propertyId = pp.propertyId
+        AND v.empNo = pp.employeeId
+        AND pp.id NOT IN (SELECT p.id FROM dbo.PropertyPicture p WHERE p.propertyId = #{propertyId}
+        AND p.employeeId = #{empNo})
+        AND pp.FingerprintCode != 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+        AND pp.FingerprintCode IN
+        <foreach item="fingerprintCode" index="index" collection="codeList"  open="(" separator="," close=")">#{fingerprintCode}</foreach>
+        )
+	</select>
+
+	<select id="countCheckedDescVote" resultType="int" parameterType="Map" >
+		select count(1)
+		from 
+		(select * from PropertyDescVote with(nolock) where status=2) pdv 
+        	inner join v_property p with(nolock)  on pdv.propertyId = p.PropertyID  
+        	<!-- 查有效描述方 -->
+        	<if test="descValidCondition =='validChecked'"> 
+			   and pdv.empNo = p.descriptEmpNo
+			</if>
+			<!-- 查非有效描述方 描述 -->
+        	<if test="descValidCondition =='inValidChecked'"> 
+			   and pdv.empNo != ISNULL(p.descriptEmpNo,0)
+			</if>
+	</select>
+	
+<!-- 查审核过的描述 -->
+	<select id="queryCheckedDescVote" resultType="PropertyDescVoteQualifiedVo" parameterType="Map" >
+		<include refid="CommonMapper.Pagination_Head"/>
+		select pdv.id,pdv.propertyId,pdv.empNo,pdv.votedAt,p.PropertyUsage 
+		from 
+		(select * from PropertyDescVote with(nolock) where status=2) pdv 
+        	inner join v_property p with(nolock)  on pdv.propertyId = p.PropertyID  
+        	<!-- 查有效描述方 -->
+        	<if test="descValidCondition =='validChecked'"> 
+			   and pdv.empNo = p.descriptEmpNo
+			</if>
+			<!-- 查非有效描述方 描述 -->
+        	<if test="descValidCondition =='inValidChecked'"> 
+			   and pdv.empNo != ISNULL(p.descriptEmpNo,0)
+			</if>
+		<include refid="CommonMapper.Pagination_Foot"/>
+	</select>
+
+	<select id="findTheMostFitDescriptEmpNo" parameterType="Map" resultType="PropertyDescVoteView">
+		SELECT TOP 1 * FROM PropertyDescVote with(nolock)
+		WHERE propertyId = #{propertyId}
+		ORDER BY flag desc,score DESC,updatedAt desc
+	</select>
+
+	<!--查询描述数量-->
+	<select id="countByPropertyId" resultType="int" parameterType="Map">
+		select count(*) from propertyDescVote with(nolock)  where propertyId = #{propertyId} and status > -1
+	</select>
+
+	<select id="voteList" parameterType="Map" resultType="PropertyDescVoteView" >
+		SELECT  *
+		FROM    (  SELECT    v.* ,
+					ROW_NUMBER() OVER ( ORDER BY v.votedAt DESC ) AS rn ,
+                    est.estateName ,
+					p.Address ,
+					p.RoomNo ,
+					descline.counts,
+					pi.descriptEmpNo
+					FROM      PropertyDescVote v WITH ( NOLOCK )
+                    LEFT JOIN dbo.property p WITH ( NOLOCK ) ON p.PropertyId = v.PropertyId
+                    LEFT JOIN dbo.PropertyInfo pi WITH ( NOLOCK ) ON p.PropertyID = pi.propertyId
+                    INNER JOIN dbo.v_fy_estate est ON p.EstateID = est.estateId
+					LEFT JOIN oms.dbo.v2_employee_final e WITH ( NOLOCK ) ON e.userCode = v.empNo
+					LEFT JOIN (    SELECT  propertyDescVoteId ,
+									COUNT(1) AS counts
+									FROM    PropertyDescVoteLine
+									WHERE   score = 1
+											AND status > -1
+											AND cateId1 IN ( 37, 38, 39, 42, 46,47 )
+									GROUP BY propertyDescVoteId
+					) AS descline ON descline.propertyDescVoteId = v.id
+					WHERE     v.status >= 1 and est.cityName = '${cityName}'
+					<if test="dataAuthRange == '' or dataAuthRange == null or dataAuthRange == '数据权限范围_本人'">
+						AND v.empNo = #{loginEmpNo}
+					</if>
+					<if test="dataAuthRange == '数据权限范围_本组织'">
+						AND e.orgLongCode like (SELECT orgLongCode+'%' FROM oms.dbo.v2_employee_final WHERE userCode = #{loginEmpNo})
+					</if>
+					<if test="descResult == '合格'">
+						AND descline.counts = 6 AND v.status = 2
+					</if>
+					<if test="descResult == '不合格'">
+						AND ( descline.counts!=6 or v.status!=2 or counts is null)
+					</if>
+					<if test="descType == '有效描述'">
+						AND v.empNo = pi.descriptEmpNo
+					</if>
+					<if test="descType == '普通描述'">
+						AND (pi.descriptEmpNo is  null or  v.empNo! = pi.descriptEmpNo )
+					</if>
+					<if test="followDateLow != '' and followDateLow != null">
+						AND v.votedAt >= #{followDateLow}
+					</if>
+					<if test="followDateHight != '' and followDateHight != null">
+						AND v.votedAt >= #{followDateLow}
+					</if>
+					<if test="ntype == '员工'">
+						AND v.empNo = #{deptID}
+					</if>
+					<if test="ntype != '' and ntype != '员工' and ntype != null ">
+						AND e.orgLongCode like (SELECT orgLongCode+'%' FROM oms.dbo.v2_organization_final WHERE id = #{deptID})
+					</if>
+		) a
+		<![CDATA[
+			WHERE   a.rn >= #{beginNum}
+			AND a.rn < #{endNum}
+		]]>
+		ORDER BY a.votedAt DESC
+	</select>
+
+	<select id="voteListCount" parameterType="Map" resultType="int" >
+		SELECT    count(*) as num
+		FROM      PropertyDescVote v WITH ( NOLOCK )
+        LEFT JOIN dbo.property p WITH ( NOLOCK ) ON p.PropertyId = v.PropertyId
+        LEFT JOIN dbo.PropertyInfo pi WITH ( NOLOCK ) ON p.PropertyID = pi.propertyId
+		LEFT JOIN oms.dbo.v2_employee_final e WITH ( NOLOCK ) ON e.userCode = v.empNo
+		LEFT JOIN (    SELECT  propertyDescVoteId ,
+						COUNT(1) AS counts
+						FROM    PropertyDescVoteLine
+						WHERE   score = 1
+						AND status > -1
+						AND cateId1 IN ( 37, 38, 39, 42, 46,47 )
+						GROUP BY propertyDescVoteId
+		) AS descline ON descline.propertyDescVoteId = v.id
+		WHERE    v.status >= 1
+		<if test="dataAuthRange == '' or dataAuthRange == null or dataAuthRange == '数据权限范围_本人'">
+			AND v.empNo = #{loginEmpNo}
+		</if>
+		<if test="dataAuthRange == '数据权限范围_本组织'">
+			AND e.orgLongCode like (SELECT orgLongCode+'%' FROM oms.dbo.v2_employee_final WHERE userCode = #{loginEmpNo})
+		</if>
+		<if test="descResult == '合格'">
+			AND descline.counts = 6 AND v.status = 2
+		</if>
+		<if test="descResult == '不合格'">
+			AND ( descline.counts!=6 or v.status!=2 or counts is null)
+		</if>
+		<if test="descType == '有效描述'">
+			AND v.empNo = pi.descriptEmpNo
+		</if>
+		<if test="descType == '普通描述'">
+			AND (pi.descriptEmpNo is  null or  v.empNo! = pi.descriptEmpNo )
+		</if>
+		<if test="followDateLow != '' and followDateLow != null">
+			AND v.votedAt >= #{followDateLow}
+		</if>
+		<if test="followDateHight != '' and followDateHight != null">
+			AND v.votedAt >= #{followDateLow}
+		</if>
+		<if test="ntype == '员工'">
+			AND v.empNo = #{deptID}
+		</if>
+		<if test="ntype != '' and ntype != '员工' and ntype != null ">
+			AND e.orgLongCode like (SELECT orgLongCode+'%' FROM oms.dbo.v2_organization_final WHERE id = #{deptID})
+		</if>
+
+	</select>
+	
+	
+	<select id="queryNeedSyncDescPropertyList" parameterType="Map" resultType="PropertyDescCountView" >
+	 select * from ( 
+			select row_.*, row_number() over(  order by  propertyId  ) as  rn from (
+			
+			SELECT  pdv.propertyId ,count(1) as descriptCount  from propertyDescVote pdv with(nolock)  
+		INNER JOIN dbo.v_Property vp WITH(NOLOCK) ON 
+		pdv.propertyId = vp.propertyId  and pdv.status > -1 GROUP BY pdv.propertyId
+		<![CDATA[
+			) row_ ) as t where t.rn >= #{beginNum}  and t.rn < #{endNum}
+		]]>
+	</select>
+	
+	<select id="countNeedSyncDescPropertyList" resultType="int" >
+		 select count(1) from ( 
+				SELECT DISTINCT  pdv.propertyId   from propertyDescVote pdv with(nolock)  
+			INNER JOIN dbo.v_Property vp WITH(NOLOCK) ON 
+			pdv.propertyId = vp.propertyId  and pdv.status > -1 GROUP BY pdv.propertyId
+	 	) t
+	</select>
+	
+</mapper>
+

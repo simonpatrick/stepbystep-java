@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyMaintainInfoMapper">
+
+    <insert id="insert" >
+        insert into PropertyMaintainInfo
+        (
+        propertyId ,
+		type,
+		inPoolTime,
+		visiblePhase,
+		inPoolUpdatedAt,
+		visibleEmpNos,
+		visibleStoreOrgIds,
+		inPoolHouseType
+        )
+        values
+        (
+        #{propertyId},
+		#{type},
+		#{inPoolTime},
+		#{visiblePhase},
+		getdate(),
+		#{visibleEmpNos},
+		#{visibleStoreOrgIds},
+		#{inPoolHouseType}
+        )
+    </insert>
+    
+	<update id="update">
+		update PropertyMaintainInfo
+			set type =#{type},maintainTime =#{maintainTime},maintainer =#{maintainer},applyTime=#{applyTime},
+				status =#{status},inPoolTime =#{inPoolTime},visiblePhase =#{visiblePhase},inPoolUpdatedAt = getdate(),
+				visibleEmpNos=#{visibleEmpNos},visibleStoreOrgIds=#{visibleStoreOrgIds},inPoolHouseType=#{inPoolHouseType}
+		where propertyId =#{propertyId}
+	</update>
+
+	<update id="updateMaintainTime">
+		update PropertyMaintainInfo
+			set type =#{type},maintainTime =#{maintainTime},
+				status =#{status},inPoolUpdatedAt = getdate()
+		where propertyId =#{propertyId} and maintainer =#{maintainer}
+	</update>
+	
+	<update id="claimToBeMaintainer">
+		update PropertyMaintainInfo
+			set type =#{type},maintainTime =#{maintainTime},maintainer =#{maintainer},applyTime=#{applyTime},
+				status =#{status},inPoolUpdatedAt = getdate()
+		where propertyId =#{propertyId} and maintainer is null
+	</update>
+
+   <select id="selectByPropertyId"  resultType="PropertyMaintainInfo">
+     	SELECT *  FROM PropertyMaintainInfo WITH(NOLOCK) 
+		WHERE propertyId = #{propertyId}
+    </select>
+    
+     <select id="selectMaintainPropertyByEmpNo"  resultType="PropertyMaintainInfo">
+     	SELECT *  FROM PropertyMaintainInfo WITH(NOLOCK) 
+		WHERE maintainer = #{maintainer} and status =0 and type =1
+    </select>
+    
+    <select id="selectOverDueMaintainProperty"  resultType="PropertyMaintainInfo">
+	    <include refid="CommonMapper.Pagination_Head"/>
+			SELECT pmi.*
+			FROM PropertyMaintainInfo pmi WITH(NOLOCK) WHERE pmi.type =1 AND pmi.status =0
+			AND maintainTime &lt; dateadd(day,-15,getDate())
+		<include refid="CommonMapper.Pagination_Foot" />
+	</select>
+	
+	<select id="countOverDueMaintainProperty"  resultType="int">
+	    SELECT count(1)
+			FROM PropertyMaintainInfo pmi WITH(NOLOCK) WHERE pmi.type =1 AND pmi.status =0
+			AND maintainTime &lt; dateadd(day,-15,getDate())
+	</select>
+	
+	<select id="selectNotSaleMaintainProperty"  resultType="PropertyMaintainInfo">
+		SELECT  pmi.*
+		FROM dbo.PropertyMaintainInfo pmi WITH(NOLOCK) LEFT JOIN property p WITH(NOLOCK) ON p.PropertyID = pmi.propertyId 
+		where ISNULL(p.saleStatus ,'') !='出售' AND maintainer IS NOT NULL 
+	</select>
+	
+	<select id="selectNotSaleWaitClaimProperty"  resultType="PropertyMaintainInfo">
+		SELECT  pmi.*,p.saleStatus
+		FROM dbo.PropertyMaintainInfo pmi WITH(NOLOCK) LEFT JOIN property p WITH(NOLOCK) ON p.PropertyID = pmi.propertyId 
+		where ISNULL(p.saleStatus ,'') !='出售' AND maintainer IS   NULL 
+	</select>
+		
+	<select id="countNormalByMaintainer"  resultType="int">
+     	SELECT count(1)  FROM PropertyMaintainInfo WITH(NOLOCK) 
+		WHERE maintainer = #{maintainer} 
+    </select>
+    
+	 <select id="selectWaitClaimOfficeProperty"  resultType="PropertyMaintainInfo">
+	    <include refid="CommonMapper.Pagination_Head"/>
+			SELECT pmi.* FROM dbo.PropertyMaintainInfo pmi WITH (NOLOCK) 
+			LEFT JOIN dbo.v_viewValidPropertyBenefit vvp  WITH (NOLOCK) ON vvp.PropertyID = pmi.propertyId
+			WHERE (vvp.propertyUsage ='写字楼' OR vvp.propertyUsage ='商铺' OR vvp.PropertyUsage ='厂房' )   AND pmi.maintainer IS NULL
+		<include refid="CommonMapper.Pagination_Foot" />
+	</select>
+	
+    <select id="countWaitClaimOfficeProperty"  resultType="int">
+     	SELECT count(1) FROM dbo.PropertyMaintainInfo pmi WITH (NOLOCK) 
+		LEFT JOIN dbo.v_viewValidPropertyBenefit vvp  WITH (NOLOCK) ON vvp.PropertyID = pmi.propertyId
+		WHERE (vvp.propertyUsage ='写字楼' OR vvp.propertyUsage ='商铺' OR vvp.PropertyUsage ='厂房' )   AND pmi.maintainer IS NULL
+    </select>
+    
+    <delete id="deleteWaitClaimProperty">
+    	 DELETE FROM dbo.PropertyMaintainInfo WHERE propertyId =#{propertyId} and maintainer IS NULL
+    </delete>
+
+	<delete id="deleteClaimProperty">
+    	 DELETE FROM dbo.PropertyMaintainInfo WHERE propertyId =#{propertyId} and maintainer =#{maintainer}
+    </delete>
+    
+	
+	<update id="updateWarnCount">
+		update PropertyMaintainInfo
+			set warnCount =#{warnCount},inPoolUpdatedAt = getdate()
+		where  propertyId = #{propertyId}
+	</update>
+	
+	<select id="countWaitClaimPropertyByHouseMaintainer"  resultType="int">
+     	SELECT count(1)
+		FROM PropertyMaintainInfo pmi
+		INNER JOIN v_viewValidPropertyBenefit p ON pmi.propertyId = p.PropertyID AND p.saleStatus ='出售'
+		WHERE pmi.type =0 AND (
+							(pmi.visiblePhase LIKE 'p%' AND p.limitSellEntrustEmpNo = #{maintainer})
+						OR ( (pmi.visiblePhase LIKE 'p[2-5]%' OR pmi.visiblePhase LIKE '%[20-50]' ) AND p.saleEmpNo = #{maintainer})
+						OR ( (pmi.visiblePhase LIKE 'p[3-5]%' OR pmi.visiblePhase LIKE '%[30-50]' ) AND (p.descriptEmpNo = #{maintainer} OR REPLACE(' '+ltrim(rtrim(pmi.visibleEmpNos))+' ',' ','@') LIKE #{maintainerFormat}) )
+						OR ( (pmi.visiblePhase LIKE 'p[4-5]%' OR pmi.visiblePhase LIKE '%[40-50]' ) AND REPLACE(' '+ltrim(rtrim(pmi.visibleEmpNos))+' ',' ','@') LIKE #{maintainerFormat} )
+						OR ( (pmi.visiblePhase LIKE 'p5%' OR pmi.visiblePhase LIKE '%50' ) AND REPLACE(' '+ltrim(rtrim(pmi.visibleStoreOrgIds))+' ',' ','@') LIKE #{storeOrgIdFormat})  )	
+						AND  pmi.inPoolTime IS  NOT NULL 
+						<!-- 取消维护人的房源 ，自己还是维护人，不过要放在别人的待认领池中，在自己的维护池里（不在自己的待认领） -->
+						AND ISNULL(pmi.maintainer,0) !=#{maintainer} 
+						AND p.areaId IN (
+								SELECT areaId FROM yunying.dbo.propertyDividePlate WITH(NOLOCK) WHERE orgId=(
+							select top 1 id from oms..v2_organization_district_final WITH(NOLOCK)
+							where exists (select 1 from oms..t_oms_employee_baseinfor as a with(nolock) where userCode = #{maintainer} and (storeId = a.orgId or branchId = a.orgId)) ) AND  status =0
+						)
+		<if test="propertyNo !=null ">
+				AND p.PropertyNo = #{propertyNo}
+		</if>
+    </select>
+    
+    <select id="queryWaitClaimPropertyByHouseMaintainer" resultType="PropertyMaintainInfoForYunying" >
+   		<include refid="CommonMapper.Pagination_Head"/>
+	     	SELECT pmi.propertyId,pmi.inPoolTime,pmi.status,pmi.warnCount,pmi.maintainer,p.PropertyNo,p.EstateID,p.EstateName,p.Address,p.RoomNo,p.handPrice
+			FROM PropertyMaintainInfo pmi
+			INNER JOIN v_viewValidPropertyBenefit p WITH(NOLOCK) ON pmi.propertyId = p.PropertyID AND p.saleStatus ='出售'
+			WHERE pmi.type =0 AND (
+								(pmi.visiblePhase LIKE 'p%' AND p.limitSellEntrustEmpNo = #{maintainer})
+							OR ( (pmi.visiblePhase LIKE 'p[2-5]%' OR pmi.visiblePhase LIKE '%[20-50]' ) AND p.saleEmpNo = #{maintainer})
+							OR ( (pmi.visiblePhase LIKE 'p[3-5]%' OR pmi.visiblePhase LIKE '%[30-50]' ) AND (p.descriptEmpNo = #{maintainer} OR REPLACE(' '+ltrim(rtrim(pmi.visibleEmpNos))+' ',' ','@') LIKE #{maintainerFormat}) )
+							OR ( (pmi.visiblePhase LIKE 'p[4-5]%' OR pmi.visiblePhase LIKE '%[40-50]' ) AND REPLACE(' '+ltrim(rtrim(pmi.visibleEmpNos))+' ',' ','@') LIKE #{maintainerFormat} )
+							OR ( (pmi.visiblePhase LIKE 'p5%' OR pmi.visiblePhase LIKE '%50' ) AND REPLACE(' '+ltrim(rtrim(pmi.visibleStoreOrgIds))+' ',' ','@') LIKE #{storeOrgIdFormat})  )	
+							AND  pmi.inPoolTime IS  NOT NULL AND ISNULL(pmi.maintainer,0) !=#{maintainer} 
+							AND p.areaId IN (
+								SELECT areaId FROM yunying.dbo.propertyDividePlate WITH(NOLOCK) WHERE orgId=(
+							select top 1 id from oms..v2_organization_district_final WITH(NOLOCK)
+							where exists (select 1 from oms..t_oms_employee_baseinfor as a with(nolock) where userCode = #{maintainer} and (storeId = a.orgId or branchId = a.orgId)) ) AND  status =0
+						)
+			<if test="propertyNo !=null ">
+				AND p.PropertyNo = #{propertyNo}
+			</if>
+		<include refid="CommonMapper.Pagination_Foot" />
+    </select>
+    
+    <select id="countWaitClaimPropertyByHaoZhaiMaintainer"  resultType="int">
+		SELECT count(1)
+		FROM PropertyMaintainInfo pmi
+		INNER JOIN v_viewValidPropertyBenefit p ON pmi.propertyId = p.PropertyID AND p.saleStatus ='出售'
+		WHERE pmi.type =0 AND (
+							(pmi.visiblePhase LIKE 'p%' AND p.limitSellEntrustEmpNo = #{maintainer})
+						OR ( (pmi.visiblePhase LIKE 'p[2-5]%' OR pmi.visiblePhase LIKE '%[20-50]' ) AND p.saleEmpNo = #{maintainer})
+						OR ( (pmi.visiblePhase LIKE 'p[3-5]%' OR pmi.visiblePhase LIKE '%[30-50]' ) AND (p.descriptEmpNo = #{maintainer} OR REPLACE(' '+ltrim(rtrim(pmi.visibleEmpNos))+' ',' ','@') LIKE #{maintainerFormat}) )
+						OR ( (pmi.visiblePhase LIKE 'p[4-5]%' OR pmi.visiblePhase LIKE '%[40-50]' ) AND REPLACE(' '+ltrim(rtrim(pmi.visibleEmpNos))+' ',' ','@') LIKE #{maintainerFormat} )
+						OR ( (pmi.visiblePhase LIKE 'p5%' OR pmi.visiblePhase LIKE '%50' ) AND p.handPrice >=1000 )  )	
+						AND  pmi.inPoolTime IS  NOT NULL 
+						<!-- 取消维护人的房源 ，自己还是维护人，不过要放在别人的待认领池中，在自己的维护池里（不在自己的待认领） -->
+						AND ISNULL(pmi.maintainer,0) !=#{maintainer}  
+						AND (pmi.inPoolHouseType = 0 OR pmi.inPoolHouseType = 2)
+		<if test="propertyNo !=null ">
+				AND p.PropertyNo = #{propertyNo}
+		</if>
+    </select>    
+   <select id="queryWaitClaimPropertyByHaoZhaiMaintainer" resultType="PropertyMaintainInfoForYunying" >
+   		<include refid="CommonMapper.Pagination_Head"/>
+	    SELECT pmi.propertyId,pmi.inPoolTime,pmi.status,pmi.warnCount,pmi.maintainer,p.PropertyNo,p.EstateID,p.EstateName,p.Address,p.RoomNo,p.handPrice
+			FROM PropertyMaintainInfo pmi
+			INNER JOIN v_viewValidPropertyBenefit p WITH(NOLOCK) ON pmi.propertyId = p.PropertyID AND p.saleStatus ='出售'
+			WHERE pmi.type =0 AND (
+								(pmi.visiblePhase LIKE 'p%' AND p.limitSellEntrustEmpNo = #{maintainer})
+							OR ( (pmi.visiblePhase LIKE 'p[2-5]%' OR pmi.visiblePhase LIKE '%[20-50]' ) AND p.saleEmpNo = #{maintainer})
+							OR ( (pmi.visiblePhase LIKE 'p[3-5]%' OR pmi.visiblePhase LIKE '%[30-50]' ) AND (p.descriptEmpNo = #{maintainer} OR REPLACE(' '+ltrim(rtrim(pmi.visibleEmpNos))+' ',' ','@') LIKE #{maintainerFormat}) )
+							OR ( (pmi.visiblePhase LIKE 'p[4-5]%' OR pmi.visiblePhase LIKE '%[40-50]' ) AND REPLACE(' '+ltrim(rtrim(pmi.visibleEmpNos))+' ',' ','@') LIKE #{maintainerFormat} )
+							OR ( (pmi.visiblePhase LIKE 'p5%' OR pmi.visiblePhase LIKE '%50' ) AND p.handPrice >=1000 )  )	
+							AND  pmi.inPoolTime IS  NOT NULL 
+							AND ISNULL(pmi.maintainer,0) !=#{maintainer} 
+							AND (pmi.inPoolHouseType = 0 OR pmi.inPoolHouseType = 2)
+			<if test="propertyNo !=null ">
+				AND p.PropertyNo = #{propertyNo}
+			</if>
+		<include refid="CommonMapper.Pagination_Foot" />
+    </select>
+    
+    <select id="countWaitClaimPropertyByVillaMaintainer"  resultType="int">
+		SELECT count(1)		
+		FROM PropertyMaintainInfo pmi
+		INNER JOIN v_viewValidPropertyBenefit p WITH(NOLOCK) ON pmi.propertyId = p.PropertyID AND p.saleStatus ='出售'
+		WHERE pmi.type =0 AND (
+							(pmi.visiblePhase LIKE 'p%' AND p.limitSellEntrustEmpNo = #{maintainer})
+						OR ( (pmi.visiblePhase LIKE 'p[2-5]%' OR pmi.visiblePhase LIKE '%[20-50]' ) AND p.saleEmpNo = #{maintainer})
+						OR ( (pmi.visiblePhase LIKE 'p[3-5]%' OR pmi.visiblePhase LIKE '%[30-50]' ) AND (p.descriptEmpNo = #{maintainer} OR REPLACE(' '+ltrim(rtrim(pmi.visibleEmpNos))+' ',' ','@') LIKE #{maintainerFormat}) )
+						OR ( (pmi.visiblePhase LIKE 'p[4-5]%' OR pmi.visiblePhase LIKE '%[40-50]' ) AND REPLACE(' '+ltrim(rtrim(pmi.visibleEmpNos))+' ',' ','@') LIKE #{maintainerFormat} )
+						OR ( (pmi.visiblePhase LIKE 'p5%' OR pmi.visiblePhase LIKE '%50' ) )  )	
+						AND  pmi.inPoolTime IS  NOT NULL AND ISNULL(pmi.maintainer,0) !=#{maintainer} AND pmi.type =0
+						AND ((pmi.inPoolHouseType = 0 AND p.propertyUsage ='别墅') OR pmi.inPoolHouseType =1)
+						AND p.areaId IN (
+								SELECT areaId FROM yunying.dbo.propertyDividePlate WITH(NOLOCK) WHERE orgId=(
+							select top 1 id from oms..v2_organization_district_final WITH(NOLOCK)
+							where exists (select 1 from oms..t_oms_employee_baseinfor as a with(nolock) where userCode = #{maintainer} and (storeId = a.orgId or branchId = a.orgId)) ) AND  status =0
+						)
+			<if test="propertyNo !=null ">
+				AND p.PropertyNo = #{propertyNo}
+			</if>
+    </select>
+    
+   <select id="queryWaitClaimPropertyByVillaMaintainer" resultType="PropertyMaintainInfoForYunying" >
+   		<include refid="CommonMapper.Pagination_Head"/>
+	    SELECT pmi.propertyId,pmi.inPoolTime,pmi.status,pmi.warnCount,pmi.maintainer,p.PropertyNo,p.EstateID,p.EstateName,p.Address,p.RoomNo,p.handPrice
+		FROM PropertyMaintainInfo pmi
+		INNER JOIN v_viewValidPropertyBenefit p WITH(NOLOCK) ON pmi.propertyId = p.PropertyID AND p.saleStatus ='出售'
+		WHERE pmi.type =0 AND (
+							(pmi.visiblePhase LIKE 'p%' AND p.limitSellEntrustEmpNo = #{maintainer})
+						OR ( (pmi.visiblePhase LIKE 'p[2-5]%' OR pmi.visiblePhase LIKE '%[20-50]' ) AND p.saleEmpNo = #{maintainer})
+						OR ( (pmi.visiblePhase LIKE 'p[3-5]%' OR pmi.visiblePhase LIKE '%[30-50]' ) AND (p.descriptEmpNo = #{maintainer} OR REPLACE(' '+ltrim(rtrim(pmi.visibleEmpNos))+' ',' ','@') LIKE #{maintainerFormat}) )
+						OR ( (pmi.visiblePhase LIKE 'p[4-5]%' OR pmi.visiblePhase LIKE '%[40-50]' ) AND REPLACE(' '+ltrim(rtrim(pmi.visibleEmpNos))+' ',' ','@') LIKE #{maintainerFormat} )
+						OR ( (pmi.visiblePhase LIKE 'p5%' OR pmi.visiblePhase LIKE '%50' ) )  )	
+						AND  pmi.inPoolTime IS  NOT NULL AND ISNULL(pmi.maintainer,0) !=#{maintainer} AND pmi.type =0
+						AND ((pmi.inPoolHouseType = 0 AND p.propertyUsage ='别墅') OR pmi.inPoolHouseType =1)
+						AND p.areaId IN (
+								SELECT areaId FROM yunying.dbo.propertyDividePlate WITH(NOLOCK) WHERE orgId=(
+							select top 1 id from oms..v2_organization_district_final WITH(NOLOCK)
+							where exists (select 1 from oms..t_oms_employee_baseinfor as a with(nolock) where userCode = #{maintainer} and (storeId = a.orgId or branchId = a.orgId)) ) AND  status =0
+						)
+			<if test="propertyNo !=null ">
+				AND p.PropertyNo = #{propertyNo}
+			</if>
+		<include refid="CommonMapper.Pagination_Foot" />
+    </select>
+    
+	<select id="countClaimPropertyByMaintainer"  resultType="int">
+     	SELECT count(1)
+		FROM PropertyMaintainInfo pmi WITH(NOLOCK)
+		INNER JOIN v_viewValidPropertyBenefit p WITH(NOLOCK) ON pmi.propertyId = p.PropertyID 
+		WHERE  pmi.maintainer =#{maintainer}
+		<if test="propertyNo !=null ">
+				AND p.PropertyNo = #{propertyNo}
+		</if>
+    </select>
+    
+    <select id="queryClaimPropertyByMaintainer"  resultType="PropertyMaintainInfoForYunying">
+    	<include refid="CommonMapper.Pagination_Head"/>
+	     	SELECT pmi.propertyId,pmi.maintainTime,pmi.status,pmi.warnCount,pmi.maintainer,p.PropertyNo,p.EstateID,p.EstateName,p.Address,p.RoomNo,p.handPrice ,tmp.houseCode
+			FROM PropertyMaintainInfo pmi WITH(NOLOCK)
+			INNER JOIN v_viewValidPropertyBenefit p WITH(NOLOCK) ON pmi.propertyId = p.PropertyID 
+			LEFT JOIN 
+			  (
+				SELECT DISTINCT * FROM (
+					SELECT mh.houseCode,mh.propertyId  FROM   mappingHouse mh WITH (NOLOCK) 
+								INNER JOIN dbo.mappingProperty mp WITH (NOLOCK) ON mp.propertyId = mh.propertyId  AND mh.status = 0 
+			) temp )AS tmp ON tmp.propertyId = p.PropertyID 
+			WHERE  pmi.maintainer =#{maintainer}
+			<if test="propertyNo !=null ">
+				AND p.PropertyNo = #{propertyNo}
+			</if>
+		<include refid="CommonMapper.Pagination_Foot" />
+    </select>
+    
+    <select id="getIllegalMaintainPropertyIds"  resultType="String">
+    SELECT pmi.propertyId FROM dbo.PropertyMaintainInfo pmi 
+	where pmi.maintainer IS NOT NULL  AND pmi.maintainTime &lt; #{checkTimeEnd} AND pmi.maintainTime > #{checkTimeBegin}
+		AND NOT EXISTS (SELECT fh.followId FROM dbo.FollowHistory fh 
+				WHERE pmi.propertyId = fh.PropertyID 
+				AND fh.FollowDate > convert(nvarchar,pmi.maintainTime-2,23)
+				AND fh.FollowDate &lt; convert(nvarchar,pmi.maintainTime+1,23) 
+				AND (fh.followType ='电话' OR fh.FollowType ='有图片附件') )
+    </select>
+    
+		
+    <select id="getNeedCheckMaintainProperty"  resultType="PropertyMaintainInfo">
+    	SELECT * FROM (
+			SELECT    r.* , ROW_NUMBER() OVER ( PARTITION BY r.maintainer ORDER BY NEWID() ) AS row
+	                  FROM      (
+			SELECT pmi.* FROM dbo.PropertyMaintainInfo pmi 
+			where pmi.maintainer IS NOT NULL AND pmi.maintainTime &lt; #{checkTimeEnd} AND pmi.maintainTime > #{checkTimeBegin}				
+			AND EXISTS (SELECT fh.followId FROM dbo.FollowHistory fh 
+				WHERE pmi.propertyId = fh.PropertyID 
+				AND fh.FollowDate > convert(nvarchar,pmi.maintainTime-2,23)
+				AND fh.FollowDate &lt; convert(nvarchar,pmi.maintainTime+1,23) 
+				AND (fh.followType ='电话' OR fh.FollowType ='有图片附件') )  
+				AND
+				NOT EXISTS (SELECT pmch.propertyId FROM dbo.PropertyMaintainCheckHistory pmch WITH(nolock)
+								WHERE  pmi.maintainer = pmch.maintainer AND pmch.createdAt > (GETDATE()-30) )
+				)r 
+			)tmp 
+			WHERE tmp.row = 1
+	</select>	
+</mapper>

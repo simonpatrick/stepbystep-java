@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="OtherCompanyStatusMapper">
+
+    <select id="queryByOldStatusSource" resultType="OtherCompanyStatus">
+        SELECT * FROM  OtherCompanyStatus with(nolock) 
+        WHERE oldStatus=#{oldStatus} and source=#{source} 
+    </select>
+
+	<insert id="insert" parameterType="OtherCompanyStatus">
+        insert into OtherCompanyStatus
+        (oldStatus,
+		newStatus,
+		source)
+        values
+        (
+		#{oldStatus},
+		#{newStatus},
+		#{source})
+    </insert>
+    
+    <delete id="deleteAll">
+    	DELETE FROM OtherCompanyStatus where source=#{source}
+    </delete>
+</mapper>

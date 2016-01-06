@@ -1,0 +1,88 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyDescVoteLineMapper">
+
+	
+	<sql id="PropertyDescVoteLine_where">
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="cateIds != null">
+				and cateId1 in 
+				<foreach item="cateId" collection="cateIds" open="(" separator=" , " close=")">
+					#{cateId}
+		        </foreach>
+			</if>
+			<if test="propertyDescVoteId != null">
+				and propertyDescVoteId = #{propertyDescVoteId}
+			</if>
+			<if test="cateId1 != null">
+				and cateId1 = #{cateId1}
+			</if>
+			<if test="cateId2 != null">
+				and cateId2 = #{cateId2}
+			</if>
+			<if test="status != null">
+				and a.status = #{status}
+			</if>
+			<if test="status == null">
+				and a.status != '-1'
+			</if>
+		</trim>
+	</sql>
+	
+	
+	<update id="update" parameterType="PropertyDescVoteLine">
+		update  PropertyDescVoteLine
+		<set>
+			<if test="status!=null">
+				status= #{status} , 
+			</if>
+			<if test="flag!=null">
+				flag= #{flag} ,
+			</if>
+			<if test="remark!=null">
+				remark= #{remark},
+			</if>
+			<if test="score!=null">
+				score= #{score},
+			</if>
+			updatedAt = getDate()
+		</set>
+		where  id = #{id}
+	</update>
+
+	<insert id="insert" parameterType="PropertyDescVoteLine">
+		insert into PropertyDescVoteLine (propertyDescVoteId , cateId1 , cateId2 , score ,  status , flag  , createdAt )
+		values ( #{propertyDescVoteId} , #{cateId1} , #{cateId2} , 0 , 0 , 0  , getDate() )
+		<selectKey resultType="Integer" keyProperty="id" order="AFTER" >
+			SELECT @@IDENTITY  AS id
+		</selectKey>  
+	</insert>
+	
+	<select id="list" resultType="PropertyDescVoteLineView" parameterType="Map" >
+		select a.* , b.name as cateName from propertyDescVoteline a  with(noLock)
+		inner join PictureCategory b on a.cateId1 = b.id
+		<include refid="PropertyDescVoteLine_where"/>
+		<if test="orderby!=null">
+			order by ${orderby}
+		</if>
+	</select>
+	
+	<select id="selectOne" resultType="PropertyDescVoteLineView" parameterType="Map" >
+		select top 1 a.* , b.name as cateName from propertyDescVoteline a  with(noLock)
+		inner join PictureCategory b on a.cateId1 = b.id
+		<include refid="PropertyDescVoteLine_where"/>
+	</select>
+	
+	<select id="selectById" resultType="PropertyDescVoteLineView" parameterType="Map" >
+		select top 1 a.* , b.name as cateName from propertyDescVoteline a  with(noLock)
+		inner join PictureCategory b on a.cateId1 = b.id
+		where a.id = #{id}
+	</select>
+	
+	<select id="count" resultType="int" parameterType="Map" >
+		select count(distinct(cateId1)) from PropertyDescVoteLine with(noLock)
+		<include refid="PropertyDescVoteLine_where"/>
+	</select>
+</mapper>

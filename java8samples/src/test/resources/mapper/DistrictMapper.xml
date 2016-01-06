@@ -1,0 +1,15 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="DistrictMapper">
+	<select id="list" resultType="com.dooioo.fy.model.District" parameterType="map">
+		SELECT  CityName ,
+        DistrictName ,
+        DistrictNo ,
+        sort
+        FROM    dbo.District WITH ( NOLOCK )
+        WHERE   cityName = #{cityName}
+        ORDER BY sort
+	</select>
+</mapper>

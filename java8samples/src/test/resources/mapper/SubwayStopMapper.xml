@@ -1,0 +1,14 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="SubwayStopMapper">
+
+
+	<select id="queryForList" resultType="SubwayStop" parameterType="map">
+		SELECT  * from dbo.SubwayStop ss WITH(nolock)
+        inner JOIN subwayLine sl WITH(nolock) ON ss.line = sl.line
+        WHERE ss.status = 0 and ss.cityName = #{cityName}
+        order BY sl.sort, ss.sort
+	</select>
+</mapper>

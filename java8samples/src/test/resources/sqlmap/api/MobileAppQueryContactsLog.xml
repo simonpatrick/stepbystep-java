@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+        PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MobileAppQueryContactsLog">
+    <typeAlias alias="mobileAppQueryContactsLog" type="com.dooioo.api.model.MobileAppQueryContactsLog"/>
+
+    <insert id="insert" parameterClass="mobileAppQueryContactsLog">
+        insert into mobileAppQueryContactsLog(propertyId,empNo)
+        values(#propertyId#,#empNo#)
+    </insert>
+
+    <select id="count" parameterClass="mobileAppQueryContactsLog" resultClass="Integer">
+        select count(1) from mobileAppQueryContactsLog  with(noLock)
+        where DateDiff(dd,createdAt,getdate()) = 0
+        <isNotNull prepend="and" property="empNo">
+            empNo = #empNo#
+        </isNotNull>
+        <isNotNull prepend="and" property="propertyId">
+            propertyId = #propertyId#
+        </isNotNull>
+    </select>
+</sqlMap>

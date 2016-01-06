@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+        PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PropertyFieldEditHistory">
+    <typeAlias alias="PropertyFieldEditHistory" type="com.dooioo.property.model.PropertyFieldEditHistory"/>
+
+    <insert id="insertAndReturnId" parameterClass="PropertyFieldEditHistory">
+        INSERT INTO PropertyFieldEditHistory
+        (propertyId
+        ,empNo
+        ,fieldName
+        <isNotEmpty property="beforeValue" prepend=",">
+            beforeValue
+        </isNotEmpty>
+        <isNotEmpty property="afterValue" prepend=",">
+            afterValue
+        </isNotEmpty>
+        ,status
+        ,createdAt)
+        VALUES
+        (#propertyId#
+        ,$empNo$
+        ,#fieldName#
+        <isNotEmpty property="beforeValue" prepend=",">
+            #beforeValue#
+        </isNotEmpty>
+        <isNotEmpty property="afterValue" prepend=",">
+            #afterValue#
+        </isNotEmpty>
+        ,1
+        ,getDate())
+
+        <selectKey resultClass="integer" keyProperty="id">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
+
+    <select id="getQueryPrice"   parameterClass="string" resultClass="PropertyFieldEditHistory">
+        select top 5 pih.*,ae.user_name_cn as employeeNameCn from PropertyFieldEditHistory pih
+        with(nolock) inner join oms.dbo.V_OMS_EMPLOYEE_BASEINFOR ae with(nolock) on pih.empNo=ae.user_code
+         where pih.propertyId=#id#  and pih.fieldName='price' and pih.afterValue!='0.0' and pih.afterValue!='0' and pih.afterValue!='0.00'  order by createdAt desc
+    </select>
+
+
+    <select id="getQueryHandPrice"   parameterClass="string" resultClass="PropertyFieldEditHistory">
+        select top 5 pih.*,ae.user_name_cn as employeeNameCn from PropertyFieldEditHistory pih
+        with(nolock) inner join oms.dbo.V_OMS_EMPLOYEE_BASEINFOR ae with(nolock) on pih.empNo=ae.user_code
+         where pih.propertyId=#id#  and pih.fieldName='handPrice'  order by createdAt desc
+    </select>
+    
+</sqlMap>

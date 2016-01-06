@@ -1,0 +1,100 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="PropertyRecordApplyMapper">
+	<select id="selectRentByPropertyId" resultType="com.dooioo.fy.model.PropertyRecordApply" parameterType="map">
+        SELECT  top 1 *
+        FROM    dbo.propertyRecordApply
+        WHERE   ( recordType = N'租' )
+        AND ( expiredDate >= GETDATE() OR expiredDate IS NULL )
+        AND ( flag != -1 )
+        AND propertyId = #{propertyId}
+        ORDER BY  id  DESC
+	</select>
+
+    <select id="selectSellByPropertyId" resultType="com.dooioo.fy.model.PropertyRecordApply" parameterType="map">
+        SELECT  top 1 *
+        FROM    dbo.propertyRecordApply
+        WHERE   ( recordType = N'售' )
+        AND ( expiredDate >= GETDATE() OR expiredDate IS NULL )
+        AND ( flag != -1 )
+        AND propertyId = #{propertyId}
+        ORDER BY  id  DESC
+    </select>
+
+    <select id="list" parameterType="map" resultType="map">
+        select * from (
+            SELECT  ROW_NUMBER() OVER ( ORDER BY createdAt DESC ) AS rowid ,
+            a.id ,
+            a.propertyId ,
+            a.propertyRightName ,
+            a.propertyRightNo ,
+            a.empNo ,
+            emp.userName ,
+            a.recordType ,
+            a.price ,
+            a.flag ,
+            a.applyAt ,
+            a.updatedAt ,
+            CONVERT(VARCHAR(100), a.createdAt, 120) AS createdAt ,
+            a.record_no ,
+            a.status ,
+            a.updateLog ,
+            et.estateName ,
+            p.address ,
+            p.roomNo ,
+            et.address AS estateAddress ,
+            a.reason
+            FROM    propertyRecordApply a WITH ( NOLOCK )
+            LEFT JOIN property p WITH ( NOLOCK ) ON a.propertyid = p.propertyid
+            LEFT JOIN Estate et WITH ( NOLOCK ) ON p.EstateID = et.EstateID
+            left join area ar WITH ( NOLOCK ) on et.areaId = ar.areaId
+            LEFT JOIN oms.dbo.v2_employee_final emp WITH ( NOLOCK ) ON a.empNo = emp.userCode
+            WHERE   a.status = 0 and ar.cityName = '${cityName}'
+            <if test="estateName != null and estateName != '' ">
+                and et.estateName = #{estateName}
+            </if>
+            <if test="flag != null and flag != '' ">
+                and a.flag = #{flag}
+            </if>
+            <if test="empNo != null and empNo != '' ">
+                and a.empNo = #{empNo}
+            </if>
+            <if test="orgLongCode != null and orgLongCode != '' ">
+                and emp.orgLongCode like #{orgLongCode}+'%'
+            </if>
+        ) a where a.rowid >= #{beginNum} and a.rowid &lt;= #{endNum}
+    </select>
+
+    <select id="listCount" parameterType="map" resultType="int">
+        SELECT  count(1) as num
+        FROM    propertyRecordApply a WITH ( NOLOCK )
+        LEFT JOIN property p WITH ( NOLOCK ) ON a.propertyid = p.propertyid
+        LEFT JOIN Estate et WITH ( NOLOCK ) ON p.EstateID = et.EstateID
+        left join area ar WITH ( NOLOCK ) on et.areaId = ar.areaId
+        LEFT JOIN oms.dbo.v2_employee_final emp WITH ( NOLOCK ) ON a.empNo = emp.userCode
+        WHERE   a.status = 0 and ar.cityName = '${cityName}'
+        <if test="estateName != null and estateName != '' ">
+            and et.estateName = #{estateName}
+        </if>
+        <if test="flag != null and flag != '' ">
+            and a.flag = #{flag}
+        </if>
+        <if test="empNo != null and empNo != '' ">
+            and a.empNo = #{empNo}
+        </if>
+        <if test="orgLongCode != null and orgLongCode != '' ">
+            and emp.orgLongCode like #{orgLongCode}+'%'
+        </if>
+    </select>
+
+
+    <update id="updateStatusByPropertyId" parameterType="map">
+        <![CDATA[
+		update propertyRecordApply set updatedAt = getDate(),status = #{status}
+		where propertyId = #{propertyId} AND expiredDate < GETDATE();
+		]]>
+    </update>
+
+</mapper>

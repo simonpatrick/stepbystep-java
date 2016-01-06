@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+            PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+            "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="OpenHouseMember">
+	<typeAlias alias="openHouseMember" type="com.dooioo.openHouse.model.OpenHouseMember"/>
+	
+	<insert id="insert" parameterClass="openHouseMember">
+		insert openHouseMember 
+		(teamId    , empNo   ,watchTime    , isCancel   ,cancelReason , isActive   , createdAt)
+		values 
+		(#teamId# , #empNo#  , #watchTime# , #isCancel#	,#cancelReason#, #isActive# , #createdAt# )
+	</insert>
+	
+	 <update id="update" parameterClass="openHouseMember">
+        update
+          openHouseMember
+        set
+          teamId = #teamId# ,empNo = #empNo#,
+          isActive = #isActive#,
+          watchTime = #watchTime# , isCancel = #isCancel#,
+          cancelReason = #cancelReason#           
+        where
+          id = #id#
+    </update>
+    
+    <select id="count" resultClass="Integer" parameterClass="Map">
+        select count(*) from openHouseMember with(nolock)
+        where  1=1 
+       	<isNotEmpty property="teamId" >
+       		and teamId = #teamId#
+       	</isNotEmpty>
+       	<isNotEmpty property="empNo" >
+       		and empNo = #empNo#
+       	</isNotEmpty>
+       	<isNotEmpty property="isActive" >
+       		and isActive = #isActive#
+       	</isNotEmpty>
+   		<isNotEmpty property="isCancel" >
+       		and isCancel = #isCancel#
+       	</isNotEmpty>
+    </select>
+    
+    
+    <select id="query" resultClass="openHouseMember">
+        select t1.*,t2.userName,t2.orgName,t2.phone as phone from  openHouseMember t1 with(nolock)
+        inner join oms.dbo.v_employee_baseinfo  t2 with(nolock)
+        on t1.empNo = t2.userCode
+        where  1=1 
+       	<isNotEmpty property="teamId" >
+       		and teamId = #teamId#
+       	</isNotEmpty>
+       	<isNotEmpty property="empNo" >
+       		and empNo = #empNo#
+       	</isNotEmpty>
+       	<isNotEmpty property="isActive" >
+       		and isActive = #isActive#
+       	</isNotEmpty>
+    </select>
+    
+    
+     <select id="findById" resultClass="openHouseMember">
+        select top 1 * from openHouseMember   with(nolock) where  id = #id#
+    </select>
+	
+	
+	 <select id="findByBean" resultClass="openHouseMember">
+        select top 1 * from openHouseMember  with(nolock)  where  1=1 
+       <isNotEmpty property="teamId" >
+       		and teamId = #teamId#
+       	</isNotEmpty>
+       	<isNotEmpty property="empNo" >
+       		and empNo = #empNo#
+       	</isNotEmpty>
+       	<isNotEmpty property="isActive" >
+       		and isActive = #isActive#
+       	</isNotEmpty>
+    </select>
+	
+</sqlMap>

@@ -1,0 +1,62 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyEntrustChangeHistoryDetailMapper">
+
+<!-- 定义查询条件 -->
+	<sql id="where_Clause">
+			<if test="id != null">
+				and id = #{id}
+			</if>
+			<if test="propertyEntrustChangeHistoryIds != null">
+	            and propertyEntrustChangeHistoryId  in
+	            <foreach item="item" index="index" collection="propertyEntrustChangeHistoryIds"
+	                     open="(" separator="," close=")">
+	                #{item}
+	            </foreach>
+			</if>
+			<if test="status != null">
+				and status = #{status}
+			</if>
+			<if test="status == null">
+				and status = 0
+			</if>
+	</sql>
+
+<!-- 添加委托编辑，审核详情 -->
+	<insert id="insert" parameterType="PropertyEntrustChangeHistoryDetail">
+		<selectKey keyProperty="id" resultType="int" order="AFTER">
+			select
+			@@IDENTITY
+		</selectKey>
+		insert into
+		propertyEntrustChangeHistoryDetail
+		(
+			propertyEntrustChangeHistoryId,
+			content,
+			pictureInfo
+
+		)
+		values
+		(
+			#{propertyEntrustChangeHistoryId},
+			#{content},
+			#{pictureInfo}
+		)
+	</insert>
+	
+<!-- 	查询委托编辑，审核详情 -->
+	<select id="selectList" resultType="PropertyEntrustChangeHistoryDetailView">
+		select * from propertyEntrustChangeHistoryDetail with(nolock) 
+		where 1 =1
+		<include refid="where_Clause"/>
+		<if test="orderby != null">
+			order by ${orderby}
+		</if>
+		<if test="orderby == null">
+			order by createdAt desc
+		</if>
+	</select>
+	
+</mapper>

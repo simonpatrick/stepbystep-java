@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--电话号码加密解密-->
+<mapper namespace="PhoneMapper">
+	<!--电话号码加密-->
+    <select id="encryptTel"  parameterType="string" resultType="string">
+		EXEC dbo.sp_EncryptOwnerTel @Phone = #{phoneNumber}
+	</select>
+
+</mapper>

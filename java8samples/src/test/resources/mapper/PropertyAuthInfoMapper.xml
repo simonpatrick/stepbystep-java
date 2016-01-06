@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyAuthInfoMapper">
+<resultMap type="com.dooioo.fy.bean.PropertyAuthInfoWrapper" id="authInfoResult">
+	<result column="propertyId" property="propertyId" />
+	<result column="chanquanhezhunriqi" property="buyinDateStr" />
+	<result column="jibenjianzhumianji" property="squareStr" />
+	<result column="chanquanquanzheng" property="propertyRightPermitNo" />
+	<result column="chanquanquanliren" property="propertyRightPerson" />
+	<result column="chanquangongyouren" property="propertyRight2ndPerson" />
+	<result column="taxiangquanliren" property="loanStatusWrapper" />
+	<result column="taxiangqishiriqi" property="propertyLoanBeginTime" />
+	<result column="taxiangzhongzhiriqi" property="propertyLoanEndTime" />
+	<result column="taxiangzhaiquanjine" property="propertyLoanTotalPriceStr" />
+	<result column="taxiangzhaiquanbizhong" property="propertyLoanPriceUnit" />
+	<result column="xianzhiqishishijian" property="propertySealTime" />
+	<result column="xianzhijieshushijian" property="propertySealEndTime" />
+	<result column="xianzhixianzhiren" property="propertySealPerson" />
+</resultMap>
+
+
+<select id="findNeedUpdateAuthedInfo" resultType="PropertyAuthInfo" >
+SELECT TOP 2000 * FROM(
+
+	SELECT
+	Property.propertyId,
+	BuyinDate,
+	authedForBuyinDate,
+	Square,
+	authedForSquare,
+	CompleteYear,
+	authedForCompleteYear,
+	propertyLoanTotalPrice,
+	authedForPropertyLoan,
+	propertyRightNO,
+	authedForPropertyRight
+	FROM
+	PropertyInfo
+	INNER JOIN Property ON PropertyInfo.propertyId = Property.PropertyID
+	WHERE
+	authedForBuyinDate = '1'
+	AND BuyinDate IS NULL
+
+	UNION
+
+	SELECT
+	Property.propertyId,
+	BuyinDate,
+	authedForBuyinDate,
+	Square,
+	authedForSquare,
+	CompleteYear,
+	authedForCompleteYear,
+	propertyLoanTotalPrice,
+	authedForPropertyLoan,
+	propertyRightNO,
+	authedForPropertyRight
+	FROM
+	PropertyInfo
+	INNER JOIN Property ON PropertyInfo.propertyId = Property.PropertyID
+	WHERE
+	authedForSquare = '1'
+	AND Square IS NULL
+	
+	UNION
+
+	SELECT
+	Property.propertyId,
+	BuyinDate,
+	authedForBuyinDate,
+	Square,
+	authedForSquare,
+	CompleteYear,
+	authedForCompleteYear,
+	propertyLoanTotalPrice,
+	authedForPropertyLoan,
+	propertyRightNO,
+	authedForPropertyRight
+	FROM
+	PropertyInfo
+	INNER JOIN Property ON PropertyInfo.propertyId = Property.PropertyID
+	WHERE
+	authedForCompleteYear = '1'
+	AND CompleteYear IS NULL
+	
+	UNION
+
+	SELECT
+	Property.propertyId,
+	BuyinDate,
+	authedForBuyinDate,
+	Square,
+	authedForSquare,
+	CompleteYear,
+	authedForCompleteYear,
+	propertyLoanTotalPrice,
+	authedForPropertyLoan,
+	propertyRightNO,
+	authedForPropertyRight
+	FROM
+	PropertyInfo
+	INNER JOIN Property ON PropertyInfo.propertyId = Property.PropertyID
+	WHERE
+	authedForPropertyLoan = '1'
+	AND propertyLoanTotalPrice IS NULL
+	
+	UNION
+	
+	SELECT
+	Property.propertyId,
+	BuyinDate,
+	authedForBuyinDate,
+	Square,
+	authedForSquare,
+	CompleteYear,
+	authedForCompleteYear,
+	propertyLoanTotalPrice,
+	authedForPropertyLoan,
+	propertyRightNO,
+	authedForPropertyRight
+	FROM
+	PropertyInfo
+	INNER JOIN Property ON PropertyInfo.propertyId = Property.PropertyID
+	WHERE
+	authedForPropertyRight = '1'
+	AND propertyRightPermitNo IS NULL
+)t
+
+
+</select>
+
+<select id="findPropertyAuthInfoCount" resultType="int">
+        SELECT  count(1) 
+	    FROM  (select DISTINCT propertyId FROM dbo.propertyAuthInfo WITH(NOLOCK) WHERE status = 0) pai 
+			    INNER join dbo.property p WITH(NOLOCK) ON p.PropertyID = pai.propertyId  
+			    INNER JOIN dbo.PropertyInfo pinfo WITH(nolock) ON p.propertyId = pinfo.propertyId 
+		where (p.Status LIKE '%出租%' AND p.Status NOT LIKE '%暂缓出租%')
+				OR (p.Status LIKE '%出售%' AND p.Status NOT LIKE '%暂缓出售%')
+			  OR pinfo.limitSellEntrustApplyId is not null 
+			  OR pinfo.exclusiveRentEntrustApplyId is not null 
+			  OR pinfo.exclusiveSellEntrustApplyId is not null
+			  OR pinfo.jpsEmpNo IS NOT NULL  
+			  OR pinfo.jpzEmpNo IS NOT NULL 
+    </select>
+    
+    <select id="findPropertyAuthInfo" resultType="PropertyAuthInfo" parameterType="hashMap">
+    	<include refid="CommonMapper.Pagination_Head" />
+        SELECT  pai.*,pinfo.authedForBuyinDate,p.buyinDate,authedForSquare,p.Square,
+			    pinfo.authedForPropertyRight,pinfo.propertyRightPermitNo,pinfo.propertyRightPerson, 
+			    pinfo.authedForPropertyLoan,pinfo.propertyLoanBeginTime,pinfo.propertyLoanEndTime,  
+			    pinfo.propertyLoanTotalPrice,pinfo.propertyLoanPriceUnit,pinfo.LoanStatus,  
+			    pinfo.propertySealPerson,pinfo.propertySealStatus,pinfo.propertySealTime,pinfo.propertySealEndTime 
+	    FROM  (select DISTINCT propertyId FROM dbo.propertyAuthInfo WITH(NOLOCK) WHERE status = 0) pai 
+			    INNER join dbo.property p WITH(NOLOCK) ON p.PropertyID = pai.propertyId  
+			    INNER JOIN dbo.PropertyInfo pinfo WITH(nolock) ON p.propertyId = pinfo.propertyId 
+		where (p.Status LIKE '%出租%' AND p.Status NOT LIKE '%暂缓出租%')
+				OR (p.Status LIKE '%出售%' AND p.Status NOT LIKE '%暂缓出售%')
+			  OR pinfo.limitSellEntrustApplyId is not null
+			  OR pinfo.exclusiveRentEntrustApplyId is not null
+			  OR pinfo.exclusiveSellEntrustApplyId is not null
+			  OR pinfo.jpsEmpNo IS NOT NULL  
+			  OR pinfo.jpzEmpNo IS NOT NULL
+		<include refid="CommonMapper.Pagination_Foot" />
+    </select>
+    
+    <!-- 更新处理状态：0：未处理-1:已处理 -->
+    <update id="uptPropertyAuthInfo" parameterType="String">
+    	update dbo.propertyAuthInfo set status = -1,updatedAt = getDate() where propertyId =#{propertyId}
+    </update>
+    
+    <select id="queryEdsPropertyByPropertyId"  statementType="CALLABLE" resultMap="authInfoResult">
+    	EXEC sp_queryEdsPropertyByPropertyId #{propertyId}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO dbo.propertyAuthInfo (propertyId) VALUES (#{propertyId})
+    </insert>
+    
+</mapper>

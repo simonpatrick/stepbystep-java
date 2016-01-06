@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PropertyPermitNoRecord">
+    <typeAlias alias="propertyPermitNoRecord" type="com.dooioo.quality.model.PropertyPermitNoRecord"/>
+
+    <insert id="insert" parameterClass="propertyPermitNoRecord">
+        insert into propertyPermitNoRecord(permitNo,empNo,status,createdAt) values (#permitNo#,#empNo#,0,getdate());
+    </insert>
+    <update id="update" parameterClass="propertyPermitNoRecord">
+        update
+            propertyPermitNoRecord
+        set
+            status = #status# ,
+            operEmpNo = #operEmpNo#,
+            updatedAt = getdate()
+        where
+            permitNo = #permitNo# and status = 0
+    </update>
+
+    <select id="queryForPaginate2" parameterClass="propertyPermitNoRecord" resultClass="propertyPermitNoRecord">
+        mst_sp_pageshowex4 '* ','$table$','$where$','$orderBy$',$pageSize$,$pageNo$
+    </select>
+
+    <select id="count2" parameterClass="propertyPermitNoRecord" resultClass="int">
+        sp_pagecount '$table$','$where$'
+    </select>
+</sqlMap>

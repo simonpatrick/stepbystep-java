@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="EmpPointMapper">
+
+
+    <select id="queryByEmpNo" resultType="EmpPoint">
+        SELECT empNo,storeId,total FROM  z_fyEmpPoint with(nolock) WHERE empNo=#{empNo}
+    </select>
+    
+    <select id="queryAllValid" resultType="EmpPoint">
+        select empNo,storeId,total
+		from z_fyEmpPoint  zfe with(nolock)
+		left join oms.dbo.v_employee_final vef on vef.userCode = zfe.empNo
+		where total >0  and vef.orgLongCode like '12020001/120720495/12020003/%' and vef.positionName ='经纪人' 
+		and  vef.status !='特殊账号' order by storeId asc ,total DESC
+    </select>
+    
+    <select id="queryByStoreId" resultType="EmpPoint">
+        SELECT empNo,storeId,total FROM  z_fyEmpPoint with(nolock) WHERE storeId=#{storeId} and total>0
+    </select>
+    
+    <select id="queryValidEmpByStoreIds" resultType="EmpPoint">
+        SELECT empNo,storeId,total FROM  z_fyEmpPoint with(nolock) WHERE total>0 and storeId in 
+        <foreach item="item" index="index" collection="storeIds"
+                     open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            order by total,empNo
+    </select>
+    
+    
+</mapper>

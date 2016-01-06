@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMapConfig PUBLIC "-//iBATIS.com//DTD SQL Map Config 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-config-2.dtd">
+
+<sqlMapConfig>
+    <settings
+            cacheModelsEnabled="true"
+            enhancementEnabled="true"
+            lazyLoadingEnabled="true"
+            useStatementNamespaces="true"/>
+
+    <typeAlias alias="integer" type="java.lang.Integer"/>
+    <typeAlias alias="string" type="java.lang.String"/>
+    <typeAlias alias="date" type="java.util.Date"/>
+    <typeAlias alias="hashMap" type="java.util.HashMap"/>
+
+    <!--root-->
+    <!--<sqlMap resource="sqlmap/Area.xml"/>-->
+    <!--<sqlMap resource="sqlmap/District.xml"/>-->
+    <!--end root-->
+
+
+    <!--portal-->
+    <!--<sqlMap resource="sqlmap/portal/PushMessage.xml"/>-->
+    <!--<sqlMap resource="sqlmap/portal/PushedMessageQueue.xml"/>-->
+    <!--<sqlMap resource="sqlmap/portal/RelatedDegreeMessageQueue.xml"/>-->
+    <sqlMap resource="sqlmap/portal/FollowWarn.xml"/>
+    <sqlMap resource="sqlmap/portal/FollowRemind.xml"/>
+    <!--<sqlMap resource="sqlmap/portal/Complaints.xml"/>-->
+    <sqlMap resource="sqlmap/portal/EmployeeStat.xml"/>
+    <sqlMap resource="sqlmap/portal/FollowCallRelation.xml"/>
+    <sqlMap resource="sqlmap/portal/PropertyRecordApply.xml"/>
+    <!--<sqlMap resource="sqlmap/portal/PropertyEntrustApply.xml"/>-->
+    <sqlMap resource="sqlmap/portal/DeletedRecord.xml"/>
+    <sqlMap resource="sqlmap/portal/RecordListenHistory.xml"/>
+    <!--end portal-->
+
+    <!--estate-->
+    <sqlMap resource="sqlmap/estate/Building.xml"/>
+    <sqlMap resource="sqlmap/estate/Estate.xml"/>
+    <sqlMap resource="sqlmap/estate/EstateStatisticsInfo.xml"/>
+    <!--end estate-->
+
+    <!--property-->
+    <sqlMap resource="sqlmap/property/PictureCategory.xml"/>
+    <!--<sqlMap resource="sqlmap/property/Property.xml"/>-->
+    <sqlMap resource="sqlmap/property/PropertyPicture.xml"/>
+    <sqlMap resource="sqlmap/property/PropertyInfoHistory.xml"/>
+    <sqlMap resource="sqlmap/property/PropertyFav.xml"/>
+    <!--<sqlMap resource="sqlmap/property/PropertyStat.xml"/>-->
+    <!--<sqlMap resource="sqlmap/property/PropertyInfo.xml"/>-->
+    <!--<sqlMap resource="sqlmap/property/PropertyStatusHistory.xml"/>-->
+    <sqlMap resource="sqlmap/property/PropertyRecommendHistory.xml"/>
+    <sqlMap resource="sqlmap/property/PropertyFieldEditHistory.xml"/>
+    <sqlMap resource="sqlmap/property/PropertyPanorama.xml"/>
+    <sqlMap resource="sqlmap/property/PropertyRecordListenFinish.xml"/>
+    <!--end property-->
+
+    <!-- keybox -->
+    <sqlMap resource="sqlmap/keybox/KeyBoxBussiness.xml"/>
+    <sqlMap resource="sqlmap/keybox/KeyBoxCardProperty.xml"/>
+    <sqlMap resource="sqlmap/keybox/KeyBoxCardPropertyMap.xml"/>
+    <sqlMap resource="sqlmap/keybox/KeyBoxKeyChangeLog.xml"/>
+    <sqlMap resource="sqlmap/keybox/PortalOrganization.xml"/>
+    <sqlMap resource="sqlmap/keybox/PortalEmployeeMan.xml"/>
+    <!-- end keybox-->
+
+    <!--quality-->
+    <sqlMap resource="sqlmap/quality/PropertyPermitNoRecord.xml"/>
+    <sqlMap resource="sqlmap/quality/PropertyRecordForCheck.xml"/>
+    <!--end quality-->
+    
+    
+
+    <sqlMap resource="sqlmap/openHouse/OpenHouseMember.xml"/>
+    <sqlMap resource="sqlmap/openHouse/OpenHouseTeam.xml"/>
+ 	<sqlMap resource="sqlmap/property/PropertyKeyApply.xml"/>
+
+    <sqlMap resource="sqlmap/api/MobileAppQueryContactsLog.xml"/>
+
+
+</sqlMapConfig>

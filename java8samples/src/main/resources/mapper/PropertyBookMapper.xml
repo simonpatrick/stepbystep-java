@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyBookMapper">
+
+    <insert id="insertNewCollect" parameterType="hashmap">
+        <selectKey resultType="int" keyProperty="id" order="AFTER">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+        insert into PropertyCollect (PropertyID, empNo,collectTime,remark,collectPrice,status)
+        select #{propertyId},#{empNo},#{collectTime},#{remark},(select price from property where propertyID = #{propertyId}),1
+    </insert>
+
+
+    <select id="collectCount" parameterType="hashmap" resultType="integer">
+        select count(PropertyID) from PropertyCollect with(nolock)
+        where PropertyID = #{propertyId} and empNo = #{empNo}
+    </select>
+    
+    <select id="collectCountApp" parameterType="hashmap" resultType="integer">
+       select count(*) from PropertyCollect with(nolock) where empNo = #{empNo} and status = 1
+    </select>
+    
+    <select id="collectCountAppV3" parameterType="hashmap" resultType="integer">
+       select count(*) from (select * from PropertyCollect with(nolock) where empNo = #{empNo} and status = 1) midCol
+       inner join property pro with(nolock) on midCol.propertyId = pro.propertyId
+       left join Estate est with(nolock) on est.EstateId = pro.EstateID
+       <where>
+       <if test='type == "1"'>
+            and pro.saleStatus = '出售'
+        </if>
+        <if test='type == "2"'>
+            and pro.rentStatus = '出租'
+        </if>
+        <if test='type == "3"'>
+            and isNull(pro.saleStatus,'') != '出售' and isNull(pro.rentStatus,'') != '出租'
+        </if>
+        <if test="estateName !=null and estateName !=''">
+            and est.EstateName like #{estateName} + '%'
+        </if>
+        <if test="propertyIds !=null">
+            <if test="propertyIds.size() > 0">
+                and pro.propertyId IN 
+                <foreach collection="propertyIds" item="propertyId" index="index" open="(" close=")" separator=",">
+                    #{propertyId}
+                </foreach>
+            </if>
+            <if test="propertyIds.size() == 0">
+                and pro.propertyId = '#'
+            </if>
+        </if>
+        </where>
+    </select>
+
+    <select id="housesCollectCount" parameterType="string" resultType="integer">
+        select count(PropertyID) from PropertyCollect with(nolock)
+        where PropertyID = #{propertyId} and status = 1
+    </select>
+
+    <select id="selectCollectByPropertyId" parameterType="string" resultType="PropertyBook">
+        select * from PropertyCollect with(nolock) where PropertyID = #{propertyId} and status = 1
+    </select>
+
+    <delete id="deleteCollectByPropertyId" parameterType="string">
+        delete from PropertyFav where propertyId = #{id}
+    </delete>
+
+    <select id="personalCollectCount" parameterType="integer" resultType="integer">
+        select count(PropertyID) from PropertyCollect with(nolock)
+        where EmpNo = #{empNo} and status = 1
+    </select>
+
+    <update id="updateCollectInfo" parameterType="hashmap">
+        update PropertyCollect
+        <set>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            remark = #{remark},
+            <if test="collectTime != null">
+                collectTime = #{collectTime},
+            </if>           
+            collectPrice = (select price from property where propertyID = #{propertyId})
+        </set>
+        where PropertyID = #{propertyId} and empNo = #{empNo}
+    </update>
+
+    <select id="showCollectList" parameterType="hashmap" resultType="PropertyCollectsView">
+        select * from (
+        select ROW_NUMBER() OVER(
+        <choose>
+            <when test="sort == 'collectTime' and sortWay == 'desc'">
+                order by baseTab.collectTime desc
+            </when>
+            <when test="sort == 'collectTime' and sortWay == 'asc'">
+                order by baseTab.collectTime asc
+            </when>
+            <when test="sort == 'totalPrice' and sortWay == 'desc'">
+                order by baseTab.price desc
+            </when>
+            <when test="sort == 'totalPrice' and sortWay == 'asc'">
+                order by baseTab.price asc
+            </when>
+            <when test="sort == 'square' and sortWay == 'desc'">
+                order by baseTab.Square desc
+            </when>
+            <when test="sort == 'square' and sortWay == 'asc'">
+                order by baseTab.Square asc
+            </when>
+        </choose>
+        ) rowNum,* from (
+        select
+        pro.propertyId as propertyId,
+        est.EstateName as estateName,
+        est.DistrictName as districtName,
+        area.AreaName as areaName,
+        pro.PropertyNo as propertyNo,
+        pro.RoomNo as roomNo,
+        pro.Address as address,
+        pro.Floor as floor,
+        build.FloorAll as floorAll,
+        pro.status as status,
+        (case when pro.CountF = '' then 0 else pro.CountF end) as countF,
+        (case when pro.CountT = '' then 0 else pro.CountT end) as countT,
+        (case when pro.CountW = '' then 0 else pro.CountW end) as countW,
+        pro.PropertyDirection as propertyDirection,
+        pro.Square as square,
+        pro.PriceUnit as priceUnit,
+        pro.price as price,
+        pro.RentPrice as rentPrice,
+        pro.PropertyDecoration as propertyDecoration,
+        estinfo.subWayStop1000 as subWayStop1000,
+        school.schoolType as education,
+        (CASE WHEN pro.BuyinDate IS NOT NULL THEN (CASE WHEN DATEADD(year, 5, pro.BuyinDate) <![CDATA[< GETDATE() THEN 2 WHEN DATEADD(year, 2, pro.BuyinDate) < GETDATE() THEN 1 ELSE 0 END) ELSE proInfo.isFiveYears END) AS isFiveYears]]>,
+        proInfo.parking as parking,
+        proInfo.handPrice as handPrice,
+        midCol.collectTime as collectTime,
+        midCol.collectPrice as collectPrice,
+        midCol.remark as remark,
+        dk.looks as dkCounts,
+        pro.saleStatus,
+        pro.rentStatus,
+        saleEntrust.entrustType as saleEntrustType,
+        rentEntrust.entrustType as rentEntrustType,
+        qianpei.entrustType as qianpeiType,
+        pic.mainPicturePath as path
+        FROM (select * from PropertyCollect with(nolock) where empNo = #{empNo} and status = 1) midCol
+        inner join property pro with(nolock)
+        on midCol.propertyId = pro.propertyId
+        <if test="type == 'sale'">
+            and pro.saleStatus = '出售'
+        </if>
+        <if test="type == 'rent'">
+            and pro.rentStatus = '出租'
+        </if>
+        <if test="type != 'sale' and type != 'rent'">
+            and isNull(pro.saleStatus,'') != '出售' and isNull(pro.rentStatus,'') != '出租'
+        </if>
+        left join propertyInfo proInfo with(nolock) on proInfo.propertyId = pro.propertyId
+        left join PropertyEntrustApply saleEntrust with(nolock) on proInfo.exclusiveSellEntrustApplyId = saleEntrust.id
+        and saleEntrust.status != -1
+        left join PropertyEntrustApply rentEntrust with(nolock) on proInfo.exclusiveRentEntrustApplyId = rentEntrust.id
+        and rentEntrust.status != -1
+        left join PropertyEntrustApply qianpei with(nolock) on proInfo.limitSellEntrustApplyId = qianpei.id
+        and qianpei.status != -1
+        left join Agency_Dk_Stat dk with(nolock) on dk.propertyId = pro.propertyId
+        left join Estate est with(nolock) on est.EstateId = pro.EstateID
+        left join Building build with(nolock) on build.BuildingName = pro.Address AND pro.EstateID = build.EstateID AND (build.FlagDeleted = 0)
+        left join estateinfo estinfo with(nolock) on estinfo.estateId = est.EstateId
+        left join EstateMatchedSchool school with(nolock) on school.estateId = est.EstateId
+        left join PropertyStat pic with(nolock) on pic.propertyId = pro.propertyId
+        left join Area area with(nolock) on area.AreaID = est.AreaID) as baseTab
+        ) as tatolTab
+        <![CDATA[where tatolTab.rowNum>(#{pageNo}-1)*(16) and tatolTab.rowNum<=#{pageNo}*16]]>
+    </select>
+    
+    
+    <select id="showAppCollectList" parameterType="hashmap" resultType="PropertyCollectsViewApp">
+        select * from (
+        select ROW_NUMBER() OVER(
+        <choose>
+            <when test="sort == 'collectTime' and sortWay == 'desc'">
+                order by baseTab.collectTime desc
+            </when>
+            <when test="sort == 'collectTime' and sortWay == 'asc'">
+                order by baseTab.collectTime asc
+            </when>
+            <when test="sort == 'totalPrice' and sortWay == 'desc'">
+                order by baseTab.price desc
+            </when>
+            <when test="sort == 'totalPrice' and sortWay == 'asc'">
+                order by baseTab.price asc
+            </when>
+            <when test="sort == 'square' and sortWay == 'desc'">
+                order by baseTab.Square desc
+            </when>
+            <when test="sort == 'square' and sortWay == 'asc'">
+                order by baseTab.Square asc
+            </when>
+        </choose>
+        ) rowNum,* from (
+        select
+        pic.hasHDPicture as hasHDPicture,
+        qianpei.entrustType as entrustType,
+        pro.PropertyLook as propertyLook,
+        pro.PropertyUsage as usage,
+        pro.propertyId as propertyId,
+        est.EstateName as estateName,
+        est.DistrictName as districtName,
+        area.AreaName as areaName,
+        pro.PropertyNo as propertyNo,
+        pro.RoomNo as roomNo,
+        pro.Address as address,
+        pro.Floor as floor,
+        build.FloorAll as floorAll,
+        pro.status as status,
+        (case when pro.CountF = '' then 0 else pro.CountF end) as countF,
+        (case when pro.CountT = '' then 0 else pro.CountT end) as countT,
+        (case when pro.CountW = '' then 0 else pro.CountW end) as countW,
+        pro.PropertyDirection as propertyDirection,
+        pro.Square as square,
+        pro.PriceUnit as priceUnit,
+        pro.price as price,
+        pro.RentPrice as rentPrice,
+        pro.PropertyDecoration as propertyDecoration,
+        estinfo.subWayStop1000 as subWayStop1000,
+        school.schoolType as education,
+        (CASE WHEN pro.BuyinDate IS NOT NULL THEN (CASE WHEN DATEADD(year, 5, pro.BuyinDate) <![CDATA[< GETDATE() THEN 2 WHEN DATEADD(year, 2, pro.BuyinDate) < GETDATE() THEN 1 ELSE 0 END) ELSE proInfo.isFiveYears END) AS isFiveYears]]>,
+        proInfo.parking as parking,
+        proInfo.handPrice as handPrice,
+        midCol.collectTime as collectTime,
+        midCol.collectPrice as collectPrice,
+        midCol.remark as remark,
+        dk.looks as dk,
+        pro.saleStatus,
+        pro.rentStatus,
+        saleEntrust.entrustType as saleEntrustType,
+        rentEntrust.entrustType as rentEntrustType,
+        qianpei.entrustType as qianpeiType,
+        pic.mainPicturePath as path,
+        proInfo.jpsEmpNo as jpsEmpNo,
+        proInfo.jpzEmpNo as jpzEmpNo
+        FROM (select * from PropertyCollect with(nolock) where empNo = #{empNo} and status = 1) midCol
+        inner join property pro with(nolock)
+        on midCol.propertyId = pro.propertyId
+        left join propertyInfo proInfo with(nolock) on proInfo.propertyId = pro.propertyId
+        left join PropertyEntrustApply saleEntrust with(nolock) on proInfo.exclusiveSellEntrustApplyId = saleEntrust.id
+        and saleEntrust.status != -1
+        left join PropertyEntrustApply rentEntrust with(nolock) on proInfo.exclusiveRentEntrustApplyId = rentEntrust.id
+        and rentEntrust.status != -1
+        left join PropertyEntrustApply qianpei with(nolock) on proInfo.limitSellEntrustApplyId = qianpei.id
+        and qianpei.status != -1
+        left join Agency_Dk_Stat dk with(nolock) on dk.propertyId = pro.propertyId
+        left join Estate est with(nolock) on est.EstateId = pro.EstateID
+        left join Building build with(nolock) on build.BuildingName = pro.Address AND pro.EstateID = build.EstateID AND (build.FlagDeleted = 0)
+        left join estateinfo estinfo with(nolock) on estinfo.estateId = est.EstateId
+        left join EstateMatchedSchool school with(nolock) on school.estateId = est.EstateId
+        left join PropertyStat pic with(nolock) on pic.propertyId = pro.propertyId
+        left join Area area with(nolock) on area.AreaID = est.AreaID) as baseTab
+        ) as tatolTab
+        <![CDATA[where tatolTab.rowNum>(#{pageNo}-1)*(80) and tatolTab.rowNum<=#{pageNo}*80]]>
+    </select>
+    
+    <select id="showAppCollectListV3" parameterType="hashmap" resultType="PropertyCollectsViewAppV3">
+        select * from (
+        select ROW_NUMBER() OVER(
+            order by baseTab.collectTime desc
+        ) rowNum,* from (
+        select
+        pic.hasHDPicture as hasHDPicture,
+        qianpei.entrustType as entrustType,
+        pro.PropertyLook as propertyLook,
+        pro.PropertyUsage as usage,
+        pro.propertyId as propertyId,
+        est.EstateName as estateName,
+        est.DistrictName as districtName,
+        area.AreaName as areaName,
+        pro.PropertyNo as propertyNo,
+        pro.RoomNo as roomNo,
+        pro.Address as address,
+        pro.Floor as floor,
+        build.FloorAll as floorAll,
+        pro.status as status,
+        (case when pro.CountF = '' then 0 else pro.CountF end) as countF,
+        (case when pro.CountT = '' then 0 else pro.CountT end) as countT,
+        (case when pro.CountW = '' then 0 else pro.CountW end) as countW,
+        pro.PropertyDirection as propertyDirection,
+        pro.Square as square,
+        proInfo.handprice as price,
+        pro.RentPrice as rentPrice,
+        pro.PropertyDecoration as propertyDecoration,
+        estinfo.subWayStop1000 as subWayStop1000,
+        school.schoolType as education,
+        (CASE WHEN pro.BuyinDate IS NOT NULL THEN (CASE WHEN DATEADD(year, 5, pro.BuyinDate) <![CDATA[< GETDATE() THEN 2 WHEN DATEADD(year, 2, pro.BuyinDate) < GETDATE() THEN 1 ELSE 0 END) ELSE proInfo.isFiveYears END) AS isFiveYears]]>,
+        proInfo.parking as parking,
+        midCol.collectTime as collectTime,
+        midCol.remark as remark,
+        dk.looks as dk,
+        pro.saleStatus,
+        pro.rentStatus,
+        saleEntrust.entrustType as saleEntrustType,
+        rentEntrust.entrustType as rentEntrustType,
+        qianpei.entrustType as qianpeiType,
+        pic.mainPicturePath as path,
+        proInfo.jpsEmpNo as jpsEmpNo,
+        proInfo.jpzEmpNo as jpzEmpNo
+        FROM (select * from PropertyCollect with(nolock) where empNo = #{empNo} and status = 1) midCol
+        inner join property pro with(nolock) on midCol.propertyId = pro.propertyId
+        left join propertyInfo proInfo with(nolock) on proInfo.propertyId = pro.propertyId
+        left join PropertyEntrustApply saleEntrust with(nolock) on proInfo.exclusiveSellEntrustApplyId = saleEntrust.id and saleEntrust.status != -1
+        left join PropertyEntrustApply rentEntrust with(nolock) on proInfo.exclusiveRentEntrustApplyId = rentEntrust.id and rentEntrust.status != -1
+        left join PropertyEntrustApply qianpei with(nolock) on proInfo.limitSellEntrustApplyId = qianpei.id and qianpei.status != -1
+        left join Agency_Dk_Stat dk with(nolock) on dk.propertyId = pro.propertyId
+        left join Estate est with(nolock) on est.EstateId = pro.EstateID
+        left join Building build with(nolock) on build.BuildingName = pro.Address AND pro.EstateID = build.EstateID AND (build.FlagDeleted = 0)
+        left join estateinfo estinfo with(nolock) on estinfo.estateId = est.EstateId
+        left join EstateMatchedSchool school with(nolock) on school.estateId = est.EstateId
+        left join PropertyStat pic with(nolock) on pic.propertyId = pro.propertyId
+        left join Area area with(nolock) on area.AreaID = est.AreaID
+        <where>
+        <if test='type == "1"'>
+            and pro.saleStatus = '出售'
+        </if>
+        <if test='type == "2"'>
+            and pro.rentStatus = '出租'
+        </if>
+        <if test='type == "3"'>
+            and isNull(pro.saleStatus,'') != '出售' and isNull(pro.rentStatus,'') != '出租'
+        </if>
+        <if test="estateName !=null and estateName !=''">
+            and est.EstateName like #{estateName} + '%'
+        </if>
+        <if test="propertyIds !=null">
+            <if test="propertyIds.size() > 0">
+                and pro.propertyId IN 
+                <foreach collection="propertyIds" item="propertyId" index="index" open="(" close=")" separator=",">
+                    #{propertyId}
+                </foreach>
+            </if>
+            <if test="propertyIds.size() == 0">
+                and pro.propertyId = '#'
+            </if>
+        </if>
+        </where>
+        ) as baseTab ) as tatolTab
+        <![CDATA[where tatolTab.rowNum>(#{pageNo}-1)*#{pageSize} and tatolTab.rowNum<=#{pageNo}*#{pageSize}]]>
+    </select>
+
+    <select id="showCollectCount" parameterType="integer" resultType="hashmap">
+        select
+        (select
+        count(pro.propertyId)
+        FROM (select * from PropertyCollect with(nolock) where empNo = #{empNo} and status = 1) midCol
+        inner join property pro
+        on midCol.propertyId = pro.propertyId
+        and pro.saleStatus = '出售') as saleCount,
+        (select
+        count(pro.propertyId)
+        FROM (select * from PropertyCollect with(nolock) where empNo = #{empNo} and status = 1) midCol
+        inner join property pro
+        on midCol.propertyId = pro.propertyId
+        and pro.rentStatus = '出租') as rentCount,
+        (select
+        count(pro.propertyId)
+        FROM (select * from PropertyCollect with(nolock) where empNo = #{empNo} and status = 1) midCol
+        inner join property pro
+        on midCol.propertyId = pro.propertyId
+        and isNull(pro.saleStatus,'') != '出售' and isNull(pro.rentStatus,'') != '出租') as otherCount
+    </select>
+
+    <select id="collectCountByStatus" parameterType="hashmap" resultType="integer">
+        select count(PropertyID) from PropertyCollect with(nolock)
+        where PropertyID = #{propertyId} and empNo = #{empNo}
+        and status = #{status}
+    </select>
+    <select id="propertyCollectCount" parameterType="hashmap" resultType="com.dooioo.property.model.PropertyCollect">
+    	select DISTINCT EmpNo,collectTime from PropertyCollect with(nolock)
+		where PropertyId = #{propertyId}
+		AND status = #{status}
+    </select>
+    
+</mapper>

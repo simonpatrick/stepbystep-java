@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+            PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+            "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="KeyBoxBussiness">
+	<typeAlias alias="keyBoxBussiness" type="com.dooioo.keybox.model.KeyBoxBussiness"/>
+	
+    <insert id="insert" parameterClass="keyBoxBussiness">
+        insert into keyBoxBussiness
+        (action
+        ,propertyId
+        ,cardNo
+        ,result
+        ,msg
+        ,cardPropertyMapId
+        ,borrowReason
+		,remark
+		 <isNotEmpty property="giveBackPlanTime" prepend=",">giveBackPlanTime</isNotEmpty>
+		,empNo
+		,empUsernameCH
+		,empUsernameEN
+		,orgName
+		,keyBelongId
+		,keyNo
+        <isNotEmpty property="deleteFlag" prepend=",">deleteFlag</isNotEmpty>
+        )
+        values
+        (#action#
+        ,#propertyId#
+        ,#cardNo#
+        ,#result#
+        ,#msg#
+        ,#cardPropertyMapId#
+        ,#borrowReason#
+		,#remark#
+		<isNotEmpty property="giveBackPlanTime" prepend=",">#giveBackPlanTime#</isNotEmpty>
+		,#empNo#
+		,#empUsernameCH#
+		,#empUsernameEN#
+		,#orgName#
+		,#keyBelongId#
+		,#keyNo#
+        <isNotEmpty property="deleteFlag" prepend=",">#deleteFlag#</isNotEmpty>
+        )
+    </insert>
+    
+    <insert id="insertAndReturnId" parameterClass="keyBoxBussiness">
+        insert into keyBoxBussiness
+        (action
+        ,propertyId
+        ,cardNo
+        ,result
+        ,msg
+        ,cardPropertyMapId
+        ,borrowReason
+		,remark
+		 <isNotEmpty property="giveBackPlanTime" prepend=",">giveBackPlanTime</isNotEmpty>
+		,empNo
+		,empUsernameCH
+		,empUsernameEN
+		,orgName
+		,keyBelongId
+		,keyNo
+        <isNotEmpty property="deleteFlag" prepend=",">deleteFlag</isNotEmpty>
+        )
+        values
+        (#action#
+        ,#propertyId#
+        ,#cardNo#
+        ,#result#
+        ,#msg#
+        ,#cardPropertyMapId#
+        ,#borrowReason#
+		,#remark# 
+		<isNotEmpty property="giveBackPlanTime" prepend=",">#giveBackPlanTime#</isNotEmpty>
+		,#empNo#
+		,#empUsernameCH#
+		,#empUsernameEN#
+		,#orgName#
+		,#keyBelongId#
+		,#keyNo#
+        <isNotEmpty property="deleteFlag" prepend=",">#deleteFlag#</isNotEmpty>
+        )
+        <selectKey resultClass="integer" keyProperty="id">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
+    
+	
+    <update id="update" parameterClass="keyBoxBussiness">
+        update keyBoxBussiness 
+        set action = #action#
+        ,propertyId=#propertyId#
+        ,cardNo=#cardNo#
+        ,result=#result#
+        ,msg=#msg#
+        ,deleteFlag=#deleteFlag#
+        ,cardPropertyMapId=#cardPropertyMapId#
+        ,borrowReason=#borrowReason#
+        ,remark=#remark#
+        <isNotEmpty property="giveBackPlanTime" prepend=",">giveBackPlanTime=#giveBackPlanTime#</isNotEmpty>
+		,empNo=#empNo#
+		,empUsernameCH=#empUsernameCH#
+		,empUsernameEN=#empUsernameEN#
+		,orgName=#orgName#
+		<isNotEmpty property="keyBelongId" prepend=",">keyBelongId=#keyBelongId#</isNotEmpty>
+        where id = #id# 
+    </update>
+
+	
+	<update id="updateResult" parameterClass="keyBoxBussiness">
+        UPDATE keyBoxBussiness 
+        SET result = #result#,
+        	msg = #msg#
+        WHERE id = #id# 
+    </update>
+    
+    <update id="batchUpdateResult" parameterClass="java.util.HashMap">
+		UPDATE keyBoxBussiness
+		SET    result = #result# ,
+		       msg = #msg#
+		WHERE  id IN ( $ids$ ) 
+    </update>
+    
+    <select id="findById" parameterClass="integer" resultClass="keyBoxBussiness">
+        SELECT 
+	        id
+	        ,action
+	        ,propertyId
+	        ,cardNo
+	        ,result
+	        ,msg
+	        ,deleteFlag
+	        ,cardPropertyMapId
+	        ,borrowReason
+			,remark
+			,giveBackPlanTime
+			,empNo
+			,empUsernameCH
+			,empUsernameEN
+			,orgName
+			,keyBelongId
+			,keyNo
+        FROM keyBoxBussiness WITH(NOLOCK) 
+		WHERE id = #id#
+    </select>
+    
+     <select id="findByIds" parameterClass="string" resultClass="keyBoxBussiness">
+		SELECT
+			id
+			,action
+			,propertyId
+			,cardNo
+			,result
+			,msg
+			,deleteFlag
+			,cardPropertyMapId
+			,borrowReason
+			,remark
+			,giveBackPlanTime
+			,empNo
+			,empUsernameCH
+			,empUsernameEN
+			,orgName
+			,keyBelongId
+			,keyNo
+		FROM keyBoxBussiness WITH(NOLOCK) 
+		WHERE id IN ($id$)
+    </select>
+    
+    
+     <select id="query" parameterClass="keyBoxBussiness" resultClass="keyBoxBussiness">
+        SELECT 
+	        id
+	        ,action
+	        ,propertyId
+	        ,cardNo
+	        ,result
+	        ,msg
+	        ,deleteFlag
+	        ,cardPropertyMapId
+	        ,borrowReason
+			,remark
+			,giveBackPlanTime
+			,empNo
+			,empUsernameCH
+			,empUsernameEN
+			,orgName
+			,keyBelongId
+			,keyNo
+        FROM keyBoxBussiness WITH(NOLOCK) 
+        WHERE deleteFlag = 0
+        <isNotNull property="action" prepend=" and ">cardNo = #action#</isNotNull>
+        <isNotNull property="propertyId" prepend=" and ">propertyId = #propertyId#</isNotNull>
+        <isNotNull property="cardNo" prepend=" and ">cardNo = #cardNo#</isNotNull>
+        <isNotNull property="result" prepend=" and ">result = #result#</isNotNull>
+        <isNotNull property="msg" prepend=" and ">msg = #msg#</isNotNull>
+    </select>
+
+    <update id="deleteById" parameterClass="integer">
+    	UPDATE keyBoxBussiness SET deleteFlag = 1 WHERE id = #id# 
+    </update>
+    
+    <select id="queryInitHistory" parameterClass="java.util.HashMap" resultClass="keyBoxBussiness">
+        SELECT 
+	        *
+        FROM keyBoxBussiness WITH(NOLOCK) 
+		WHERE propertyId = #propertyId#
+		    AND keyNo is not null
+		    AND action In ('init', 'initNoBox')
+		ORDER BY createdAt DESC
+    </select>
+    
+    <select id="findByPropertyId" resultClass="keyBoxBussiness">
+        SELECT TOP 1
+	        id
+	        ,action
+	        ,propertyId
+	        ,cardNo
+	        ,result
+	        ,borrowReason
+			,remark
+			,empNo
+			,empUsernameCH
+			,orgName
+			,keyNo
+        FROM keyBoxBussiness WITH(NOLOCK) 
+		WHERE propertyId = #propertyId#
+		    AND deleteFlag = 0
+		ORDER BY
+		    createdAt DESC
+    </select>
+    
+    <select id="findByKeyNo" resultClass="keyBoxBussiness">
+        SELECT TOP 1
+	        id
+	        ,action
+	        ,propertyId
+	        ,cardNo
+	        ,result
+	        ,borrowReason
+			,remark
+			,empNo
+			,empUsernameCH
+			,orgName
+			,keyNo
+        FROM keyBoxBussiness WITH(NOLOCK) 
+		WHERE propertyId = #propertyId#
+		    AND deleteFlag = 0
+		    AND keyNo = #keyNo#
+		ORDER BY
+		    createdAt DESC
+    </select>
+    
+</sqlMap>

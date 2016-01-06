@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AreaMapper" >
+	<select id="queryArea" resultType="com.dooioo.fy.model.Area">
+        SELECT     CityName ,
+                    DistrictName ,
+                    DistrictNo ,
+                    AreaID ,
+                    AreaName ,
+                    AreaNo
+        FROM    dbo.Area
+        WHERE   AreaID = #{areaId}
+    </select>
+
+    <select id="findAreaByPropertyId" resultMap="areaResult">
+        SELECT     a.CityName ,
+                   a.DistrictName ,
+                   a.DistrictNo ,
+                   a.AreaID,
+                   a.AreaName ,
+                   a.AreaNo,
+                   a.NewPhotoPlatformFlag,
+                   a.NewPhotoPlatformDate
+        FROM dbo.Area a
+        inner join dbo.estate b on a.areaId = b.areaId
+        inner join dbo.property c on b.estateId = c.estateId
+        WHERE c.propertyId = #{propertyId}
+    </select>
+
+    <resultMap type="com.dooioo.fy.model.Area" id="areaResult">
+        <id column="AreaID" property="areaId"/>
+        <result column="CityName" property="cityName"/>
+        <result column="DistrictName" property="districtName"/>
+        <result column="DistrictNo" property="districtNo"/>
+        <result column="AreaName" property="areaName"/>
+        <result column="AreaNo" property="areaNo"/>
+        <result column="NewPhotoPlatformFlag" property="newPhotoPlatformFlag" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
+        <result column="NewPhotoPlatformDate" property="newPhotoPlatformDate"/>
+    </resultMap>
+
+    <select id="list" resultType="com.dooioo.fy.model.Area">
+        SELECT     CityName ,
+                    DistrictName ,
+                    DistrictNo ,
+                    AreaID ,
+                    AreaName ,
+                    AreaNo
+        FROM    dbo.Area
+        WHERE   FlagDeleted = 0 AND cityName = #{cityName}
+        ORDER BY DistrictNo ,
+                AreaNo
+    </select>
+    
+     <!--根据区域编号查询板块-->
+    <select id="queryListByDistrictNo" resultType="com.dooioo.fy.model.Area">
+        SELECT
+            a.areaID,
+            a.cityName,
+            a.districtName,
+            a.areaNo,
+            a.areaName,
+            a.modDate,
+            a.flagTrashed,
+            a.flagDeleted,
+            a.exDate,
+            a.districtNo,
+            ac.centerX,
+            ac.centerY,
+            ac.originX,
+            ac.originY
+        FROM   agencyjizhong.dbo.area  a WITH(nolock)
+         left join mapAreaCenter ac WITH (nolock) on a.areaName = ac.areaName
+         WHERE districtNo = #{districtNo}
+    </select>
+    
+    <update id="cleanAllBelongToOrgId">
+        UPDATE Area SET belongToOrgId = NULL
+    </update>
+    
+    <update id="updateBelongToOrgId" parameterType="map">
+        UPDATE Area SET belongToOrgId = #{belongToOrgId} where AreaID = #{areaId}
+    </update>
+
+</mapper>

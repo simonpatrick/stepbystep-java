@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ComplaintsMapper">
+
+	<sql id="Complaints_where">
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="id != null">
+				and c.id = #{id}
+			</if>
+			<if test="relationId != null">
+				and c.relationId = #{relationId} 
+			</if>
+			<if test="receiveEmpNo != null">
+				and c.receiveEmpNo = #{receiveEmpNo}
+			</if>
+			<if test="empNo != null">
+				and c.empNo = #{empNo}
+			</if>
+			<if test="receiveOrgLongCode != null">
+				and receiveEmp.longCode like #{receiveOrgLongCode} + '%'
+			</if>
+			<if test="orgIds != null">
+				and emp.orgId in (${orgIds})
+			</if>
+			<if test="orgLongCode != null">
+				and emp.longCode like #{orgLongCode} + '%'
+			</if>
+			<if test="authEmpNo != null">
+				and c.empNo = #{authEmpNo}
+			</if>
+			<if test="estateName != null">
+				and e.estateName = #{estateName}
+			</if>
+			<if test="startDate != null">
+				and c.createdAt > #{startDate}
+			</if>
+			<if test="endDate != null">
+				<![CDATA[ and c.createdAt < #{endDate} ]]>
+			</if>
+			<if test="result != null">
+				<choose>
+					<when test="result == '待处理'">
+						and (result is null or result = '处理中') 
+					</when>
+					<when test="result == '已处理'">
+						and result is not null
+					</when>
+					<otherwise>
+						and c.result  = #{result}
+					</otherwise>
+				</choose>
+			</if>
+		</trim>
+	</sql>
+
+
+    <insert id="insert" >
+    	<selectKey keyProperty="id" resultType="int" order="AFTER">
+			select
+			@@IDENTITY
+		</selectKey>
+        insert into Complaints
+        (relationId , relationType , empNo , receiveEmpNo , type )
+        values
+        (#{relationId} , '2', #{empNo} , #{receiveEmpNo} , '描述')
+    </insert>
+
+    <select id="list"  resultType="ComplaintsView">
+    	<include refid="CommonMapper.Pagination_Head"/>
+        select e.EstateName  + ' - ' + p.Address + ' - ' + p.RoomNo as propertyName , c.* , 
+ 		case  when  v.id is null then '合格' else '不合格' end as checkStatus 
+        from Complaints c with(noLock)
+        inner join property p with(noLock) on c.relationId = PropertyID
+        inner join estate e with(noLock) on e.EstateID = p.EstateID
+        inner join oms.dbo.v_employee_baseinfo emp with(noLock) on emp.userCode = c.empNo
+        inner join oms.dbo.v_employee_baseinfo receiveEmp with(noLock) on receiveEmp.userCode = c.receiveEmpNo
+        left join PropertyDescVote v on v.propertyId = c.relationId and v.empNo = c.receiveEmpNo and v.status != -1 
+        	and exists (Select 1 from PropertyDescVoteLine where score = 0 and propertyDescVoteId = v.id )
+        <include refid="Complaints_where"/>
+        <include refid="CommonMapper.Pagination_Foot"/>
+         <if test="orderby != null">
+        	order by ${orderby}
+        </if>
+    </select>
+
+   <select id="selectOne"  resultType="ComplaintsView">
+     	select top 1 e.EstateName  + ' - ' + p.Address + ' - ' + p.RoomNo as propertyName , c.* ,p.attentionCount,
+		case  when  v.id is null then '合格' else '不合格' end as checkStatus 
+        from Complaints c with(noLock)
+        inner join property p with(noLock) on c.relationId = PropertyID
+        inner join estate e with(noLock) on e.EstateID = p.EstateID
+        inner join oms.dbo.v_employee_baseinfo emp with(noLock) on emp.userCode = c.empNo
+        left join PropertyDescVote v on v.propertyId = c.relationId and v.empNo = c.receiveEmpNo and v.status != -1
+        	and exists (Select 1 from PropertyDescVoteLine with(nolock) where score = 0 and propertyDescVoteId = v.id )
+        <include refid="Complaints_where"/>
+    </select>
+    
+    <select id="selectById"  resultType="ComplaintsView">
+     	select * 
+        from Complaints with(nolock)
+       	where id = ${id}
+    </select>
+    
+     <select id="count"  resultType="int">
+        select count(1)
+        from Complaints c with(noLock)
+        inner join property p on c.relationId = PropertyID
+        inner join estate e on e.EstateID = p.EstateID
+        inner join oms.dbo.v_employee_baseinfo emp on emp.userCode = c.empNo
+        <include refid="Complaints_where"/>
+    </select>
+    
+    
+    <update id = "update">
+    	update Complaints
+    	<set>
+    		<if test="result!=null">
+    			result = #{result},
+    		</if>
+    		<if test="operEmpNo!=null">
+    			operEmpNo = #{operEmpNo},
+    		</if>
+    		<if test="operEmpNo!=null">
+    			remark = #{remark},
+    		</if>
+    		<if test="operAt!=null">
+    			operAt = #{operAt},
+    		</if>
+    		updateAt = getdate()
+    	</set>
+    	where id = #{id}
+    </update>
+
+</mapper>

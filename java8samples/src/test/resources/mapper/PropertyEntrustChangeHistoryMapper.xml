@@ -1,0 +1,150 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyEntrustChangeHistoryMapper">
+
+	<!-- 条件定义 -->
+	<sql id="where_Clause">
+		<where>
+			<if test="status == null">
+				and status = 0
+			</if>
+			<if test="entrustApplyId != null">
+				and entrustApplyId = #{entrustApplyId}
+			</if>
+		</where>
+	</sql>
+
+	<!-- 查询委托编辑或审核记录 -->
+	<select id="selectList" resultType="PropertyEntrustChangeHistoryView">
+		select * from propertyEntrustChangeHistory with (nolock)
+		<include refid="where_Clause" />
+		<if test="orderby != null">
+			order by ${orderby}
+			<if test="desc != null">
+				desc
+			</if>
+		</if>
+	</select>
+
+	<!-- 添加委托编辑或审核记录 -->
+	<insert id="insert" parameterType="PropertyEntrustChangeHistory">
+		<selectKey keyProperty="id" resultType="int" order="AFTER">
+			select
+			@@IDENTITY
+		</selectKey>
+		insert into
+		propertyEntrustChangeHistory
+		(
+		entrustApplyId,
+		content,
+		empNo
+		)
+		values
+		(
+		#{entrustApplyId},
+		#{content},
+		#{empNo}
+		)
+	</insert>
+
+	<!-- 查询委托编辑或审核记录 -->
+	<select id="selectListByPropertyEntrustApply" resultType="PropertyEntrustChangeHistory">
+		select a.* from
+		PropertyEntrustChangeHistory a  with(noLock)
+		inner join
+		propertyEntrustApply b  with(noLock)
+		on
+		a.entrustApplyid = b.id
+		where
+		b.propertyId=#{propertyId}
+		and
+		entrustType =#{entrustType}
+
+		<if test="orderby != null">
+			order by ${orderby}
+			<if test="desc != null">
+				desc
+			</if>
+		</if>
+	</select>
+
+
+	<!-- 批量添加委托历史记录 -->
+	<insert id="batchInsert" parameterType="java.util.List">
+		<selectKey keyProperty="id" resultType="int" order="AFTER">
+			select
+			@@IDENTITY
+		</selectKey>
+		insert into propertyEntrustChangeHistory
+		(
+		propertyId,
+		entrustApplyId,
+		content,
+		createdAt,
+		empNo,
+		status,
+		prictureInfo
+		)
+		values
+		<foreach collection="list" item="item" separator=",">
+			(
+			#{propertyId},
+			#{entrustApplyId},
+			#{content},
+			getdate(),
+			#{empNo},
+			0,
+			#{prictureInfo}
+			)
+		</foreach>
+
+	</insert>
+
+
+
+	<!-- 删除委托历史记录 -->
+	<update id="delete" parameterType="int">
+		update
+		propertyEntrustChangeHistory
+		set status = -1
+		where id = #{id}
+	</update>
+
+	<!-- 修改委托历史记录 -->
+	<update id="update" parameterType="PropertyEntrustChangeHistory">
+		update propertyEntrustChangeHistory
+		<set>
+			<if test="propertyId != null">
+				propertyId = #{propertyId}
+			</if>
+			<if test="entrustApplyId != null">
+				entrustApplyId = #{entrustApplyId}
+			</if>
+			<if test="content != null">
+				content = #{content}
+			</if>
+			<if test="createAt != null">
+				createAt = #{createAt}
+			</if>
+			<if test="empNo != null">
+				empNo = #{empNo}
+			</if>
+			<if test="status != null">
+				status = #{status}
+			</if>
+			<if test="prictureInfo != null">
+				prictureInfo = #{prictureInfo}
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+
+	<!-- 查询全部委托 -->
+	<select id="list" resultType="PropertyEntrustChangeHistory">
+		select * from
+		propertyEntrustChangeHistory  with(noLock)
+	</select>
+
+</mapper>

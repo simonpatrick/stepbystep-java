@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertySignMapper">
+
+    <insert id="insert" >
+    	<selectKey keyProperty="id" resultType="int" order="AFTER">
+			select
+			@@IDENTITY
+		</selectKey>
+        insert into PropertySign
+        (propertyId , signType , operEmpNo  )
+        values
+        (#{propertyId} , #{signType}, #{operEmpNo} )
+    </insert>
+
+   <select id="selectOne"  resultType="PropertySign">
+     	select top 1 ps.id,ps.propertyId,ps.signType,ps.status,ps.operEmpNo,ps.createdAt,ps.updatedAt
+     	from PropertySign ps with(nolock)
+     	where ps.propertyId=#{propertyId} and ps.status=0 and ps.signType = #{signType}
+     	order by #{orderby}
+    </select>
+    
+    <select id="selectById"  resultType="PropertySign">
+     	select ps.id,ps.propertyId,ps.signType,ps.status,ps.operEmpNo,ps.createdAt,ps.updatedAt
+        from PropertySign ps with(nolock)
+       	where id = ${id}
+    </select>
+    
+     <select id="count"  resultType="int">
+        select count(1)
+        from PropertySign ps with(noLock)
+        where ps.propertyId=#{propertyId} and ps.status=0 and ps.signType = #{signType}
+    </select>
+    
+    <update id = "cancel" parameterType="hashMap">
+    	update PropertySign
+    	set status =-1,updatedAt = getdate()
+    	where propertyId = #{propertyId} and signType=#{signType} and status=0
+    </update>
+
+</mapper>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="OtherCompanyPropertyContactMapper">
+
+    <select id="queryByPropertyIdAndSource" resultType="OtherCompanyPropertyContact">
+        SELECT propertyId,  contactName,cellPhone,tel,relation,source FROM  OtherCompanyPropertyContact WHERE propertyId=#{propertyId}
+         and source=#{source}
+    </select>
+
+	<insert id="insert" parameterType="OtherCompanyPropertyContact">
+        insert into OtherCompanyPropertyContact
+        (propertyId,
+	  contactName ,
+	  cellPhone ,
+	  tel,
+	  relation,
+	   source)
+        values
+        (#{propertyId} , 
+        #{contactName} , 
+        #{cellPhone} , 
+        #{tel} ,
+	  #{relation},
+	  #{source})
+    </insert>
+    
+ <delete id="deleteAll">
+    	DELETE FROM OtherCompanyPropertyContact where source=#{source}
+    </delete>
+</mapper>

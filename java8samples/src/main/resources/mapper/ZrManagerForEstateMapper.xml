@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ZrManagerForEstateMapper">
+
+    <select id="queryManagerByEstateId" resultType="ZrManagerForEstate">
+       select top 1 empNo,estateId,id from zrManagerForEstate with (nolock) where status = 0 and estateId = #{estateId}
+    </select>
+	<select id="queryAllManagerEstate" resultType="ZrManagerForEstate">
+        select a.*,b.EstateName from 
+			(select empNo,estateId,id from zrManagerForEstate with (nolock) where status = 0 )  a
+			left join estate b with (nolock) on a.estateId = b.EstateID order by empNo,id desc
+    </select>
+
+ 
+	<insert id="addEstate">
+       insert into zrManagerForEstate (empNo,estateId) values (#{empNo},#{estateId})
+    </insert>
+    
+    <update id="deleteEstate">
+    	update zrManagerForEstate set status = -1 where id = #{id}
+    </update>
+    
+    
+</mapper>

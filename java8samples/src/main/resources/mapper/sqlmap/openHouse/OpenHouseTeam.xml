@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+            PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+            "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="OpenHouseTeam">
+	<typeAlias alias="openHouseTeam" type="com.dooioo.openHouse.model.OpenHouseTeam"/>
+	
+	<insert id="insert" parameterClass="openHouseTeam">
+		insert openHouseTeam 
+		( leaderEmpNo   , startTime , endTime , remark, isClose , closeReason , canTakeWatch, propertyId , createdAt , memberSum)
+		values
+		(#leaderEmpNo# , #startTime# , #endTime# , #remark# ,  #isClose#,  #closeReason#, #canTakeWatch# , #propertyId# , #createdAt# , #memberSum#)
+	</insert>
+	
+	<update id="update" parameterClass="openHouseTeam">
+        update
+          openHouseTeam
+        set
+          startTime = #startTime# ,endTime = #endTime#,
+          remark = #remark# ,isClose = #isClose#,
+          closeReason = #closeReason#,  propertyId = #propertyId#,
+          memberSum = #memberSum#,
+          canTakeWatch  = #canTakeWatch#
+        where
+          id = #id#
+    </update>
+    
+    
+    
+    <select id="query" resultClass="openHouseTeam">
+        select * from
+            openHouseTeam with(nolock)
+        where  1=1 
+       	<isNotEmpty property="leaderEmpNo" >
+       		and leaderEmpNo = #leaderEmpNo#
+       	</isNotEmpty>
+       	<isNotEmpty property="startTime" >
+       		and startTime = #startTime#
+       	</isNotEmpty>
+       	<isNotEmpty property="endTime" >
+       		and endTime = #endTime#
+       	</isNotEmpty>
+       	<isNotEmpty property="remark" >
+       		and remark = #remark#
+       	</isNotEmpty>
+       	<isNotEmpty property="isClose" >
+       		and isClose = #isClose#
+       	</isNotEmpty>
+       	<isNotEmpty property="openHouseName" >
+       		and openHouseName = #openHouseName#
+       	</isNotEmpty>
+       	<isNotEmpty property="propertyId" >
+       		and propertyId = #propertyId#
+       	</isNotEmpty>
+       	<isNotEmpty property="endTime" >
+  	  		<![CDATA[
+       			and endTime >= #endTime#
+       		]]>
+       	</isNotEmpty>
+       	<isNotEmpty property="startTime" >
+  	  		<![CDATA[
+       			and startTime <= #startTime#
+       		]]>
+       	</isNotEmpty>
+    </select>
+    
+    
+     <select id="findById" resultClass="openHouseTeam">
+        select top 1 * from openHouseTeam with(nolock)
+        where  id = #id#
+    </select>
+	
+	
+	<select id="queryTeamAndPropertyByBean" resultClass="openHouseTeam" parameterClass="Map">
+      select  oh.*,e.EstateName + '-' +  p.Address  + '-' + p.RoomNo as propertyName,
+  		emp.userName as leaderName , emp.orgName as leaderOrgName , emp.phone as leaderPhone , 
+  		emp.userCode as leaderEmpNo
+		from  openHouseTeam oh  with(nolock)
+       	inner join property p with(nolock) on	oh.propertyId = p.PropertyID
+     	inner join estate   e  with(nolock) on   e.estateid = p.estateid
+        inner join oms.dbo.v_employee_baseinfo  emp on emp.userCode = oh.leaderEmpNo 
+		where  1=1 
+       <isNotEmpty property="leaderEmpNo" >
+       		and oh.leaderEmpNo = #leaderEmpNo#
+       	</isNotEmpty>
+       	<isNotEmpty property="isStart" >
+       		<![CDATA[
+       			and startTime <= getDate() and endTime   >= getDate()
+       		]]> 
+       	</isNotEmpty>
+       	<isNotEmpty property="notStart" >
+       		<![CDATA[
+       			and startTime >= getDate()
+       		]]> 
+       	</isNotEmpty>
+       	   	<isNotEmpty property="isEnd" >
+       		<![CDATA[
+       			and endTime <= getDate()
+       		]]> 
+      	</isNotEmpty>
+  		<isNotEmpty property="endTime" >
+  	  		<![CDATA[
+       			and oh.endTime >= #endTime#
+       		]]>
+       	</isNotEmpty>
+       	<isNotEmpty property="startTime" >
+  	  		<![CDATA[
+       			and oh.startTime <= #startTime#
+       		]]>
+       	</isNotEmpty>
+   		<isNotEmpty property="memberEmpNo" >
+       		and #memberEmpNo# in
+       		(select empno from openHouseMember with(nolock) where teamId = oh.id)
+    	</isNotEmpty>
+  	   	<isNotEmpty property="isClose" >
+       		and oh.isClose = #isClose#
+       	</isNotEmpty>
+       	<isNotEmpty property="propertyId" >
+       		and oh.propertyId = #propertyId#
+       	</isNotEmpty>
+       	order by oh.createdAt desc
+    </select>
+	
+	
+	<select id="findTeamAndPropertyByProId" resultClass="openHouseTeam" parameterClass="String">
+      select  oh.*,e.EstateName + '-' +  p.Address  + '-' + p.RoomNo as propertyName,
+  		emp.userName as leaderName , emp.orgName as leaderOrgName , emp.phone as leaderPhone
+		from  openHouseTeam oh  with(nolock)
+       	inner join property p with(nolock) on	oh.propertyId = p.PropertyID
+     	inner join estate   e with(nolock)  on   e.estateid = p.estateid
+        inner join oms.dbo.v_employee_baseinfo  emp on emp.userCode = oh.leaderEmpNo 
+		where  1=1  and oh.propertyId = #id#
+    </select>
+	
+	<select id="findListAndProperty" resultClass="openHouseTeam" parameterClass="Map">
+  		select  oh.*,e.EstateName + '-' +  p.Address  + '-' + p.RoomNo as propertyName,
+  		emp.userName as leaderName , emp.orgName as leaderOrgName , emp.phone as leaderPhone
+		from  openHouseTeam oh  with(nolock)
+       	inner join property p with(nolock) on	oh.propertyId = p.PropertyID
+     	inner join estate   e  with(nolock) on   e.estateid = p.estateid
+        inner join oms.dbo.v_employee_baseinfo  emp on emp.userCode = oh.leaderEmpNo 
+		where  1=1 
+       	<isNotEmpty property="leaderEmpNo" >
+       		and oh.leaderEmpNo = #leaderEmpNo#
+       	</isNotEmpty>
+       	<isNotEmpty property="isStart" >
+       		<![CDATA[
+       			and startTime <= getDate() and endTime   >= getDate()
+       		]]> 
+       	</isNotEmpty>
+       	<isNotEmpty property="notStart" >
+       		<![CDATA[
+       			and startTime >= getDate()
+       		]]> 
+       	</isNotEmpty>
+       	   	<isNotEmpty property="isEnd" >
+       		<![CDATA[
+       			and endTime <= getDate()
+       		]]> 
+      	</isNotEmpty>
+  		<isNotEmpty property="endTime" >
+  	  		<![CDATA[
+       			and oh.endTime >= #endTime#
+       		]]>
+       	</isNotEmpty>
+       	<isNotEmpty property="startTime" >
+  	  		<![CDATA[
+       			and oh.startTime <= #startTime#
+       		]]>
+       	</isNotEmpty>
+   		<isNotEmpty property="memberEmpNo" >
+       		and #memberEmpNo# in
+       		(select empno from openHouseMember with(nolock) where teamId = oh.id)
+    	</isNotEmpty>
+  	   	<isNotEmpty property="isClose" >
+       		and oh.isClose = #isClose#
+       	</isNotEmpty>
+       	<isNotEmpty property="propertyId" >
+       		and oh.propertyId = #propertyId#
+       	</isNotEmpty>
+    </select>
+	
+</sqlMap>

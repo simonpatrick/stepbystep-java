@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+            PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+            "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PropertyRecordApply">
+	<typeAlias alias="propertyRecordApply" type="com.dooioo.portal.model.PropertyRecordApply"/>
+
+	<insert id="insert" parameterClass="java.util.HashMap">
+		insert into propertyRecordApply
+		(propertyId,propertyRightName,propertyRightNo,empNo,recordType,price,flag,applyAt,createdAt,status)
+		values
+		(#propertyId#,
+        <isEqual property="propertyUsage" compareValue="住宅">
+          #propertyRightPerson#,
+        </isEqual>
+        <isNotEqual property="propertyUsage" compareValue="住宅">
+          #propertyRightName#,
+        </isNotEqual>
+        #propertyRightNo#,#empNo#,#recordType#,#price#,0,getdate(),getdate(),0)
+		<selectKey resultClass="int" keyProperty="id">
+     		SELECT @@IDENTITY AS id  
+    	</selectKey>
+	</insert>
+	
+	
+	<select id="queryPropertyRecordApplyList" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+		select * from (
+			select row_number() over(order by createdAt desc) as rowid, 
+					 a.id,
+			         a.propertyId,
+			         a.propertyRightName,
+			         a.propertyRightNo,
+			         a.empNo,
+                     emp.user_name_cn,
+			         a.recordType,
+			         a.price,
+			         a.flag,
+			         a.applyAt,
+			         a.updatedAt,
+			         CONVERT(varchar(100), a.createdAt, 120) as createdAt,
+			         a.record_no,
+			         a.status,
+			         a.updateLog,
+			         et.estateName,
+			         p.address,
+			         p.roomNo,
+			         et.address as estateAddress ,
+                     a.reason
+			FROM     propertyRecordApply a  with(nolock)
+			         left join property p with(nolock) on a.propertyid = p.propertyid 
+			         left join Estate et with(nolock) on p.EstateID = et.EstateID
+                     left join oms.dbo.V_OMS_EMPLOYEE_BASEINFOR emp with(nolock) on a.empNo = emp.user_code
+			where a.status = 0
+            <isNotEmpty property="estateName" prepend="and">
+                et.estateName = #estateName#
+            </isNotEmpty>
+			<isNotEmpty property="flag" prepend="and" >
+                <isEqual property="flag" compareValue="1"> a.flag != '0' </isEqual>
+                <isEqual property="flag" compareValue="0"> a.flag = '0' </isEqual>
+                <isEqual property="flag" compareValue="-1"> a.flag = '-1' </isEqual>
+            </isNotEmpty>
+            <isNotNull property="ntype" prepend="and">
+                <isEqual property="ntype" compareValue="员工">
+                    a.empNo = #deptID#
+                </isEqual>
+                <isNotEqual property="ntype" compareValue="员工">
+                    emp.org_Id  in (
+                    select id from oms.dbo.V_OMS_ORGANIZATION with(nolock) where ORG_LONGCODE like (
+                    select ORG_LONGCODE + '%' from oms.dbo.V_OMS_ORGANIZATION with(nolock) where id = #deptID#
+                    )
+                    )
+                </isNotEqual>
+            </isNotNull>
+		) a where a.rowid >= #beginNum# and a.rowid &lt;= #endNum#
+
+	</select>
+	
+	<select id="queryPropertyRecordApplyListCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		select count(*) from PropertyRecordApply a with(nolock)
+              left join oms.dbo.V_OMS_EMPLOYEE_BASEINFOR emp on a.empNo = emp.user_code
+              left join property p on a.propertyid = p.propertyid
+              left join Estate et on p.EstateID = et.EstateID
+        where a.status = 0
+        <isNotEmpty property="estateName" prepend="and">
+            et.estateName = #estateName#
+        </isNotEmpty>
+        <isNotEmpty property="flag" prepend="and" >
+            <isEqual property="flag" compareValue="1"> a.flag != '0' </isEqual>
+            <isEqual property="flag" compareValue="0"> a.flag = '0' </isEqual>
+            <isEqual property="flag" compareValue="-1"> a.flag = '-1' </isEqual>
+        </isNotEmpty>
+        <isNotNull property="ntype" prepend="and">
+            <isEqual property="ntype" compareValue="员工">
+                a.empNo = #deptID#
+            </isEqual>
+            <isNotEqual property="ntype" compareValue="员工">
+                emp.org_Id  in (
+                select id from oms.dbo.V_OMS_ORGANIZATION with(nolock) where ORG_LONGCODE like (
+                select ORG_LONGCODE + '%' from oms.dbo.V_OMS_ORGANIZATION with(nolock) where id = #deptID#
+                )
+                )
+            </isNotEqual>
+        </isNotNull>
+	</select>
+	
+	<update id="update" parameterClass="java.util.HashMap">
+		update propertyRecordApply    
+		set
+		<isEqual property="flag" compareValue="1">
+            <isEmpty property="record_no">
+                updatedAt = getDate(), flag = '0',reason=NULL, record_no = NULL, updateLog = #updateLog# + ' '+ CONVERT(varchar(100), getDate(), 120) + '&lt;/p&gt;'
+            </isEmpty>
+            <isNotEmpty property="record_no">
+                updatedAt = getDate(), flag = '1',reason=NULL,
+                expiredDate = #expiredDate#,
+                record_no = #record_no#, updateLog = #updateLog# + ' '+ CONVERT(varchar(100), getDate(), 120) + '&lt;/p&gt;'
+            </isNotEmpty>
+		</isEqual>
+        <isNotEqual property="flag" compareValue="1">
+            updatedAt = getDate(), flag = '-1',record_no=NULL, reason=#reason#,updateLog = #updateLog# + ' '+ CONVERT(varchar(100), getDate(), 120) + '&lt;/p&gt;'
+        </isNotEqual>
+        where id = #id#
+	</update>
+
+
+	
+	<update id="updateById" parameterClass="java.util.HashMap">
+		update propertyRecordApply set updatedAt = getDate(),price = #price#
+		where id = #id#;
+	</update>
+	
+	<select id="queryRecord" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+		select top 1 * from PropertyRecordApply with(nolock) where status = 0
+		and recordType = #recordType# and propertyId = #propertyId# and dateadd(year,1, applyAt) >= getdate()
+	</select>
+	
+	<!-- 查询有效备案记录 -->
+	<select id="queryValidRecord" parameterClass="PropertyRecordApply" resultClass="PropertyRecordApply">
+		select top 1 * from PropertyRecordApply with(nolock) where flag = 1
+		and recordType = #recordType# and propertyId = #propertyId# AND expiredDate >= GETDATE()
+	</select>
+	<!-- 根据Id查询备案记录 -->
+	<select id="queryRecordById" parameterClass="PropertyRecordApply" resultClass="PropertyRecordApply">
+		select top 1 * from PropertyRecordApply with(nolock) where id=#id#
+	</select>
+	
+	 <update id="cancleRecordApplyById"  parameterClass="String">
+		update propertyRecordApply set updatedAt = getDate(),flag = -1
+		where Id = #Id#
+	</update>
+
+    <update id="updateStatusByPropertyId" parameterClass="String">
+        <![CDATA[
+		update propertyRecordApply set updatedAt = getDate(),status = -1
+		where propertyId = #propertyId# AND expiredDate < GETDATE();
+		]]>
+	</update>
+
+
+</sqlMap>

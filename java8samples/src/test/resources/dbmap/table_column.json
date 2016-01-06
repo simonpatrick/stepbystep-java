@@ -1,0 +1,20 @@
+{
+  tables: {
+    propertyInfo: [
+      "location",
+      "grade",
+      "width",
+      "length",
+      "officeArea",
+      "blankArea",
+      "depth",
+      "useRate",
+      "totalArea",
+      "floorHeight",
+      "mgtPrice",
+      "transferPrice",
+      "airPrice",
+      "electricPower"
+    ]
+  }
+}

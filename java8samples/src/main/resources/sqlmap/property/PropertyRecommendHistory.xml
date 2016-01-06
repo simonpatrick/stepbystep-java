@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+        PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PropertyRecommendHistory">
+    <typeAlias alias="propertyRecommendHistory" type="com.dooioo.property.model.PropertyRecommendHistory"/>
+
+	<insert id="insert" parameterClass="propertyRecommendHistory">
+		INSERT INTO dbo.propertyRecommendHistory
+	        ( 
+	          propertyId
+	          ,operEmpNo
+	          ,empNo
+	          ,orgId
+	          ,orgName
+	          ,type
+	          ,status
+	          <isNotEmpty property="remark" prepend=",">remark</isNotEmpty>
+	          ,createdAt
+	        )
+		VALUES  
+			( 
+			  #propertyId#
+	          ,$operEmpNo$
+	          ,$empNo$
+	          ,#orgId#
+	          ,#orgName#
+	          ,#type#
+	          ,0
+	          <isNotEmpty property="remark" prepend=",">#remark#</isNotEmpty>
+	          ,GETDATE()
+        )
+	</insert>
+	
+</sqlMap>

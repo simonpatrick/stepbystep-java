@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyForAppMapper">
+        <select id="queryPropertyByEmpNoAndType" parameterType="hashMap" resultType="com.dooioo.fy.api.model.PropertyForApp">
+                SELECT  vp.PropertyID ,
+                        vp.PropertyNo ,
+                        est.EstateName ,
+                        vp.status ,
+                        vp.PropertyDecoration ,
+                        vp.Floor ,
+                        vp.floorAll ,
+                        vp.RentPrice ,
+                        vp.RentUnitName ,
+                        pi.handprice ,
+                        vp.price ,
+                        vp.UnitName ,
+                        vp.CompleteYear ,
+                        vp.Square ,
+                        vp.CountF ,
+                        vp.CountT ,
+                        vp.CountW ,
+                        vp.PropertyUsage ,
+                        vp.PropertyLook ,
+                        vp.PropertyDirection ,
+                        est.AreaName AS area  ,
+                        est.districtName ,
+                        pi.jpsEmpNo ,
+                        pi.jpzEmpNo ,
+                        pi.descriptEmpNo ,
+                        ps.mainPicturePath ,
+                        <if test="type == '我的房源'">
+                                CASE WHEN vp.privateEmpNo IS NOT NULL THEN 1
+                                     ELSE 0
+                                END AS Privy
+                        </if>
+                        <if test="type == '关注房源'">
+                                mp.realTime AS bookedAt
+                        </if>
+                        <if test="type == '联系房源'">
+                                mp.realTime AS contactTime ,
+                                mp.propertyContactName
+                        </if>
+                        <if test="type == '带看房源'">
+                                mp.realTime AS takeWatchTime ,
+                                mp.inquiryCustName
+                        </if>
+                FROM    dbo.PropertyMobileData mp WITH ( NOLOCK )
+                        INNER JOIN dbo.property vp WITH ( NOLOCK ) ON vp.PropertyID = mp.propertyId
+                        LEFT JOIN dbo.PropertyInfo pi WITH ( NOLOCK ) ON vp.PropertyID = pi.propertyId
+                        LEFT JOIN dbo.PropertyStat ps WITH ( NOLOCK ) ON vp.PropertyID = ps.propertyId
+                        INNER JOIN dbo.v_fy_estate est ON vp.EstateID = est.EstateID
+                WHERE   mp.empNo = #{empNo}
+                        <if test="type != null">
+                                AND type = #{type}
+                        </if>
+                ORDER BY mp.realTime DESC
+        </select>
+</mapper>

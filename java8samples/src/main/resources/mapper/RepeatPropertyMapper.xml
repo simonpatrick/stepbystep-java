@@ -1,0 +1,37 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="RepeatPropertyMapper">
+
+	<sql id="estateParam">
+			<trim>
+				<if test="estateName!= null and estateName!=''">
+					and pri.estate=#{estateName}
+				</if>
+			</trim>
+	</sql>
+	
+	<!-- 查询重复房源总数 -->
+	<select id="queryRepeatPropertyCount" resultType="int">
+		select count(1) from propertyRepeatInfo pri with(nolock) inner join estate e with(nolock) on pri.estateId = e.EstateID and e.CityName=#{cityName}
+		where 1=1
+		<include refid="estateParam" />
+	</select>
+	
+	
+	<!--分页  查询 重复房源  -->
+	<select id="queryRepeatPropertyList"  resultType="RepeatPropertyView">
+	   <include refid="CommonMapper.Pagination_Head"/>
+			select pri.* from propertyRepeatInfo pri with(nolock)
+			inner join estate e with(nolock) on pri.estateId = e.EstateID and e.CityName=#{cityName}
+			where 1=1
+				 <include refid="estateParam" />  
+        <include refid="CommonMapper.Pagination_Foot" />
+		<if test="orderby !=null">
+			order by ${orderby}
+		</if>
+	</select>
+
+	
+</mapper>

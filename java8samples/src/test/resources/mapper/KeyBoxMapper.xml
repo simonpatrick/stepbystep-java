@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="KeyBoxMapper">
+
+    <!-- 根据IP获取所在门店 -->
+    <select id="selectByIpPrefix" resultType="com.dooioo.keybox.model.KeyBox" parameterType="map">
+        SELECT
+        TOP 1 kb.*
+        FROM dbo.keyBox kb with(noLock)
+        WHERE kb.ipPrefix like #{ipPrefix} + '%' AND kb.deleteFlag = 0
+    </select>
+    <!-- 根据ID获取所在门店 -->
+    <select id="selectById" resultType="com.dooioo.keybox.model.KeyBox" parameterType="map">
+        SELECT
+        TOP 1 kb.*
+        FROM dbo.keyBox kb with(noLock)
+        WHERE id=#{id} AND kb.deleteFlag = 0
+    </select>
+    <!-- 房源查钥匙箱信息－包含门店坐标信息－提供移动德佑 -->
+    <select id="selectByIdForApp" resultType="com.dooioo.keybox.model.KeyBox" parameterType="map">
+        SELECT TOP 1 
+            KB.id,KB.port,KB.keyMax,KB.boxNo,KB.deleteFlag,KB.name,KB.fkStoreId,
+            TOOC.x keyStoreX,
+            TOOC.y keyStoreY
+        FROM keyBox KB with(noLock)
+        LEFT JOIN oms.dbo.T_OMS_ORGANIZATION_COORDINATE TOOC with(noLock)
+        ON KB.fkStoreId = TOOC.orgId
+		WHERE KB.id = #{id} AND KB.deleteFlag = 0
+    </select>
+</mapper>

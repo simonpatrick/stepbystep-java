@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="EstateRoomMapper" >
+
+    <!--楼盘手动认证的房子-->
+    <select id="countEstateRoom" parameterType="map" resultType="int">
+        SELECT  COUNT(1)
+        FROM    dbo.EstateRoom er
+                LEFT JOIN dbo.Building b ON b.BuildingID = er.BuildingId
+        WHERE   Status = 0
+                AND b.FlagDeleted = 0
+                AND b.EstateID = #{estateId}
+                AND b.BuildingName = #{address}
+                AND er.RoomNo = #{roomNo}
+    </select>
+
+</mapper>

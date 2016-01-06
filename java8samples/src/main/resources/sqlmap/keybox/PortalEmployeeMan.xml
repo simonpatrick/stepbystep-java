@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PortalEmployeeMan">
+    <typeAlias alias="PortalEmployeeMan" type="com.dooioo.framework.model.PortalEmployeeMan"/>
+    
+    <resultMap id="portalEmployeeResult" class="PortalEmployeeMan">
+        <result property="id" column="ID"/>
+        <result property="orgId" column="ORG_ID"/>
+        <result property="levelId" column="LEVEL_ID"/>
+        <result property="userCode" column="USER_CODE"/>
+        <result property="userNameCn" column="USER_NAME_CN"/>
+        <result property="userNameEn" column="USER_NAME_EN"/>
+        <result property="credentialsType" column="CREDENTIALS_TYPE"/>
+        <result property="credentialsNo" column="CREDENTIALS_NO"/>
+        <result property="phone" column="PHONE"/>
+        <result property="experience" column="EXPERIENCE"/>
+        <result property="sex" column="SEX"/>
+        <result property="status" column="STATUS"/>
+        <result property="joinDate" column="JOIN_DATE"/>
+        <result property="formalDate" column="FORMAL_DATE"/>
+        <result property="country" column="COUNTRY"/>
+        <result property="password" column="PASSWORD"/>
+        <result property="headImage" column="HEAD_IMAGE"/>
+        <result property="createTime" column="CREATE_TIME"/>
+        <result property="creator" column="CREATOR"/>
+        <result property="userTitle" column="USER_TITLE"/>
+    </resultMap>
+    
+    <resultMap id="portalEmployeeResultV2" class="PortalEmployeeMan">
+        <result property="id" column="ID"/>
+        <result property="orgId" column="ORG_ID"/>
+        <result property="levelId" column="LEVEL_ID"/>
+        <result property="userCode" column="USER_CODE"/>
+        <result property="userNameCn" column="USER_NAME_CN"/>
+        <result property="userNameEn" column="USER_NAME_EN"/>
+        <result property="credentialsType" column="CREDENTIALS_TYPE"/>
+        <result property="credentialsNo" column="CREDENTIALS_NO"/>
+        <result property="phone" column="PHONE"/>
+        <result property="experience" column="EXPERIENCE"/>
+        <result property="sex" column="SEX"/>
+        <result property="status" column="STATUS"/>
+        <result property="joinDate" column="JOIN_DATE"/>
+        <result property="formalDate" column="FORMAL_DATE"/>
+        <result property="country" column="COUNTRY"/>
+        <result property="password" column="PASSWORD"/>
+        <result property="headImage" column="HEAD_IMAGE"/>
+        <result property="createTime" column="CREATE_TIME"/>
+        <result property="creator" column="CREATOR"/>
+        <result property="orgName" column="ORG_NAME"/>
+        <result property="userTitle" column="USER_TITLE"/>
+    </resultMap>
+    
+    <resultMap id="portalEmployeeResultV3" class="PortalEmployeeMan">
+        <result property="userCode" column="USER_CODE"/>
+        <result property="userNameCn" column="USER_NAME_CN"/>
+        <result property="orgId" column="ORG_ID"/>
+        <result property="status" column="STATUS"/>
+    </resultMap>
+
+    <resultMap id="storeEmployeeResult" class="PortalEmployeeMan">
+        <result property="orgId" column="ORG_ID"/>
+        <result property="orgName" column="ORG_NAME"/>
+    </resultMap>
+
+    <select id="findById" parameterClass="int" resultMap="portalEmployeeResult">
+        SELECT 
+            ID,ORG_ID,LEVEL_ID,USER_CODE,USER_NAME_CN,USER_NAME_EN,CREDENTIALS_TYPE,CREDENTIALS_NO,PHONE,EXPERIENCE,SEX,STATUS,JOIN_DATE,FORMAL_DATE,COUNTRY,PASSWORD,HEAD_IMAGE,CREATE_TIME,CREATOR,USER_TITLE
+        FROM 
+            OMS.DBO.V_OMS_EMPLOYEE_BASEINFOR WITH(NOLOCK) 
+        WHERE
+            ID = #id#
+    </select>
+    
+    <select id="getPortalEmployeeMan" parameterClass="PortalEmployeeMan" resultMap="portalEmployeeResultV2">
+        SELECT 
+            top 1 A.ID,A.ORG_ID,A.LEVEL_ID,A.USER_CODE,A.USER_NAME_CN,A.USER_NAME_EN,A.CREDENTIALS_TYPE,A.CREDENTIALS_NO,A.PHONE,EXPERIENCE,A.SEX,A.STATUS,A.JOIN_DATE,A.FORMAL_DATE,A.COUNTRY,A.PASSWORD,A.HEAD_IMAGE,A.CREATE_TIME,A.CREATOR,B.ORG_NAME,A.USER_TITLE
+        FROM 
+            OMS.DBO.V_OMS_EMPLOYEE_BASEINFOR AS A WITH(NOLOCK) 
+        INNER JOIN 
+            OMS.DBO.V_OMS_ORGANIZATION AS B WITH(NOLOCK) 
+        ON 
+            A.ORG_ID = B.ID
+        <dynamic prepend="where">
+            <isNotEmpty  prepend="AND" property="id"> A.ID=#id# </isNotEmpty>
+            <isNotEmpty  prepend="AND" property="orgId"> A.ORG_ID=#orgId# </isNotEmpty>
+            <isNotEmpty  prepend="AND" property="levelId"> A.LEVEL_ID=#levelId# </isNotEmpty>
+            <isNotEmpty  prepend="AND" property="userCode"> A.USER_CODE=#userCode# </isNotEmpty>
+            <isNotEmpty  prepend="AND" property="userNameCn"> A.USER_NAME_CN=#userNameCn# </isNotEmpty>
+            <isNotEmpty  prepend="AND" property="userNameEn"> A.USER_NAME_EN=#userNameEn# </isNotEmpty>
+            <isNotEmpty  prepend="AND" property="credentialsType"> A.CREDENTIALS_TYPE=#credentialsType# </isNotEmpty>
+            <isNotEmpty  prepend="AND" property="credentialsNo"> A.CREDENTIALS_NO=#credentialsNo# </isNotEmpty>
+            <isNotEmpty  prepend="AND" property="phone"> A.PHONE=#phone# </isNotEmpty>
+            <isNotEmpty  prepend="AND" property="experience"> A.EXPERIENCE=#experience# </isNotEmpty>
+            <isNotEmpty  prepend="AND" property="sex"> A.SEX=#sex# </isNotEmpty>
+            <isNotEmpty  prepend="AND" property="status"> A.STATUS=#status# </isNotEmpty>
+            <isNotEmpty  prepend="AND" property="joinDate"> A.JOIN_DATE=#joinDate# </isNotEmpty>
+            <isNotEmpty  prepend="AND" property="formalDate"> A.FORMAL_DATE=#formalDate# </isNotEmpty>
+            <isNotEmpty  prepend="AND" property="country"> A.COUNTRY=#country# </isNotEmpty>
+            <isNotEmpty  prepend="AND" property="password"> A.PASSWORD=#password# </isNotEmpty>
+            <isNotEmpty  prepend="AND" property="headImage"> A.HEAD_IMAGE=#headImage# </isNotEmpty>
+            <isNotEmpty  prepend="AND" property="createTime"> A.CREATE_TIME=#createTime# </isNotEmpty>
+            <isNotEmpty  prepend="AND" property="creator"> A.CREATOR=#creator# </isNotEmpty>
+        </dynamic>
+    </select>
+
+    <select id="getPortalEmployeeStore" parameterClass="PortalEmployeeMan" resultMap="storeEmployeeResult">
+        SELECT
+            V2E_ST.ORGID    AS ORG_ID
+            ,V2E_ST.ORGNAME  AS ORG_NAME
+        FROM
+                OMS..V2_EMPLOYEE_FINAL V2E     WITH(NOLOCK)
+            INNER JOIN 
+                OMS..V2_EMPLOYEE_FINAL V2E_ST  WITH(NOLOCK)
+            ON V2E_ST.ORGID = V2E.PARENTID
+            AND V2E_ST.ORGTYPE = '门店'
+        WHERE 
+            V2E.USERCODE = #empNo#
+            AND V2E.STATUS IN ('正式','试用期')
+            AND (V2E.ORGTYPE = '门店' OR V2E.ORGTYPE = '分行')
+    </select>
+
+</sqlMap>

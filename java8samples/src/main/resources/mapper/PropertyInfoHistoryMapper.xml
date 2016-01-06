@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyInfoHistoryMapper">
+
+    <sql id="where_Clause">
+        <trim prefix="where" prefixOverrides="and|or">
+            <if test="propertyId != null">
+                and propertyId = #{propertyId}
+            </if>
+            <if test="beginDate != null">
+                and createdAt > #{beginDate}
+            </if>
+            <if test="endDate != null">
+                and <![CDATA[ createdAt < #{endDate} ]]>
+            </if>
+            
+            <if test="employeeId != null">
+                and employeeId = #{employeeId}
+            </if>
+            
+            <if test="fieldNameList != null">
+                and fieldName in
+                <foreach collection="fieldNameList" index="index" item="item" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </trim>
+    </sql>
+
+    <insert id="insert" parameterType="PropertyInfoHistory">
+        INSERT INTO dbo.PropertyInfoHistory ( propertyId, employeeId, fieldName, beforeValue, afterValue, status, createdAt, orgId)
+        Values( #{propertyId}, #{employeeId}, #{fieldName}, #{beforeValue}, #{afterValue}, 1, getdate(),  #{orgId})
+    </insert>
+
+    <select id="query" resultType="PropertyInfoHistoryView" parameterType="PropertyInfoHistoryParam">
+        select * from
+        propertyInfoHistory with(nolock)
+        <include refid="where_Clause"/>
+        <if test="orderby != null">
+            order by ${orderby}
+        </if>
+    </select>
+    
+    <!-- 分页查询 -->
+    <select id="queryPageInfo" resultType="PropertyInfoHistoryView" parameterType="PropertyInfoHistoryParam">
+       select b.*,v.EstateName,v.Address,v.RoomNo from  (
+        <include refid="CommonMapper.Pagination_Head"/>
+        select id from propertyInfoHistory with(nolock)
+        <include refid="where_Clause"/>
+        <include refid="CommonMapper.Pagination_Foot" />
+        ) as a left join propertyInfoHistory b with(nolock)
+        on a.id = b.id
+        left join v_viewPropertyBenefit v 
+        on b.propertyId = v.PropertyID
+        <if test="orderby != null">
+            order by ${orderby}
+        </if>
+    </select>
+    <select id="queryPageInfoCount" resultType="int" parameterType="PropertyInfoHistoryParam">
+        select count(1) from propertyInfoHistory with(nolock)
+        <include refid="where_Clause"/>
+    </select>
+    
+
+    <select id="queryTopOneClearSystemPropertyHistory" resultType="PropertyInfoHistoryView" parameterType="hashMap">
+        select top 1 * from propertyInfoHistory with(nolock)
+        where propertyId = #{propertyId}
+        and employeeId = 80001
+        AND afterValue LIKE '系统盘'
+        ORDER by id desc
+    </select>
+
+    <select id="queryLastStatusHistoryByAfterValue" resultType="PropertyInfoHistoryView">
+        select top 1 * from propertyInfoHistory with(nolock)
+        where propertyId = #{propertyId}
+        and fieldName in ('status','status3')
+        and afterValue like #{afterValue}
+        ORDER by id desc
+    </select>
+
+    <select id="queryLastNotBookingOrMySaleStatus" resultType="PropertyInfoHistoryView">
+        select top 1 * from propertyInfoHistory with(nolock)
+        where propertyId = #{propertyId}
+        and fieldName in ('status','status3')
+        and convert(nvarchar(255),beforeValue) not in ('预定', '我售')
+        ORDER by id desc
+    </select>
+
+    <select id="queryModifyStatusIn24hours" resultType="PropertyInfoHistoryView">
+        select * from propertyInfoHistory with(nolock)
+        where propertyId = #{propertyId}
+        and fieldName in ('status','status3')
+        and orgId = #{orgId}
+        and createdAt > dateadd(hour, -24, getDate())
+    </select>
+
+    <select id="queryByPropertyIdAndFieldName" resultType="PropertyInfoHistoryView">
+        select pinfo.*,e.userName AS empName from propertyInfoHistory pinfo with(nolock)
+        left join oms.dbo.v2_employee_final e on pinfo.employeeId = e.userCode
+        where pinfo.propertyId = #{propertyId}
+        and pinfo.fieldName = #{fieldName}
+        order by pinfo.id desc
+    </select>
+
+    <select id="queryLastOneByPropertyIdAndFieldName" resultType="PropertyInfoHistoryView">
+        select top 1 pinfo.*,e.userName AS empName,
+	  	 CASE WHEN  CHARINDEX('12020001/150103155238/12020009/130420643',e.orgLongCode) =1
+	  	 or CHARINDEX('12020001/150103155238/150313163111/12020004/12020031',e.orgLongCode) =1 THEN 1
+	  	 ELSE 0 end AS belongToJHOrg
+	  	 from propertyInfoHistory pinfo with(nolock)
+        left join oms.dbo.v2_employee_final e on pinfo.employeeId = e.userCode
+        where pinfo.propertyId = #{propertyId}
+        and pinfo.fieldName = #{fieldName}
+        order by pinfo.id DESC
+    </select>
+    <!-- 查询倒数第二条记录 -->
+    <select id="queryLastTwoByPropertyIdAndFieldName" resultType="PropertyInfoHistoryView">
+       select * from (
+		select top 2  *,row_number() over(order by id desc) as row from propertyInfoHistory pinfo with(nolock)
+	 	where pinfo.propertyId = #{propertyId}
+        and pinfo.fieldName = #{fieldName}
+		)temp where row = 2
+    </select>
+    
+     <select id="findById" resultType="PropertyInfoHistoryView">
+        select * from propertyInfoHistory with(nolock)
+        where id = ${id}
+    </select>
+    
+    
+     <select id="queryLastPropertyInfo" resultType="PropertyInfoHistoryView">
+         select top 1 pinfo.* from propertyInfoHistory pinfo with(nolock)
+        where pinfo.propertyId = #{propertyId}
+        and pinfo.fieldName = #{fieldName}
+        order by pinfo.id desc
+    </select>
+
+	<select id="queryEarliestPropertyInfo" resultType="PropertyInfoHistoryView">
+         select top 1 pinfo.* from propertyInfoHistory pinfo with(nolock)
+        where pinfo.propertyId = #{propertyId}
+        and pinfo.fieldName = #{fieldName}
+        order by pinfo.createdAt ASC 
+    </select>
+
+
+    <!--兼容以前代码直接改过来 没研究业务-->
+    <select id="queryLastByParams" resultType="com.dooioo.fy.model.PropertyInfoHistory">
+        select top 1 * from PropertyInfoHistory with(nolock)
+        where 1=1
+        and fieldName = 'status3'
+        and createdAt > #{startTime}
+        <![CDATA[ and createdAt < #{endTime}	 ]]>
+        and propertyId = #{propertyId}
+
+        and employeeId = #{empNo}
+        order by createdAt desc
+    </select>
+</mapper>

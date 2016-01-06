@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyLimitEntrustKeepAddMapper">
+	<insert id="insert" parameterType="PropertyLimitEntrustKeepAdd">
+			<selectKey keyProperty="id" resultType="int" order="AFTER">
+				select
+				@@IDENTITY
+			</selectKey>
+		insert into PropertyLimitEntrustKeepAdd(
+		propertyId,limitSellEntrustApplyId,status,limitStartTime,limitEndTime,empNo,createdAt,updatedAt,
+		limitPrice,limitHandPrice,commission,safePrivy
+		) values(#{propertyId},#{limitSellEntrustApplyId},0,#{limitStartTime},#{limitEndTime}
+		,#{empNo},getDate(),getDate(),#{limitPrice},#{limitHandPrice},#{commission},#{safePrivy})
+	</insert>
+	<!--根据速销Id查询待审核的续签记录 -->
+	<select id="queryCheckingKeepLimitBylimitId" resultType="PropertyLimitEntrustKeepAdd">
+		select top 1 * from PropertyLimitEntrustKeepAdd with(nolock) where limitSellEntrustApplyId=#{limitSellEntrustApplyId} and status =0 order by id desc
+	</select>
+	
+	<select id="queryListBylimitId" resultType="PropertyLimitEntrustKeepAdd">
+		select * from PropertyLimitEntrustKeepAdd with(nolock) where limitSellEntrustApplyId=#{limitSellEntrustApplyId} order by id asc
+	</select>
+	
+	<select id="queryBylimitId" resultType="PropertyLimitEntrustKeepAdd">
+		select top 1 * from PropertyLimitEntrustKeepAdd with(nolock) where limitSellEntrustApplyId=#{limitSellEntrustApplyId} and limitEndTime >#{endEntrustDate} and status =1 order by id asc
+	</select>
+	
+	<select id="selectById" resultType="PropertyLimitEntrustKeepAdd">
+		select top 1 * from PropertyLimitEntrustKeepAdd with(nolock) where id=#{id}
+	</select>
+	
+	
+	<update id="updateKeepLimitStatus">
+		update PropertyLimitEntrustKeepAdd set status =#{status},updatedAt=getDate() where id = #{id}
+	</update>
+	
+	
+	<select id="selectAllKeepLimit" resultType="PropertyLimitEntrustKeepAdd">
+		select * from PropertyLimitEntrustKeepAdd with(nolock) where status =1 order by id asc
+	</select>
+
+
+</mapper>

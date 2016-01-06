@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyMobileDataMapper">
+    <insert id="insert" parameterType="PropertyMobileData">
+        INSERT  INTO dbo.PropertyMobileData
+                ( propertyId ,
+                  empNo ,
+                  type ,
+                  realTime ,
+                  <if test="propertyContactId != null">
+                      propertyContactId ,
+                      propertyContactName ,
+                  </if>
+                  <if test="inquiryId != null">
+                      inquiryId ,
+                      inquiryCustName ,
+                  </if>
+                  createdAt
+                )
+        VALUES  ( #{propertyId} ,
+                   #{empNo} ,
+                   #{type} ,
+                   #{realTime} ,
+                   <if test="propertyContactId != null">
+                       #{propertyContactId} ,
+                       #{propertyContactName} ,
+                   </if>
+                   <if test="inquiryId != null">
+                       #{inquiryId} ,
+                       #{inquiryCustName} ,
+                   </if>
+                   GETDATE()
+                )
+    </insert>
+
+    <select id="countByType" parameterType="hashMap" resultType="int">
+        SELECT COUNT(1) FROM dbo.PropertyMobileData WITH (NOLOCK) WHERE empNo = #{empNo} AND type = #{type}
+    </select>
+
+    <select id="isPropertyExist" parameterType="hashMap" resultType="int">
+        SELECT COUNT(1) FROM dbo.PropertyMobileData WITH (NOLOCK) WHERE empNo = #{empNo} AND propertyId = #{propertyId} AND type = #{type}
+    </select>
+
+	<select id="selectPropertyExist" parameterType="hashMap" resultType="PropertyMobileData">
+        SELECT * FROM dbo.PropertyMobileData WITH (NOLOCK) WHERE empNo = #{empNo} AND propertyId = #{propertyId} AND type = #{type}
+    </select>
+    
+    <select id="countPropertyExist" parameterType="hashMap" resultType="int">
+        SELECT count(1) FROM dbo.PropertyMobileData WITH (NOLOCK) WHERE empNo = #{empNo} AND propertyId = #{propertyId}
+    </select>
+    
+	<select id="queryTakeWatchByProperty" parameterType="hashMap" resultType="PropertyMobileData">
+        SELECT * FROM dbo.PropertyMobileData WITH (NOLOCK) WHERE propertyId = #{propertyId} and type = #{type}
+    </select>
+    <update id="refreshRealTime" parameterType="hashMap">
+        UPDATE  dbo.PropertyMobileData
+        SET     realTime = #{realTime}
+                <if test="propertyContactId != null">
+                    ,propertyContactId = #{propertyContactId}
+                    ,propertyContactName = #{propertyContactName}
+                </if>
+        WHERE   empNo = #{empNo}
+                AND propertyId = #{propertyId}
+                AND type = #{type}
+    </update>
+
+    <delete id="delete" parameterType="hashMap">
+        DELETE FROM dbo.PropertyMobileData WHERE propertyId = #{propertyId} AND empNo = #{empNo} AND type = #{type}
+    </delete>
+
+    <delete id="deleteBeyondTopN" parameterType="hashMap">
+        DELETE  FROM dbo.PropertyMobileData
+        WHERE   id IN (
+                SELECT  id
+                FROM    ( SELECT    id ,
+                                    ROW_NUMBER() OVER ( ORDER BY id DESC ) AS rn
+                          FROM      dbo.PropertyMobileData
+                          WHERE     empNo = #{empNo}
+                                    AND type = #{type}
+                        ) AS t
+                WHERE   t.rn > #{topCount} )
+    </delete>
+    
+    <insert id="addPropertyMobileTakeWatch">
+    	declare @temp varchar(20)
+		select @temp=(select convert(varchar(20),dateadd(MONTH,-1,getdate()),120) )
+		insert into PropertyMobileData(propertyId,empNo,type,realTime,createdAt,inquiryId,inquiryCustName)
+		select propertyId,empNo,'带看房源' as type,lookTime as realTime,getDate() as createdAt,inquiryId,CustName from 
+		keyuan.dbo.V_InquiryTakeWatch with(nolock) WHERE lookTime > @temp
+		ORDER BY empNo,propertyId
+		<!-- insert into PropertyMobileData(propertyId,empNo,type,realTime,createdAt,inquiryId,inquiryCustName)
+				select propertyId,empNo,'带看房源' as type,lookTime as realTime,getDate() as createdAt,inquiryId,CustName from (
+					select *,row_number() over(partition by empNo order by lookTime DESC) AS rowId from (
+						select *,row_number() over(partition by empNo,propertyId order by lookTime DESC) AS row_id 
+						from keyuan.dbo.V_InquiryTakeWatch with(nolock)
+					) temp where row_id = 1
+				)cc where rowId &lt;= 50 -->
+	</insert>
+	
+	<delete id = "deletePropertyMobileTakeWatch">
+		delete from PropertyMobileData where type = '带看房源'
+	</delete>
+</mapper>

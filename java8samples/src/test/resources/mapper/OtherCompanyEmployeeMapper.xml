@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="OtherCompanyEmployeeMapper">
+
+    <select id="queryByOldEmpIdSource" resultType="OtherCompanyEmployee">
+        SELECT * FROM  OtherCompanyEmployee with(nolock) 
+        WHERE oldEmpId=#{oldEmpId} and source=#{source} 
+    </select>
+    
+    <select id="queryByNewEmpNoSource" resultType="OtherCompanyEmployee">
+        SELECT * FROM  OtherCompanyEmployee with(nolock) 
+        WHERE newEmpNo=#{newEmpNo} and source=#{source} 
+    </select>
+    
+	<insert id="insert" parameterType="OtherCompanyEmployee">
+        insert into OtherCompanyEmployee
+        (oldEmpId,
+		empName,
+		newEmpNo,
+		source)
+        values
+        (
+		#{oldEmpId},
+		#{empName},
+		#{newEmpNo},
+		#{source})
+    </insert>
+    
+    <delete id="deleteAll">
+    	DELETE FROM OtherCompanyEmployee where source=#{source}
+    </delete>
+</mapper>

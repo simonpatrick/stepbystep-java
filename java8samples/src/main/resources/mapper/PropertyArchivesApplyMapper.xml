@@ -1,0 +1,66 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyArchivesApplyMapper">
+	<sql id="propertyArchivesApplyParam">
+		<trim>
+			<if test="estateName!= null and estateName!=''">
+				and v.EstateName=#{estateName}
+			</if>
+			<if test="applyCause!= null and applyCause!=''">
+				and a.applyCause=#{applyCause}
+			</if>
+			<if test="beginTime!= null and beginTime!=''">
+				<![CDATA[
+				and a.createdAt >= CAST(#{beginTime} as datetime)
+				]]>  
+				</if>
+			<if test="endTime!= null and endTime!=''">
+				<![CDATA[
+				and a.createdAt < CAST(#{endTime} as datetime) +1
+				]]>  
+			</if>
+		</trim>
+	</sql>
+	
+	
+	<!-- 查询建档失败总数  2表示建档成功 -->
+	<select id="queryPropertyArchivesFailedCount" resultType="int">
+		select
+		count(1)
+		from PropertyArchivesApply a with(nolock) inner join property p with(nolock) on a.propertyId = p.propertyId
+		inner join v_fy_estate v on p.estateId = v.estateId
+		and a.applyStatus !=2
+		<include refid="propertyArchivesApplyParam" />
+	</select>
+
+
+	<!--分页 查询建档失败  2表示建档成功-->
+	<select id="queryPropertyArchivesFailedList" resultType="PropertyArchivesApply">
+		<include refid="CommonMapper.Pagination_Head" />
+		select a.id,
+		a.propertyId,a.createdAt,a.applyCause,v.Address,v.EstateName,v.RoomNo as Floor,v.estateAddress
+		from PropertyArchivesApply a with(nolock)
+        INNER JOIN property p WITH ( NOLOCK ) ON a.propertyId = p.propertyId
+        INNER JOIN v_fy_estate v ON p.estateId = v.estateId
+		and a.applyStatus !=2
+		<include refid="propertyArchivesApplyParam" />
+		<include refid="CommonMapper.Pagination_Foot" />
+		<if test="orderby !=null">
+			order by ${orderby}
+		</if>
+	</select>
+
+	<!--建档申请插入 -->
+	<insert id="savePropertyArchivesApply" parameterType="PropertyArchivesApply">
+		insert into PropertyArchivesApply
+		(propertyId,applyCause) values (#{propertyId},#{applyCause})
+	</insert>
+	<!--建档申请修改 -->
+	<insert id="updatePropertyArchivesApply" parameterType="PropertyArchivesApply">
+		update PropertyArchivesApply set applyStatus = #{applyStatus},
+		updatedAt = getdate()
+		where propertyId = #{propertyId}
+	</insert> 
+</mapper>

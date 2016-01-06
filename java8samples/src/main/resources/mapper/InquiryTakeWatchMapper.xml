@@ -1,0 +1,50 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="InquiryTakeWatchMapper">
+	<!--查询昨天的带看(昨天凌晨到今天凌晨)：A：以房源分组，一个房源只取一条 B：昨天数据 C：出售、二手、当前登盘 D：去除（认证拍卖房）-->
+	<select id="queryYesterday" resultType="com.dooioo.fy.view.InquiryTakeWatchView">
+		 SELECT
+		    *
+		 FROM (
+				SELECT
+					tw.takeWatchId,
+					tw.watchPropertyId,
+					tw.inquiryId,
+					tw.custName,
+					tw.propertyId,
+					tw.takeType,
+					tw.createdAt,
+					tw.empNo,
+					tw.userName,
+					tw.watchState,
+		            Row_number() OVER(ORDER BY tw.createdAt DESC ) AS RowId
+				FROM keyuan.dbo.V_InquiryTakeWatch tw with(nolock)
+				inner join (
+						select max(takeWatchId) as takeWatchId,propertyId from keyuan.dbo.V_InquiryTakeWatch with(nolock)
+						where createdAt &lt; CONVERT(varchar(100), GETDATE(),23)
+								and
+							   createdAt >= CONVERT(varchar(100), dateadd(day,-1,GETDATE()),23)
+						group by propertyId
+				) twp on tw.takeWatchId = twp.takeWatchId and tw.propertyId = twp.propertyId and tw.takeType = '二手'
+				inner join PropertyInfo pi on tw.propertyId = pi.propertyId  and (pi.isAuction is null or pi.isAuction != 1)
+				inner join Property p on tw.propertyId = p.PropertyID and p.saleStatus ='出售'
+			) twRs WHERE RowId >= #{beginNum} AND  RowId &lt; #{endNum}
+	</select>
+
+	<select id="queryYesterdayCount" resultType="int">
+		SELECT
+		   count(0)
+		FROM keyuan.dbo.V_InquiryTakeWatch tw with(nolock)
+		inner join (
+				select max(takeWatchId) as takeWatchId,propertyId from keyuan.dbo.V_InquiryTakeWatch with(nolock)
+				where createdAt &lt; CONVERT(varchar(100), GETDATE(),23)
+				and
+					createdAt >= CONVERT(varchar(100), dateadd(day,-1,GETDATE()),23)
+				group by propertyId
+		) twp on tw.takeWatchId = twp.takeWatchId and tw.propertyId = twp.propertyId and tw.takeType = '二手'
+		inner join PropertyInfo pi on tw.propertyId = pi.propertyId  and (pi.isAuction is null or pi.isAuction != 1)
+		inner join Property p on tw.propertyId = p.PropertyID and p.saleStatus ='出售'
+	</select>
+</mapper>

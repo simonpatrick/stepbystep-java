@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="FollowCallRelation">
+    <typeAlias alias="followCallRelation" type="com.dooioo.portal.model.FollowCallRelation"/>
+
+    <insert id="insertAndReturnId" parameterClass="followCallRelation">
+        insert into FollowCallRelation(followId, telPostHistoryId, recordFile, keepTime , phoneId)
+        values
+        (#followId#, #telPostHistoryId#, #recordFile#, #keepTime# , #phoneId#)
+        <selectKey resultClass="integer" keyProperty="id">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
+
+    <select id="queryByFollowId" parameterClass="string" resultClass="followCallRelation">
+        select * from FollowCallRelation with(nolock) where followId = #id#
+    </select>
+
+    <select id="queryByFollowId_preventHarass" parameterClass="hashMap" resultClass="followCallRelation">
+        select fcr.*,prlf.id AS recordListenId
+        from FollowCallRelation fcr with(nolock)
+        LEFT JOIN (
+            SELECT * FROM dbo.PropertyRecordListenFinish a with(nolock) WHERE a.id IN
+            (
+                SELECT TOP 1 id FROM PropertyRecordListenFinish b with(nolock)
+                WHERE b.telPostHistoryId = a.telPostHistoryId AND b.empNo = #empNo#
+                AND b.createdAt >= CONVERT(VARCHAR(30),GETDATE(),23) AND b.createdAt &lt; CONVERT(VARCHAR(30),GETDATE()+1,23)
+            )
+        ) AS prlf
+            ON fcr.followId = prlf.followId AND fcr.telPostHistoryId = prlf.telPostHistoryId
+		where fcr.followId = #followId#
+    </select>
+
+    <select id="queryByFollowIds" parameterClass="string" resultClass="followCallRelation">
+        select * from FollowCallRelation with(nolock) where followId in (#id#)
+    </select>
+
+    <select id="findByTelPostId" parameterClass="int" resultClass="followCallRelation">
+        select top 1 f.followId,f.propertyId from follow f with(nolock) inner join FollowCallRelation fcr with(nolock) on f.followId= fcr.followId
+        where fcr.telPostHistoryId = #id#
+    </select>
+</sqlMap>

@@ -1,0 +1,1125 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyInfoMapper">
+
+    <insert id="insert">
+        INSERT INTO PropertyInfo
+        (
+        propertyId
+        ,shopLocation
+        ,officeGrade
+        ,width
+        ,length
+        ,officeArea
+        ,blankArea
+        ,depth
+        ,realRate
+        ,totalArea
+        ,floorHeight
+        ,transferFee
+        ,airConditionCosts
+        ,electricPower
+        ,parking
+        ,parkingRemark
+        ,loanStatus
+        ,status
+        ,isOnlyOne
+        ,isFiveYears
+        ,permitNo
+        ,shape
+        ,countParks
+        ,countGarage
+        ,permitSquare
+        ,countCellar
+        ,countGarden
+        ,cellar
+        ,gardenSquare
+        ,gardenToward
+        ,waterToward
+        ,groundFloor
+        ,handPrice
+        ,houseType
+        ,isAuction
+        ,propertyRightPerson
+        ,propertyRightPermitNo
+        ,parkingSquare
+        ,parkingAddress
+        ,parkingNumber
+        ,landSquare
+        ,cellarSquare
+        ,currentStatus
+        ,rentAvailableDate
+        ,rentExpireDate
+        ,currentStatusRemark
+        ,keyLocation
+        ,keyRemark
+        ,houseWhenToSee
+        )
+        VALUES
+        (
+        #{propertyId}
+        ,#{shopLocation}
+        ,#{officeGrade}
+        ,#{width}
+        ,#{length}
+        ,#{officeArea}
+        ,#{blankArea}
+        ,#{depth}
+        ,#{realRate}
+        ,#{totalArea}
+        ,#{floorHeight}
+        ,#{transferFee}
+        ,#{airConditionCosts}
+        ,#{electricPower}
+        ,#{parking}
+        ,#{parkingRemark}
+        ,#{loanStatus}
+        ,0
+        ,#{isOnlyOne}
+        ,#{isFiveYears}
+        ,#{permitNo}
+        ,#{shape}
+        ,#{countParks}
+        ,#{countGarage}
+        ,#{permitSquare}
+        ,#{countCellar}
+        ,#{countGarden}
+        ,#{cellar}
+        ,#{gardenSquare}
+        ,#{gardenToward}
+        ,#{waterToward}
+        ,#{groundFloor}
+        ,#{handPrice}
+        ,#{houseType}
+        ,#{isAuction}
+        ,#{propertyRightPerson}
+        ,#{propertyRightPermitNo}
+        ,#{parkingSquare}
+        ,#{parkingAddress}
+        ,#{parkingNumber}
+        ,#{landSquare}
+        ,#{cellarSquare}
+        ,#{currentStatus}
+        ,#{rentAvailableDate}
+        ,#{rentExpireDate}
+        ,#{currentStatusRemark}
+        ,#{keyLocation}
+        ,#{keyRemark}
+        ,#{houseWhenToSee}
+        )
+    </insert>
+
+    <update id="updateForSystemPropertyAdd">
+        update propertyinfo
+        set
+        shopLocation = #{shopLocation}
+        ,officeGrade = #{officeGrade}
+        ,width = #{width}
+        ,length = #{length}
+        ,officeArea = #{officeArea}
+        ,blankArea = #{blankArea}
+        ,depth = #{depth}
+        ,realRate = #{realRate}
+        ,totalArea = #{totalArea}
+        ,floorHeight = #{floorHeight}
+        ,transferFee = #{transferFee}
+        ,airConditionCosts = #{airConditionCosts}
+        ,electricPower = #{electricPower}
+        ,parking = #{parking}
+        ,parkingRemark = #{parkingRemark}
+        ,loanStatus = #{loanStatus}
+        ,status = 0
+        ,isOnlyOne = #{isOnlyOne}
+        ,isFiveYears = #{isFiveYears}
+        ,permitNo = #{permitNo}
+        ,shape = #{shape}
+        ,countParks = #{countParks}
+        ,countGarage = #{countGarage}
+        ,permitSquare = #{permitSquare}
+        ,countCellar = #{countCellar}
+        ,countGarden = #{countGarden}
+        ,cellar = #{cellar}
+        ,gardenSquare = #{gardenSquare}
+        ,gardenToward = #{gardenToward}
+        ,waterToward = #{waterToward}
+        ,groundFloor = #{groundFloor}
+        ,handPrice = #{handPrice}
+        ,houseType = #{houseType}
+        ,isAuction = #{isAuction}
+        ,propertyRightPerson = #{propertyRightPerson}
+        ,propertyRightPermitNo = #{propertyRightPermitNo}
+        ,parkingSquare = #{parkingSquare}
+        ,parkingAddress = #{parkingAddress}
+        ,parkingNumber = #{parkingNumber}
+        ,landSquare = #{landSquare}
+        ,cellarSquare = #{cellarSquare}
+        ,currentStatus = #{currentStatus}
+        ,rentExpireDate =#{rentExpireDate}
+        ,rentAvailableDate =#{rentAvailableDate}
+        ,currentStatusRemark =#{currentStatusRemark}
+        ,keyLocation = #{keyLocation}
+        ,keyRemark = #{keyRemark}
+        ,houseWhenToSee = #{houseWhenToSee}
+        where propertyId = #{propertyId}
+    </update>
+
+	<!-- 添加委托时同时跟新房源信息 -->
+	<update id="update" parameterType="PropertyInfo">
+		update propertyinfo
+		<set>
+				updatedAt = getdate(),
+			<if test="safePrivy != null">
+				safePrivy = #{safePrivy},
+			</if>
+			<if test="descriptEmpNo != null">
+				descriptEmpNo = #{descriptEmpNo},
+			</if>
+			<if test="descriptOrgId != null">
+				descriptOrgId = #{descriptOrgId},
+			</if>
+			<if test="descriptCreatedAt != null">
+				descriptCreatedAt = #{descriptCreatedAt},
+			</if>
+            <if test="limitCommissionRate != null">
+                limitCommissionRate = #{limitCommissionRate},
+            </if>
+            <if test="limitCommissionRateChangeDate != null">
+                limitCommissionRateChangeDate = #{limitCommissionRateChangeDate},
+            </if>
+		</set>
+		where propertyId = #{propertyId}
+	</update>
+	
+	<update id="updateLimitCommissionRate">
+		update propertyinfo set
+				updatedAt = getdate(),
+                limitCommissionRate = #{limitCommissionRate}
+		where propertyId = #{propertyId}
+	</update>
+
+
+	<update id="clearDescriptEmpByPropertyId">
+		update 	PropertyInfo set
+			descriptEmpNo = null ,
+			descriptOrgId = null ,
+			descriptCreatedAt = null
+		where propertyId = #{propertyId}
+	</update>
+
+    <!-- **************** 以下为人员异动代码  ************** -->
+    	<!--修改出售推荐方权益归属   -->
+	<update id="updateJpsEmpNo">
+		update propertyinfo set jpsEmpNo=${jpsEmpNo},jpsOrgId = ${jpsOrgId}
+		where propertyId=#{propertyId}
+	</update>      
+	<!--根据出售推荐方查询房源   -->
+	<select id="selectPropertyByJpsEmpNo" resultType="PropertyBenefitor">
+		<include refid="CommonMapper.Pagination_Head"/>
+		select a.PropertyID,a.status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice
+			 from v_viewValidPropertyBenefit as a with (nolock)
+			 where jpsEmpNo = #{jpsEmpNo}
+		<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+		<include refid="CommonMapper.Pagination_Foot" />
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select>   
+	<select id="selectTopNPropertyByJpsEmpNo" resultType="PropertyBenefitor">
+		select top ${topN} a.PropertyID,status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice from 
+		v_viewValidPropertyBenefit as a  with (nolock)
+		where jpsEmpNo=#{jpsEmpNo}
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select>    
+	<select id="countByJpsEmpNo" resultType="int">
+		select count(1) from 
+		v_viewValidPropertyBenefit as a  with (nolock)
+		where jpsEmpNo=#{jpsEmpNo}
+		<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+	</select>  
+	       
+			<!--修改出租推荐方权益归属   -->
+	<update id="updateJpzEmpNo">
+		update propertyinfo set jpzEmpNo=#{jpzEmpNo},jpzOrgId = #{jpzOrgId}
+		where propertyId=#{propertyId}
+	</update>  
+	<!--根据出租推荐方查询房源   -->
+	<select id="selectPropertyByJpzEmpNo" resultType="PropertyBenefitor">
+		<include refid="CommonMapper.Pagination_Head"/>
+		select a.PropertyID,a.status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice
+			 from v_viewValidPropertyBenefit as a with (nolock)
+			 where jpzEmpNo = #{jpzEmpNo}
+		<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+		<include refid="CommonMapper.Pagination_Foot" />
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select> 
+	
+	
+	<select id="selectTopNPropertyByJpzEmpNo" resultType="PropertyBenefitor">
+		select top ${topN} a.PropertyID,status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice from 
+			v_viewValidPropertyBenefit as a  with (nolock)
+			where jpzEmpNo=#{jpzEmpNo}
+			<if test="orderby !=null">
+				order by  ${orderby }
+			</if>
+	</select> 
+	<select id="countByJpzEmpNo" resultType="int">
+		select count(1) from 
+		v_viewValidPropertyBenefit as a with (nolock)
+		where jpzEmpNo=#{jpzEmpNo}
+		<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+	</select>
+				<!--修改一般出售委托权益归属   -->
+	<update id="updateSellEntrustEmpNo">
+		update propertyinfo set sellEntrustEmpNo=#{sellEntrustEmpNo} where propertyId=#{propertyId}
+	</update>  
+	<!--根据一般出售委托查询房源   -->
+	<select id="selectPropertyBySellEntrustEmpNo" resultType="PropertyBenefitor">
+		<include refid="CommonMapper.Pagination_Head"/>
+		select a.PropertyID,a.status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice
+			 from v_viewValidPropertyBenefit as a with (nolock)
+			 where sellEntrustEmpNo = #{sellEntrustEmpNo}
+		<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+		<include refid="CommonMapper.Pagination_Foot" />
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select> 
+	
+	<select id="selectTopNPropertyBySellEntrustEmpNo" resultType="PropertyBenefitor">
+		select top ${topN} a.PropertyID,status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice from 
+		v_viewValidPropertyBenefit as a with (nolock)
+  		where sellEntrustEmpNo=#{sellEntrustEmpNo}
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select> 
+	
+	<select id="countBySellEntrustEmpNo" resultType="int">
+		select count(1) from 
+		v_viewValidPropertyBenefit as a  with (nolock)
+		where sellEntrustEmpNo=#{sellEntrustEmpNo}
+		<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+	</select>
+				<!--修改一般出租委托权益归属   -->
+	<update id="updateRentEntrustEmpNo">
+		update propertyinfo set rentEntrustEmpNo=#{rentEntrustEmpNo} where propertyId=#{propertyId}
+	</update>  
+	<!--根据一般出租委托查询房源   -->
+	<select id="selectPropertyByRentEntrustEmpNo" resultType="PropertyBenefitor">
+		<include refid="CommonMapper.Pagination_Head"/>
+		select a.PropertyID,a.status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice
+			 from v_viewValidPropertyBenefit as a with (nolock)
+			 where rentEntrustEmpNo = #{rentEntrustEmpNo}
+		<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+		<include refid="CommonMapper.Pagination_Foot" />
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select> 
+	
+	<select id="selectTopNPropertyByRentEntrustEmpNo" resultType="PropertyBenefitor">
+		select top ${topN} a.PropertyID,status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice from 
+		v_viewValidPropertyBenefit as a  with (nolock)
+		where rentEntrustEmpNo=#{rentEntrustEmpNo}
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select> 
+	
+	<select id="countByRentEntrustEmpNo" resultType="int">
+		select count(1) from 
+		v_viewValidPropertyBenefit as a with (nolock)
+		where rentEntrustEmpNo=#{rentEntrustEmpNo}
+		<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+	</select>
+					<!--修改独家出售委托权益归属   -->
+	<update id="updateExclusiveSellEntrustEmpNo">
+		update propertyinfo set exclusiveSellEntrustEmpNo=#{exclusiveSellEntrustEmpNo}	where propertyId=#{propertyId}
+	</update>  
+	<!--根据独家出售委托查询房源   -->
+	<select id="selectPropertyByExclusiveSellEntrustEmpNo" resultType="PropertyBenefitor">
+		<include refid="CommonMapper.Pagination_Head"/>
+		select a.PropertyID,a.status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice
+			 from v_viewValidPropertyBenefit as a with (nolock)
+			 where exclusiveSellEntrustEmpNo = #{exclusiveSellEntrustEmpNo}
+		<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+		<include refid="CommonMapper.Pagination_Foot" />
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select>
+
+	<select id="selectTopNPropertyByExclusiveSellEntrustEmpNo" resultType="PropertyBenefitor">
+		select top ${topN} a.PropertyID,status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice from 
+		v_viewValidPropertyBenefit as a  with (nolock)
+		where exclusiveSellEntrustEmpNo=#{exclusiveSellEntrustEmpNo}
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select> 
+	<select id="countByExclusiveSellEntrustEmpNo" resultType="int">
+		select count(1) from 
+		v_viewValidPropertyBenefit as a with (nolock)
+		where exclusiveSellEntrustEmpNo=#{exclusiveSellEntrustEmpNo}
+		<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+	</select>
+					<!--修改独家出租委托权益归属   -->
+	<update id="updateExclusiveRentEntrustEmpNo">
+		update propertyinfo set exclusiveRentEntrustEmpNo=#{exclusiveRentEntrustEmpNo} where propertyId=#{propertyId}
+	</update>  
+	<!--根据独家出租委托查询房源   -->
+	<select id="selectPropertyByExclusiveRentEntrustEmpNo" resultType="PropertyBenefitor">
+		<include refid="CommonMapper.Pagination_Head"/>
+		select a.PropertyID,a.status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice
+			 from v_viewValidPropertyBenefit as a with (nolock)
+			 where exclusiveRentEntrustEmpNo = #{exclusiveRentEntrustEmpNo}
+		<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+		<include refid="CommonMapper.Pagination_Foot" />
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select> 
+	
+	<select id="selectTopNPropertyByExclusiveRentEntrustEmpNo" resultType="PropertyBenefitor">
+		select top ${topN} a.PropertyID,status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice from 
+		v_viewValidPropertyBenefit as a  with (nolock)
+		where exclusiveRentEntrustEmpNo=#{exclusiveRentEntrustEmpNo}
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select> 
+	<select id="countByExclusiveRentEntrustEmpNo" resultType="int">
+		select count(1) from 
+		v_viewValidPropertyBenefit as a  with (nolock)
+		where exclusiveRentEntrustEmpNo=#{exclusiveRentEntrustEmpNo}
+		<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+	</select>
+		<!--修改速销委托权益归属   -->
+	<update id="updateLimitSellEntrustEmpNo">
+		update propertyinfo set limitSellEntrustEmpNo=#{limitSellEntrustEmpNo}	where propertyId=#{propertyId}
+	</update>  
+	<!--根据速销委托查询房源   -->
+	<select id="selectPropertyByLimitSellEntrustEmpNo" resultType="PropertyBenefitor">
+		<include refid="CommonMapper.Pagination_Head"/>
+		select a.PropertyID,a.status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice
+			 from v_viewValidPropertyBenefit as a with (nolock)
+			 where limitSellEntrustEmpNo = #{limitSellEntrustEmpNo}
+		<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+		<include refid="CommonMapper.Pagination_Foot" />
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select> 
+	
+	<select id="selectTopNPropertyByLimitSellEntrustEmpNo" resultType="PropertyBenefitor">
+		select top ${topN} a.PropertyID,status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice from 
+		v_viewValidPropertyBenefit as a  with (nolock)
+		where limitSellEntrustEmpNo=#{limitSellEntrustEmpNo}
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select> 
+	
+	<select id="countByLimitSellEntrustEmpNo" resultType="int">
+		select count(1) from 
+		v_viewValidPropertyBenefit as a with (nolock)
+		where limitSellEntrustEmpNo=#{limitSellEntrustEmpNo}
+		<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+	</select>
+    	<!--修改有效描述方权益归属   -->
+	<update id="updateDescriptEmpNo">
+		update propertyinfo set descriptEmpNo=#{descriptEmpNo},descriptOrgId=#{descriptOrgId}
+		where propertyId=#{propertyId}
+	</update>  
+     <!--根据有效描述方查询房源   -->
+	<select id="selectPropertyByDescriptEmpNo" resultType="PropertyBenefitor">
+		<include refid="CommonMapper.Pagination_Head"/>
+		select a.PropertyID,a.status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice
+			 from v_viewValidPropertyBenefit as a with (nolock)
+			 where descriptEmpNo = #{descriptEmpNo}
+		<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+		<include refid="CommonMapper.Pagination_Foot" />
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select> 
+	
+	
+	<select id="selectTopNPropertyByDescriptEmpNo" resultType="PropertyBenefitor">
+		select top ${topN} a.PropertyID,status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice from 
+		v_viewValidPropertyBenefit as a with (nolock)
+		where descriptEmpNo=#{descriptEmpNo} and a.descriptCreatedAt is not null
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select> 
+	<select id="countByDescriptEmpNo" resultType="int">
+		select count(1) from 
+		v_viewValidPropertyBenefit as a  with (nolock)
+		where descriptEmpNo=#{descriptEmpNo} and a.descriptCreatedAt is not null
+		<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+	</select>
+	
+	
+	 <!--查询普通描述房源   -->
+	<select id="selectPropertyByDisDescriptEmpNo" resultType="PropertyBenefitor">
+		<include refid="CommonMapper.Pagination_Head"/>
+		select a.PropertyID,a.status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice
+			 from v_viewValidPropertyBenefit as a with (nolock)
+			 left join (
+				select empNo, propertyId  from PropertyDescVote  with(noLock) 
+				where status!='-1' and empNo= #{disDescriptEmpNo,jdbcType=DECIMAL}
+				group by empNo , propertyId 
+			) b on a.PropertyID = b.propertyId
+			where b.empNo =  #{disDescriptEmpNo} and (a.descriptEmpNo != #{disDescriptEmpNo}   or   a.descriptEmpNo  is null)
+			<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+			</if>
+		<include refid="CommonMapper.Pagination_Foot" />
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select> 
+	
+	
+	<select id="selectTopNPropertyByDisDescriptEmpNo" resultType="PropertyBenefitor">
+		select top ${topN} a.PropertyID,status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice  from 
+		v_viewValidPropertyBenefit as a with (nolock)
+			 left join (
+				select empNo, propertyId  from PropertyDescVote   with(noLock) 
+				where status!='-1' and empNo= #{disDescriptEmpNo,jdbcType=DECIMAL}
+				group by empNo , propertyId 
+			) b on a.PropertyID = b.propertyId
+			where b.empNo =  #{disDescriptEmpNo} 
+				and (a.descriptEmpNo != #{disDescriptEmpNo}   or   a.descriptEmpNo  is null)
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select> 
+	<select id="countByDisDescriptEmpNo" resultType="int">
+		select count(1) from v_viewValidPropertyBenefit as a with (nolock)
+		 left join (
+				select empNo, propertyId  from PropertyDescVote   with(noLock) 
+				where status!='-1' and empNo= ${disDescriptEmpNo}
+				group by empNo , propertyId 
+			) b on a.PropertyID = b.propertyId
+			where b.empNo =  ${disDescriptEmpNo} and (a.descriptEmpNo != ${disDescriptEmpNo}   or   a.descriptEmpNo  is null)
+			<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+			</if>
+	</select>
+    
+
+    <update id="updateWithParamByPropertyId" parameterType="propertyInfoParam">
+        update a
+            <set>
+            <if test="unRecommendType != null and unRecommendType == 'rent'">
+                jpzEmpNo = NULL,
+                jpzOrgId = NULL,
+                jpzCreatedAt = NULL,
+            </if>
+            <if test="unRecommendType != null and unRecommendType == 'sale'">
+                jpsEmpNo = NULL,
+                jpsOrgId = NULL,
+                jpsCreatedAt = NULL,
+                </if>
+            <if test="cancelPrivy != null and cancelPrivy == true">
+                safePrivy = null,
+            </if>
+        </set>
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <select id="queryLimitProperty" parameterType="hashMap" resultType="propertyInfoView">
+	        select pinfo.propertyId, apply.empNo , daqu.ORG_NAME as daquOrgName,pinfo.limitSellEntrustApplyId
+	        from propertyInfo pinfo with(nolock)
+	        inner join propertyEntrustApply apply on apply.id = pinfo.limitSellEntrustApplyId
+	        LEFT JOIN oms.dbo.v_employee_baseinfo e WITH(nolock) ON limitSellEntrustEmpNo = e.userCode
+	        LEFT JOIN oms.dbo.V_OMS_ORGANIZATION fenghang WITH(nolock) ON e.orgId = fenghang.id
+	        LEFT JOIN oms.dbo.V_OMS_ORGANIZATION mendian WITH(nolock) ON fenghang.PARENT_ID = mendian.id
+	        LEFT JOIN oms.dbo.V_OMS_ORGANIZATION quyu WITH(nolock) ON mendian.PARENT_ID = quyu.id
+	        LEFT JOIN oms.dbo.V_OMS_ORGANIZATION daqu WITH(nolock) ON quyu.PARENT_ID = daqu.id
+	        where <![CDATA[apply.commissionStartAt < #{beginDate}]]>
+	        AND apply.entrustEndDate  > #{endDate}
+	        AND NOT EXISTS (SELECT 1 FROM dbo.propertyValidLimitFollow WITH(nolock) WHERE propertyId = pinfo.propertyId AND (weekBeginDate = #{beginDate}))
+	        <if test="empNo != null">
+	            and apply.empNo = #{empNo}
+	        </if>
+	        <if test="orgId != null">
+	            and e.orgId = #{orgId}
+	        </if>
+	        ORDER BY daqu.ORG_NAME
+    </select>
+    
+    <select id="queryAllLimitProperty" resultType="propertyInfoView">
+         SELECT * FROM PropertyInfo WHERE limitSellEntrustApplyId IS NOT NULL
+    </select>
+
+    <select id="queryByPropertyId" resultType="propertyInfoView">
+        select top 1 * from propertyInfo with(nolock) where propertyId=#{propertyId}
+    </select>
+    
+    <update id = "updatePropertyInfoSavePrivy">
+    	update propertyInfo set safePrivy = #{safePrivy} where propertyId = #{propertyId}
+    </update>
+    
+    
+    <update id="updateAuthInfo4PropertyInfo">
+		UPDATE propertyInfo
+		<set>
+			propertySealStatus = #{propertySealStatus},
+            propertySealPerson = #{propertySealPerson},
+            propertySealTime = #{propertySealTime},
+            propertySealEndTime = #{propertySealEndTime},
+
+            authedForBuyinDate = #{authedForBuyinDate},
+            authedForSquare =  #{authedForSquare},
+
+            authedForPropertyLoan =  #{authedForPropertyLoan},
+            loanStatus =#{loanStatus},
+            propertyLoanTotalPrice = #{propertyLoanTotalPrice},
+            propertyLoanPriceUnit = #{propertyLoanPriceUnit},
+            propertyLoanBeginTime = #{propertyLoanBeginTime},
+            propertyLoanEndTime = #{propertyLoanEndTime},
+
+            authedForPropertyRight = #{authedForPropertyRight},
+            propertyRightPerson = #{propertyRightPerson},
+            propertyRightPermitNo = #{propertyRightPermitNo}
+		</set>
+		where propertyId = #{propertyId}
+	</update>
+
+    <update id="updateHandPrice">
+        update a set handPrice = #{handPrice}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateIsFiveYears">
+        update a set isFiveYears = #{isFiveYears}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updatePricePrecise">
+        update a set pricePrecise = #{pricePrecise}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateRoomLayout">
+        update a set countGarden = #{countGarden},countCellar = #{countCellar}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updatePropertyLoan">
+        update a set loanStatus = #{loanStatus},
+          propertyLoanTotalPrice = #{propertyLoanTotalPrice},
+          propertyLoanSurplusPrice = #{propertyLoanSurplusPrice},
+          propertyLoanPriceUnit = #{propertyLoanPriceUnit},
+          propertyLoanSurplusPriceUnit = #{propertyLoanSurplusPriceUnit},
+          propertyLoanBeginTime = #{propertyLoanBeginTime},
+          propertyLoanEndTime = #{propertyLoanEndTime}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateParking">
+        update a set parking = #{parking},
+          parkingAddress = #{parkingAddress},
+          parkingNumber = #{parkingNumber},
+          parkingSquare = #{parkingSquare},
+          parkingRemark = #{parkingRemark},
+          countParks = #{countParks},
+          countGarage = #{countGarage}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updatePropertyRightInfo">
+        update a set propertyRightPerson = #{propertyRightPerson},
+          propertyRightPermitNo = #{propertyRightPermitNo}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateIsOnlyOne">
+        update a set isOnlyOne = #{isOnlyOne}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateShape">
+        update a set shape = #{shape}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateParlor">
+        update a set parlor = #{parlor}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateWaterToward">
+        update a set waterToward = #{waterToward}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateGardenToward">
+        update a set gardenToward = #{gardenToward}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateLandSquare">
+        update a set landSquare = #{landSquare}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateCellarSquare">
+        update a set cellarSquare = #{cellarSquare}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateGardenSquare">
+        update a set gardenSquare = #{gardenSquare}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateFacility">
+        update a set facility = #{facility}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateCellar">
+        update a set cellar = #{cellar}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateOfficeGrade">
+        update a set officeGrade = #{officeGrade}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateRealRate">
+        update a set realRate = #{realRate}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateFloorHeight">
+        update a set floorHeight = #{floorHeight}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateAirConditionCosts">
+        update a set airConditionCosts = #{airConditionCosts}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateShopLocation">
+        update a set shopLocation = #{shopLocation}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateDepth">
+        update a set depth = #{depth}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateTransferFee">
+        update a set transferFee = #{transferFee}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updatePermitNo">
+        update a set permitNo = #{permitNo}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateOfficeArea">
+        update a set officeArea = #{officeArea}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateBlankArea">
+        update a set blankArea = #{blankArea}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateTotalArea">
+        update a set totalArea = #{totalArea}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateElectricPower">
+        update a set electricPower = #{electricPower}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateCurrentStatus">
+        update a set currentStatus = #{currentStatus},
+            rentExpireDate = #{rentExpireDate},
+            rentAvailableDate =#{rentAvailableDate},
+            currentStatusRemark = #{currentStatusRemark}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateLookHouseStatus">
+        update a set keyLocation = #{keyLocation},
+        	houseWhenToSee =#{houseWhenToSee},
+            keyRemark = #{keyRemark}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updatePriceMemo">
+        update a set priceMemo = #{priceMemo}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updatePropertyDecoration" parameterType="hashMap">
+        update a set devices = #{devices}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateRentPrice">
+        update a set isRentPriceIncludeMgtPrice = #{isRentPriceIncludeMgtPrice},
+            isRentPriceIncludeInvoice = #{isRentPriceIncludeInvoice}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+	<update id="updateSellEntrust">
+		 update propertyInfo set 
+		 sellEntrustApplyId = #{sellEntrustApplyId}
+		 where propertyId = #{propertyId}
+	</update>
+	<update id="updateRentEntrust">
+		 update propertyInfo set 
+		 rentEntrustApplyId = #{rentEntrustApplyId} 
+		 where propertyId = #{propertyId}
+	</update>
+	<update id="updateExclusiveSellEntrust">
+		 update propertyInfo set 
+		 exclusiveSellEntrustApplyId = #{exclusiveSellEntrustApplyId}
+		 where propertyId = #{propertyId}
+	</update>
+	<update id="updateExclusiveRentEntrust">
+		 update propertyInfo set 
+		 exclusiveRentEntrustApplyId = #{exclusiveRentEntrustApplyId}
+		 where propertyId = #{propertyId}
+	</update>
+	
+	<update id="updateLimitSellEntrust">
+		 update propertyInfo set 
+		 limitSellEntrustApplyId = #{limitSellEntrustApplyId}
+		 where propertyId = #{propertyId}
+	</update>
+	
+    <insert id="backupForclearProperty" parameterType="string">
+           INSERT INTO dbo.temp_clear_propertyinfo ( propertyId , shopLocation , officeGrade, width, length, officeArea, blankArea, depth, realRate, totalArea, floorHeight, mgtPrice, transferFee, airConditionCosts, electricPower, lookHouseStatus, keyType, keyLocation, keyRemark, currentStatus, rentExpireDate, currentStatusRemark, parking, parkingRemark, loanStatus, balance, repaymentStatus, loanRemark, beianNo, status, createdAt, updatedAt,  bakStatus, jpsDeptId, jpsEmpNo, jpsCreatedAt, jpzDeptId, jpzEmpNo, jpzCreatedAt, descriptDeptId, descriptEmpNo, descriptCreatedAt, jpsBranchId, jpzBranchId, descriptBranchId, jpzOrgId, jpsOrgId, descriptOrgId, isOnlyOne, propertyRightName, propertyRightNO, pricePrecise, isFiveYears, sellEntrustFlag, sellEntrustType, sellEntrustEndDate, rentEntrustFlag, rentEntrustType, rentEntrustEndDate, exclusiveSellEntrustFlag , exclusiveSellEntrustType , exclusiveSellEntrustEndDate , exclusiveRentEntrustFlag , exclusiveRentEntrustType , exclusiveRentEntrustEndDate , exclusiveRentEntrustEmpOrgName , sellEntrustEmpNo , sellEntrustEmpName , sellEntrustCreatedDate, sellEntrustEmpOrgName, rentEntrustEmpNo, rentEntrustEmpName, rentEntrustCreatedDate, rentEntrustEmpOrgName, exclusiveSellEntrustEmpNo , exclusiveSellEntrustEmpName , exclusiveSellEntrustCreatedDate , exclusiveSellEntrustEmpOrgName , exclusiveRentEntrustEmpNo , exclusiveRentEntrustEmpName , exclusiveRentEntrustCreatedDate , permitNo , havaKey , responsibility, shape, countParks, countGarage, permitSquare, countCellar, countGarden, cellar, gardenSquare, gardenToward, waterToward, parlor, groundFloor, facility, handprice, houseType, isAuction, propertySealStatus, propertySealTime, propertySealPerson, authedForBuyinDate, authedForSquare, authedForCompleteYear, authedForPropertyLoan, propertyLoanStatus, propertyLoanTotalPrice, propertyLoanPriceUnit, propertyLoanBeginTime, propertyLoanEndTime, authedForPropertyRight, propertyRightPerson, propertyRightPermitNo, safePrivy)
+               SELECT propertyId , shopLocation , officeGrade, width, length, officeArea, blankArea, depth, realRate, totalArea, floorHeight, mgtPrice, transferFee, airConditionCosts, electricPower, lookHouseStatus, keyType, keyLocation, keyRemark, currentStatus, rentExpireDate, currentStatusRemark, parking, parkingRemark, loanStatus, balance, repaymentStatus, loanRemark, beianNo, status, createdAt, updatedAt,  bakStatus, jpsDeptId, jpsEmpNo, jpsCreatedAt, jpzDeptId, jpzEmpNo, jpzCreatedAt, descriptDeptId, descriptEmpNo, descriptCreatedAt, jpsBranchId, jpzBranchId, descriptBranchId, jpzOrgId, jpsOrgId, descriptOrgId, isOnlyOne, propertyRightName, propertyRightNO, pricePrecise, isFiveYears, sellEntrustFlag, sellEntrustType, sellEntrustEndDate, rentEntrustFlag, rentEntrustType, rentEntrustEndDate, exclusiveSellEntrustFlag , exclusiveSellEntrustType , exclusiveSellEntrustEndDate , exclusiveRentEntrustFlag , exclusiveRentEntrustType , exclusiveRentEntrustEndDate , exclusiveRentEntrustEmpOrgName , sellEntrustEmpNo , sellEntrustEmpName , sellEntrustCreatedDate, sellEntrustEmpOrgName, rentEntrustEmpNo, rentEntrustEmpName, rentEntrustCreatedDate, rentEntrustEmpOrgName, exclusiveSellEntrustEmpNo , exclusiveSellEntrustEmpName , exclusiveSellEntrustCreatedDate , exclusiveSellEntrustEmpOrgName , exclusiveRentEntrustEmpNo , exclusiveRentEntrustEmpName , exclusiveRentEntrustCreatedDate , permitNo , havaKey , responsibility, shape, countParks, countGarage, permitSquare, countCellar, countGarden, cellar, gardenSquare, gardenToward, waterToward, parlor, groundFloor, facility, handprice, houseType, isAuction, propertySealStatus, propertySealTime, propertySealPerson, authedForBuyinDate, authedForSquare, authedForCompleteYear, authedForPropertyLoan, propertyLoanStatus, propertyLoanTotalPrice, propertyLoanPriceUnit, propertyLoanBeginTime, propertyLoanEndTime, authedForPropertyRight, propertyRightPerson, propertyRightPermitNo, safePrivy
+               FROM propertyinfo p WITH(NOLOCK)
+               WHERE p.propertyId =  #{propertyId}
+	</insert>
+	
+	<update id="updateLookHouseStatusForDirtyData">
+        update a set keyLocation = #{keyLocation},
+        	keyPassword =#{keyPassword}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateBelongToOrgCode">
+        update a set belongToOrgCode = #{belongToOrgCode}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+    
+    <update id="updateRtOtherBenefitInfo">
+        update a set otherBenefitInfo = #{otherBenefitInfo}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+    
+    <update id="updateOwnerMood">
+        update a set ownerMood = #{ownerMood}
+        from propertyInfo a
+        where propertyId = #{propertyId}
+    </update>
+    
+    <select id="queryUnSearchableProperty" resultType="string">
+    	SELECT pin.propertyId
+			FROM dbo.PropertyInfo pin with (nolock) INNER JOIN v_property vp with (nolock)
+			ON Pin.propertyId = vp.PropertyID AND pin.belongToOrgCode IS NOT NULL AND vp.status !='资料盘'
+    </select>
+
+    <select id="selectByPropertyId" parameterType="map" resultType="com.dooioo.fy.temp.PropertyInfo">
+        SELECT  *
+        FROM    dbo.PropertyInfo WITH ( NOLOCK )
+        WHERE   PropertyID = #{propertyId} AND status = 0
+
+    </select>
+
+    <delete id="delete" parameterType="map">
+        UPDATE  a
+        SET     a.status = -1
+        FROM    propertyInfo a
+        WHERE   propertyId = #{propertyId}
+    </delete>
+    
+     <select id="querySameBelongToOrgCode" parameterType="string" resultType="string">
+        SELECT propertyId FROM PropertyInfo WHERE  belongToOrgCode =#{belongToOrgCode}
+    </select>
+   
+   <!-- 提交人:谢洋 内容:清除表propertyInfo 里面钥匙的存放的类别和清空其他关于钥匙信息 -->
+	<update id="clearKeyInfo" parameterType="string">
+		update PropertyInfo set
+			keyLocation = NULL,
+			keyRemark = NULL
+		where propertyId = #{propertyId}
+	</update>
+	
+	<update id="recommend" parameterType="PropertyInfo">
+		UPDATE PropertyInfo 
+			SET 
+			updatedAt = GETDATE()
+			
+			<if test="recommendType == 'sale' ">
+				, jpsEmpNo = #{jpsEmpNo},
+				jpsOrgId = #{jpsOrgId},
+				jpsCreatedAt = getDate()
+			</if>
+			
+			<if test="recommendType == 'rent' ">
+				, jpzEmpNo = #{jpzEmpNo},
+				jpzOrgId = #{jpzOrgId},
+				jpzCreatedAt = getDate()
+			</if>
+			WHERE propertyId = #{propertyId}
+	</update>
+	
+		<update id="unRecommend" parameterType="PropertyInfo">
+		UPDATE p
+			SET 
+			updatedAt = GETDATE()
+			
+			<if test="unRecommendType == 'sale' ">
+				, jpsEmpNo = NULL,
+				jpsOrgId = NULL,
+				jpsCreatedAt = NULL
+			</if>
+			<if test="unRecommendType == 'rent' ">
+				, jpzEmpNo = NULL,
+				jpzOrgId = NULL,
+				jpzCreatedAt = NULL
+			</if>
+        from PropertyInfo p
+            left join oms.dbo.v_employee_final jps on p.jpsEmpNo = jps.userCode
+            left join oms.dbo.v_employee_final jpz on p.jpzEmpNo = jpz.userCode
+        WHERE propertyId = #{propertyId}
+        
+        <if test="jpsOrgId != null ">
+        	and jps.orgId = #{jpsOrgId}
+		</if>
+		
+		<if test="jpsEmpNo != null ">
+        	and jpsEmpNo = #{jpsEmpNo}
+		</if>
+		
+		<if test="jpzOrgId != null ">
+        	and jpz.orgId = #{jpzOrgId}
+		</if>
+		
+		<if test="jpzEmpNo != null ">
+        	and jpzEmpNo = #{jpzEmpNo}
+		</if>
+	</update>
+	
+		<select id="checkRecommendByDeptEmp" parameterType="PropertyInfo" resultType="int">
+		select count(*) from propertyInfo pi  with(nolock)
+        inner join property p with(nolock) on pi.propertyid=p.propertyid and p.flagdeleted = 0
+        left join oms.dbo.v_employee_final jps with(nolock) on pi.jpsEmpNo = jps.userCode
+        left join oms.dbo.v_employee_final jpz with(nolock) on pi.jpzEmpNo = jpz.userCode
+        where  p.propertyId = #{propertyId}
+        
+        	<if test="unRecommendType == 'sale' and jpsOrgId !=null ">
+				and jps.orgId = #{jpsOrgId}
+			</if>
+        
+        	<if test="unRecommendType == 'sale' and jpsEmpNo !=null ">
+				and pi.jpsEmpNo = #{jpsEmpNo}
+			</if>
+			
+			<if test="unRecommendType == 'rent' and jpzOrgId !=null ">
+				and jpz.orgId = #{jpzOrgId}
+			</if>
+        
+        	<if test="unRecommendType == 'rent' and jpzEmpNo !=null ">
+				and pi.jpzEmpNo = #{jpzEmpNo}
+			</if>
+			
+	</select>
+	
+		<select id="checkRecommendByType" parameterType="PropertyInfo" resultType="int">
+		select count(*) from propertyInfo with(nolock)  where propertyId = #{propertyId} and status = 0
+			<if test="recommendType == 'sale' ">
+				and jpsCreatedAt IS NOT NULL
+			</if>
+			<if test="recommendType == 'rent' ">
+				and jpzCreatedAt IS NOT NULL 
+			</if>
+	</select>
+	
+	<select id="getRecommendCount" parameterType="PropertyInfo" resultType="int">
+        select count(*) from Propertyinfo p with(nolock)
+        left join oms.dbo.v_employee_final jps on p.jpsEmpNo = jps.userCode
+        left join oms.dbo.v_employee_final jpz on p.jpzEmpNo = jpz.userCode
+        where p.status = 0 and
+        	<if test="recommendType == 'sale' ">
+                jps.orgId = #{jpsOrgId}
+			</if>
+			<if test="recommendType == 'rent' ">
+                jpz.orgId = #{jpzOrgId}
+			</if>
+	</select>
+
+    <!--解绑查询范围-->
+    <update id="updateBelongToOrgCodeNull" parameterType="map">
+        UPDATE  propertyinfo
+        SET     belongToOrgCode = NULL
+        WHERE   propertyId = #{propertyId}
+    </update>
+
+    <update id="updateForSystemPropertyAddProperty">
+        update propertyinfo
+        set
+        officeGrade = #{officeGrade}
+        ,depth = #{depth}
+        ,realRate = #{realRate}
+        ,floorHeight = #{floorHeight}
+        ,transferFee = #{transferFee}
+        ,airConditionCosts = #{airConditionCosts}
+        ,electricPower = #{electricPower}
+        ,parking = #{parking}
+        ,loanStatus = #{loanStatus}
+        ,status = 0
+        ,permitNo = #{permitNo}
+        ,shape = #{shape}
+        ,countParks = #{countParks}
+        ,countGarage = #{countGarage}
+        ,countCellar = #{countCellar}
+        ,countGarden = #{countGarden}
+        ,waterToward = #{waterToward}
+        ,groundFloor = #{groundFloor}
+        ,handPrice = #{handPrice}
+        ,isAuction = #{isAuction}
+        ,currentStatus = #{currentStatus}
+        ,rentExpireDate =#{rentExpireDate}
+        ,rentAvailableDate =#{rentAvailableDate}
+        ,currentStatusRemark =#{currentStatusRemark}
+        ,keyRemark = #{keyRemark}
+        ,houseWhenToSee = #{houseWhenToSee}
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="cancelPrivate">
+        UPDATE   pi
+               SET      pi.safePrivy = NULL
+               FROM     propertyinfo pi
+               WHERE    propertyId = #{propertyId}
+    </update>
+    
+    <update id="synLimitApplyId">
+        UPDATE b SET b.limitSellEntrustApplyId = a.id
+        FROM
+        	propertyEntrustApply a
+        JOIN PropertyInfo b ON a.propertyId = b.propertyId
+        WHERE
+        	a.entrustType = 3
+        AND (
+        	a.checkState IN (1, 2)
+        	OR a.checkState IS NULL
+        )
+        AND a.status = 0
+        AND b.limitSellEntrustApplyId IS NULL
+    </update>
+	
+	<select id="queryLimit40" resultType="String">
+		SELECT count(PropertyInfo.propertyId)
+		FROM PropertyInfo WITH(nolock) 
+		INNER JOIN v_Property ON PropertyInfo.propertyId = v_Property.PropertyID AND limitCommissionRate = 40 AND v_Property.cityName = '上海'
+	</select>
+	
+	<update id = "updateHaveKey">
+    	UPDATE propertyInfo SET havaKey = #{havaKey} WHERE propertyId = #{propertyId}
+    </update>
+    
+    <select id="selectHaveKeyFromDb" parameterType="map" resultType="com.dooioo.fy.temp.PropertyInfo">
+        SELECT  propertyId,LTRIM(RTRIM(havaKey)) AS havaKey
+        FROM  dbo.PropertyInfo WITH ( NOLOCK )
+        WHERE  havaKey = '1' AND status = 0
+    </select>
+</mapper>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ImportPropertyDetailMapper">
+
+    <select id="queryBySourcePropertyId" resultType="ImportPropertyDetail">
+        SELECT * FROM  ImportPropertyDetail with(nolock) WHERE propertyId=#{propertyId} and source =#{source}
+    </select>
+    
+    <select id="queryBySourceStatus" resultType="ImportPropertyDetail">
+        SELECT * FROM  ImportPropertyDetail with(nolock) WHERE status=#{status} and source =#{source}
+    </select>
+    
+    <select id="queryImportDetail" resultType="ImportPropertyDetail">
+   	 <include refid="CommonMapper.Pagination_Head"/>
+        SELECT * FROM  ImportPropertyDetail with(nolock) WHERE source =#{source}
+        	<if test="status !=null">
+				and status =#{status}
+			</if>
+			<if test="type !=null">
+				and type =#{type}
+			</if>
+		
+			<if test="startTime !=null">
+				and createdAt > #{startTime}
+			</if>
+			<if test="endTime !=null">
+				and createdAt &lt; #{endTime}
+			</if>
+		<include refid="CommonMapper.Pagination_Foot" />
+    </select>
+    
+     <select id="queryDirtyBenefitForXinDe" resultType="OtherCompanyXinDeDirtyBenefit">
+	        SELECT ipd.propertyId AS oldOtherCmpId,ipd.myPropertyId,
+				epb.deptEmpNo AS exoDeptEmpNo,p.empNo AS mainEmpNo,oce.empName AS mainEmpName  
+			FROM dbo.ImportPropertyDetail ipd WITH(NOLOCK)
+			INNER JOIN dbo.ExosystemPropertyBenefit epb WITH(NOLOCK) ON ipd.myPropertyId = epb.propertyId
+			INNER JOIN dbo.Property p WITH(NOLOCK) ON p.PropertyID = ipd.myPropertyId 
+			LEFT JOIN dbo.OtherCompanyEmployee oce WITH(NOLOCK) ON oce.source = ipd.source AND oce.newEmpNo = p.empNo
+			WHERE ipd.source ='xinDe' AND ipd.STATUS = 1 AND ipd.type ='重盘'
+			AND   oce.empName IS NOT NULL
+	</select>
+	
+     <insert id="insert" >
+        insert into ImportPropertyDetail
+        (propertyId , status , type , message,myPropertyId,source )
+        values
+        (#{propertyId} , #{status}, #{type} , #{message}, #{myPropertyId},#{source})
+    </insert>
+    
+     <update id = "update">
+    	update ImportPropertyDetail
+    	set status = #{status},
+    			type = #{type},
+    			message=#{message},
+    			myPropertyId=#{myPropertyId},
+    		updatedAt = getdate()
+    	where propertyId = #{propertyId} and source =#{source}
+    </update>
+    
+</mapper>

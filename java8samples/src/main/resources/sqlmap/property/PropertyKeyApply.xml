@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PropertyKeyApply">
+	<typeAlias alias="propertyKeyApply" type="com.dooioo.quality.model.PropertyKeyApply"/>
+	<insert id="insert" parameterClass="propertyKeyApply">
+		insert into
+			propertyKeyApply
+		(propertyId ,  empNo  ,createdAt ,keyInfo , keyType , checkState , checkTime , reason , keyNo)
+			values
+		(#propertyId#,#empNo# ,getDate(),#keyInfo#,#keyType#,#checkState#,#checkTime#,#reason#,#keyNo#);
+		<selectKey resultClass="integer" keyProperty="id">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
+	
+	<!-- 创建人:谢洋 内容:按照propertyId和keyType获取最后申请钥匙检核的检核状态和员工id -->
+	<select id="queryEmpNoById" parameterClass="propertyKeyApply" resultClass="propertyKeyApply" >
+		select top 1 empNo,checkState from propertyKeyApply with(nolock)  where propertyId=#propertyId# 
+		and keyType=#keyType#  
+		order by createdAt desc
+	</select> 
+	
+	<select id="findById" parameterClass="int" resultClass="propertyKeyApply" >
+		select * from propertyKeyApply with(nolock)  where id =#id#
+	</select> 
+	
+	<select id="paginateByMapList" parameterClass="hashMap" resultClass="propertyKeyApply">
+ 		mst_sp_pageshowex4 '$columns$','$table$','$where$','$orderBy$',$pageSize$,$page$
+	</select>
+
+	<select id="paginateByMapCount" parameterClass="hashMap" resultClass="int">
+		  sp_pagecount '$table$','$where$'
+	</select>
+	
+	<update id="update">
+		update propertyKeyApply	set 
+			checkState = #checkState# ,
+			checkEmpNo = #checkEmpNo# ,		
+			checkTime = #checkTime#,
+			reason = #reason#
+		where id = #id#	
+	</update>
+
+    <!-- zhaojian 内容:按照propertyId获取最新申请 -->
+	<select id="queryByPropertyId" parameterClass="propertyKeyApply" resultClass="propertyKeyApply" >
+		select top 1 id,empNo,createdAt,keyInfo,checkState,checkTime,reason,keyType,checkEmpNo,keyNo
+		from propertyKeyApply with(nolock) 
+		where propertyId=#propertyId#
+		order by createdAt desc
+	</select>
+
+	<!-- zhaojian 内容:按照propertyId和KeyNo获取最新申请 -->
+	<select id="queryByPropertyIdAndKey" parameterClass="propertyKeyApply" resultClass="propertyKeyApply" >
+		select top 1 id,empNo,createdAt,keyInfo,checkState,checkTime,reason,keyType,checkEmpNo,keyNo
+		from propertyKeyApply with(nolock) 
+		where propertyId=#propertyId#
+		    and keyNo=#keyNo#
+		order by createdAt desc
+	</select>
+
+	<select id="queryByPropertyIdNewInfo" parameterClass="propertyKeyApply" resultClass="propertyKeyApply" >
+		select top 1 id,empNo,createdAt,keyInfo,checkState,checkTime,reason,keyType,checkEmpNo,keyNo
+		from propertyKeyApply with(nolock) 
+		where propertyId=#propertyId#
+		    and keyNo is not null
+		order by createdAt desc
+	</select> 
+
+	<select id="queryById" parameterClass="propertyKeyApply" resultClass="propertyKeyApply" >
+		select id,empNo,createdAt,keyInfo,keyType,checkEmpNo,keyNo
+		from propertyKeyApply with(nolock) 
+		where id=#id#
+	</select> 
+
+	<update id="updateCheckState" parameterClass="propertyKeyApply">
+		update propertyKeyApply	set 
+			checkState = #checkState#
+		where id = #id#	
+	</update>
+
+</sqlMap>

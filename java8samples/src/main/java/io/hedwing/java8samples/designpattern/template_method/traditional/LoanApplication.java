@@ -1,6 +1,7 @@
 package io.hedwing.java8samples.designpattern.template_method.traditional;
 
-import com.insightfullogic.java8.examples.chapter8.template_method.ApplicationDenied;
+
+import io.hedwing.java8samples.designpattern.template_method.ApplicationDenied;
 
 // BEGIN LoanApplication
 public abstract class LoanApplication {

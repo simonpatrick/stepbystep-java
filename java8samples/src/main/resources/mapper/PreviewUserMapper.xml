@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PreviewUserMapper">
+
+	<sql id="where_Clause">
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="id != null">
+				and a.id = #{id,jdbcType=DECIMAL}
+			</if>
+			<if test="status != null">
+				and a.status = #{status , jdbcType=VARCHAR }
+			</if>
+			<if test="status == null">
+				and a.status != -1
+			</if>
+			<if test="relationType != null">
+				and a.relationType = #{relationType , jdbcType=DECIMAL }
+			</if>
+			<if test="relationId != null">
+				and a.relationId = #{relationId , jdbcType=VARCHAR }
+			</if>
+			<if test="authType != null">
+				and a.authType = #{authType , jdbcType=VARCHAR }
+			</if>
+			<if test="startTime != null">
+				and a.createdAt > #{startTime}
+			</if>
+			<if test="endTime != null">
+				<![CDATA[
+				and a.createdAt < #{endTime}
+				]]>
+			</if>
+		</trim>
+	</sql>
+	
+	<select id= "authList" resultType="String">
+		select distinct authType from PreviewUser with(nolock)
+	</select>
+	
+
+    <select id="list" resultType="PreviewUser">
+    	<include refid="CommonMapper.Pagination_Head"/>
+		select a.* , b.userName as empName  ,
+		  case when b.orgName is not null then b.orgName else c.orgName end 'orgName'  from PreviewUser a  with(nolock)
+			left join (
+				select a1.id , b1.userName , b1.orgName from PreviewUser a1  with(nolock)
+					left join oms.dbo.v_employee_final b1 with(nolock)
+					on a1.relationId = b1.userCode and a1.relationType = 1					
+				) b
+			on a.id = b.id
+			left join (
+				select a1.id , b1.orgName from PreviewUser a1  with(nolock)
+					left join oms.dbo.v_organization b1 with(nolock)
+					on a1.relationId = b1.id and a1.relationType = 2
+				) c
+			on a.id = c.id
+		<include refid="where_Clause"/>
+		<include refid="CommonMapper.Pagination_Foot"/>
+		<if test="orderby !=null ">
+			order by ${ orderby }
+		</if>
+	</select>
+	
+	
+	 <select id="count" resultType="Integer">
+		select count(1) from previewUser a with(nolock)
+		<include refid="where_Clause"/>
+	</select>
+
+    <insert id="insert" parameterType="PreviewUser" >
+        <selectKey keyProperty="id" resultType="int" order="AFTER" >
+            select @@IDENTITY
+        </selectKey>
+        INSERT INTO previewUser(relationId , authType , status , createdAt , updatedAt , relationType )
+        VALUES  (
+        		#{relationId ,jdbcType=DECIMAL } ,  
+        		#{authType,jdbcType=VARCHAR }, 
+        		0 ,
+        		getDate() ,
+        		getDate(),  
+        		#{relationType, jdbcType=VARCHAR} 
+        	)
+    </insert>
+    
+    
+    <update id="update" parameterType="PreviewUser">
+    	update previewUser 
+    		<set>
+    			<if test="relationId != null">
+    				relationId = #{relationId ,jdbcType=DECIMAL } ,  
+    			</if>
+    			<if test="authType != null">
+    				authType = #{authType,jdbcType=VARCHAR }, 
+    			</if>
+    			<if test="status != null">
+    				status  = #{status , jdbcType=VARCHAR  },
+    			</if>
+    			<if test="relationType != null">
+    				relationType = #{relationType, jdbcType=VARCHAR} ,
+    			</if>
+    			updatedAt = getDate() ,
+    		</set>
+    		where id = #{id , jdbcType=DECIMAL }
+    </update>
+    
+    <update id="del" parameterType="String">
+    	update previewUser 
+    		set status  =  -1,
+        		updatedAt = getDate() 
+    		where id = #{id , jdbcType=DECIMAL }
+    </update>
+
+</mapper>

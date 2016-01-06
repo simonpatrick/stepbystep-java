@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyMaintainCancelMapper">
+	<insert id="insertMaintainCancel">
+		insert into dbo.PropertyMaintainCancel (empNo,operEmpNo,propertyId,content,type) values (#{empNo},#{operEmpNo},#{propertyId},#{content},#{type})
+	</insert>
+	
+	<select id="isLimitMaintainer" resultType="int">
+		SELECT COUNT(1) FROM PropertyMaintainCancel pmc WITH(NOLOCK)  WHERE propertyId = #{propertyId} 
+			AND createdAt > CONVERT(varchar(100), GETDATE()-7,120) AND empNo =#{empNo} AND type !=1  and status=0
+	</select>
+</mapper>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyMobileCallRestrictionMapper">
+
+	<select id="queryRemainCountByEmpNo" resultType="PropertyMobileCallRestriction">
+       select * from  PropertyMobileCallRestriction with (nolock) where empNo = #{empNo}
+    </select>
+
+	<insert id="addCallRestriction">
+       insert into PropertyMobileCallRestriction (empNo,remainCount) values (#{empNo},#{remainCount})
+    </insert>
+    
+    <update id="updateRemainCount">
+    	update PropertyMobileCallRestriction set remainCount = remainCount-1 where empNo = #{empNo}
+    </update>
+    
+    <update id="recoverAllCount">
+    	update PropertyMobileCallRestriction set remainCount = #{remainCount}
+    </update>
+    
+    
+</mapper>

@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PropertyRecordForCheck">
+    <typeAlias alias="propertyRecordForCheck" type="com.dooioo.quality.model.PropertyRecordForCheck"/>
+
+    <select id="findById" parameterClass="int" resultClass="propertyRecordForCheck">
+        select * from propertyRecordForCheck with(nolock) where id = #id# and status > -1
+    </select>
+    
+    <select id="query" resultClass="propertyRecordForCheck">
+        select * from propertyRecordForCheck with(nolock) where 1=1
+        <isNotEmpty property="propertyId" prepend="and">
+        	propertyId = #propertyId#
+        </isNotEmpty>
+        <isNotEmpty property="empNo" prepend="and">
+        	empNo = #empNo#
+        </isNotEmpty>
+        <isNotEmpty property="startTime" prepend="and">
+        	createdAt >= #startTime#
+        </isNotEmpty>
+        <isNotEmpty property="type" prepend="and">
+        	type = #type#
+        </isNotEmpty>
+        <isNotNull property="qualityStatus" prepend="and">
+        	qualityStatus = #qualityStatus#
+        </isNotNull>
+        <isNotEmpty property="endTime" prepend="and">
+        	<![CDATA[
+        		createdAt <= #endTime#
+        	]]>
+        </isNotEmpty>
+    </select>
+    
+    <select id="queryCheckDataByStatusType" resultClass="propertyRecordForCheck">
+        select top 1 * from propertyRecordForCheck with(nolock) 
+		WHERE qualityStatus =1 
+		AND propertyId =#propertyId#
+		<isEqual property="type" compareValue="propertyAdd">
+       		AND (type ='propertyAdd' OR type ='statusChanged')
+    	</isEqual>
+	    <isEqual property="type" compareValue="rentPropertyAdd">
+	        AND (type ='rentPropertyAdd' OR type ='statusChanged')
+	    </isEqual>
+		and qualityCreatedAt is not null
+		ORDER BY qualityCreatedAt DESC
+    </select>
+    
+    <select id="count" resultClass="Integer">
+        select count(1) from propertyRecordForCheck with(nolock) where 1=1
+        <isNotEmpty property="propertyId" prepend="and">
+        	propertyId = #propertyId#
+        </isNotEmpty>
+        <isNotEmpty property="empNo" prepend="and">
+        	empNo = #empNo#
+        </isNotEmpty>
+        <isNotEmpty property="startTime" prepend="and">
+        	createdAt >= #startTime#
+        </isNotEmpty>
+        <isNotEmpty property="type" prepend="and">
+        	type = #type#
+        </isNotEmpty>
+        <isNotEmpty property="endTime" prepend="and">
+        	<![CDATA[
+        		createdAt <= #endTime#
+        	]]>
+        </isNotEmpty>
+    </select>
+
+    <insert id="insert" parameterClass="propertyRecordForCheck">
+      insert into propertyRecordForCheck(type,propertyId,empNo,orgId,managerEmpNo,operStatus,remark)
+      values(#type#,#propertyId#,#empNo#,#orgId#,#managerEmpNo#,#operStatus#,#remark#)
+    </insert>
+
+    <insert id="insertAndReturnId" parameterClass="propertyRecordForCheck">
+      insert into propertyRecordForCheck(type,propertyId,empNo,orgId,managerEmpNo,operStatus,remark)
+      values(#type#,#propertyId#,#empNo#,#orgId#,#managerEmpNo#,#operStatus#,#remark#)
+        <selectKey resultClass="integer" keyProperty="id">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
+
+    <!--经理 需要在24小时内回访-->
+    <update id="dealTask" parameterClass="propertyRecordForCheck">
+        update
+          propertyRecordForCheck
+        set
+            operStatus = #operStatus# , operCreatedAt = getDate() ,
+            operEmpNo  = #operEmpNo#
+        <isNotEmpty property="followId" prepend=",">
+            followId   = #followId#
+        </isNotEmpty>
+        where
+            status > -1 and operStatus = 0
+            and propertyId = #propertyId#
+            <isNotEmpty property="managerEmpNo" prepend="and">
+                managerEmpNo = #managerEmpNo#
+            </isNotEmpty>
+    </update>
+
+    <select id="countMangeCheck" parameterClass="int" resultClass="int">
+        select count(1) from propertyRecordForCheck prfc with(nolock)
+        inner join property p  with(nolock) on prfc.propertyId = p.propertyId
+        inner join Estate e  with(nolock) on e.estateId = p.estateId
+        where prfc.status > -1 and prfc.managerEmpNo = #id# and prfc.makeSureStatus is null and prfc.operStatus != 1
+        and p.flagDeleted = 0 and p.flagTrashed = 0
+        and e.flagDeleted = 0 and e.flagTrashed = 0
+    </select>
+
+    <select id="count2" parameterClass="propertyRecordForCheck" resultClass="int">
+		sp_pagecount '$table$','$where$'
+	</select>
+
+    <select id="queryForPaginate2" parameterClass="propertyRecordForCheck" resultClass="propertyRecordForCheck">
+		mst_sp_pageshowex4 ' $columns$ ','$table$','$where$','$orderBy$',$pageSize$,$pageNo$
+	</select>
+
+    <update id="update" parameterClass="propertyRecordForCheck">
+        update
+          propertyRecordForCheck
+        set
+          qualityStatus = #qualityStatus#,qualityCreatedAt=getDate(),qualityEmpNo = #qualityEmpNo#
+          <isEqual property="qualityStatus" compareValue="1"  prepend=",">qualityRemark = NULL </isEqual>
+          <isEqual property="qualityStatus" compareValue="0"  prepend=",">qualityRemark = #qualityRemark# </isEqual>
+          <isEqual property="qualityStatus" compareValue="-1" prepend=",">qualityRemark = #qualityRemark# </isEqual>
+        where
+          id = #id#
+    </update>
+
+    <update id="makeSureCheck" parameterClass="propertyRecordForCheck">
+        update
+          propertyRecordForCheck
+        set
+          makeSureStatus = 1,makeSureCreatedAt = getDate(),operCheckType = #operCheckType#,operCheckContent = #operCheckContent#
+        where
+          id = #id#
+    </update>
+    
+    <sql id="list_where">
+    	 <isNotEmpty property="empNo">
+    		 and prfc.empNo = #empNo#
+    	 </isNotEmpty>
+    	 <!-- 权限empNo -->
+    	 <isNotEmpty property="authEmpNo">
+    		 and prfc.empNo = #authEmpNo#
+    	 </isNotEmpty>
+    	 <!-- 选择的组织id -->
+    	 <isNotEmpty property="orgId">
+    		 and prfc.orgId in ( select id from oms.dbo.V_OMS_ORGANIZATION where ORG_LONGCODE like (
+    		 select ORG_LONGCODE +'%' from oms.dbo.V_OMS_ORGANIZATION where id = ' $orgId$ '))
+    	 </isNotEmpty>
+    	 <!-- 兼职组织处理 -->
+    	 <isNotEmpty property="orgIds">
+    	 	and emp.orgId in ($orgIds$) 
+    	 </isNotEmpty>
+    	 <!-- 处理情况 -->
+    	  <isNotEmpty property="status">
+    	 	<isEqual property="status" compareValue="0">
+    	 		and prfc.makeSureStatus is null and prfc.operStatus != 1
+    	 	</isEqual>
+    	 	<isEqual property="status" compareValue="1">
+    	 		and (prfc.makeSureStatus is not null or prfc.operStatus = 1)
+    	 	</isEqual>
+    	 </isNotEmpty>
+    	 <!-- 合格情况 -->
+    	 <isNotEmpty property="isValid">
+    	 	and prfc.qualityStatus = #isValid#
+    	 </isNotEmpty>
+    	 <isNotEmpty property="estateName">
+    	 	and e.estateName = #estateName#
+    	 </isNotEmpty>
+    	 <isNotEmpty property="beginDate">
+    	 	and prfc.createdAt &gt;= ' $beginDate$ '
+    	 </isNotEmpty>
+    	 <isNotEmpty property="endDate">
+    	 	and prfc.createdAt &lt;= ' $endDate$ '
+    	 </isNotEmpty>
+    </sql>
+    <!--   -->
+    <select id="queryPagePropertyRecord" resultClass="propertyRecordForCheck">
+    	 select aa.*,cc.propertyId,cc.empNo,cc.type,cc.createdAt,cc.qualityEmpNo,cc.managerEmpNo,cc.qualityCreatedAt,org.org_name as orgName,manager.user_name_cn as managerEmpName,quality.user_name_cn as qualityEmpName from (
+	    	select * from (
+	   		 select prfc.id,e.estateName,p.address as building ,p.roomNo,p.status as propertyStatus,p.propertyUsage,emp.userName as empName,Row_number() OVER(ORDER BY prfc.id DESC ) AS RowId
+	    	 	FROM   propertyRecordForCheck prfc WITH(nolock)
+	               INNER JOIN property p WITH(nolock)
+	                       ON prfc.propertyId = p.propertyId
+	               INNER JOIN PropertyInfo pinfo
+	                       ON pinfo.propertyId = p.PropertyID
+	               INNER JOIN Estate e WITH(nolock)
+	                       ON e.estateId = p.estateId
+	               INNER JOIN oms.dbo.v_employee_baseinfo emp WITH(nolock)
+	                       ON emp.usercode = prfc.empNo
+                  left join area ar WITH(nolock) on e.AreaID = ar.AreaID
+	               WHERE  prfc.status > -1
+	               AND p.flagDeleted = 0
+	               AND p.flagTrashed = 0
+	               AND e.flagDeleted = 0
+	               AND e.flagTrashed = 0
+                  AND ar.cityName = #cityName#
+	              <include refid="list_where"/>
+	               ) tt WHERE  RowId BETWEEN #beginNum# AND #endNum# 
+	               ) aa  
+	               left join propertyRecordForCheck cc with(nolock)  on aa.id = cc.id
+	               left join oms.dbo.V_OMS_ORGANIZATION org  with(nolock) on org.id = cc.orgId 
+	               left join oms.dbo.V_OMS_EMPLOYEE_BASEINFOR manager with(nolock) on manager.user_code = cc.managerEmpNo
+	               left join oms.dbo.V_OMS_EMPLOYEE_BASEINFOR quality with(nolock) on quality.user_code = cc.qualityEmpNo
+    </select>
+    
+    
+    <select id="countPropertyRecord" resultClass="int">
+    	select count(1)
+    	 	FROM   propertyRecordForCheck prfc WITH(nolock)
+               INNER JOIN property p WITH(nolock)
+                       ON prfc.propertyId = p.propertyId
+               INNER JOIN PropertyInfo pinfo
+                       ON pinfo.propertyId = p.PropertyID
+               INNER JOIN Estate e WITH(nolock)
+                       ON e.estateId = p.estateId
+               INNER JOIN oms.dbo.v_employee_baseinfo emp WITH(nolock)
+                       ON emp.usercode = prfc.empNo
+              left join area ar WITH(nolock) on e.AreaID = ar.AreaID
+               WHERE  prfc.status > -1
+               AND p.flagDeleted = 0
+               AND p.flagTrashed = 0
+               AND e.flagDeleted = 0
+               AND e.flagTrashed = 0
+              AND ar.cityName = #cityName#
+               <include refid="list_where"/>
+    </select>
+	
+</sqlMap>

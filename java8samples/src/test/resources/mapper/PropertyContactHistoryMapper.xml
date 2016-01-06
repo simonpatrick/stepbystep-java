@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyContactHistoryMapper">
+
+    <sql id="where_clause">
+        <trim prefix="where" prefixOverrides="and|or">
+            pch.status != -1
+            <if test="propertyContactId != null">
+                and pch.propertyContactId = #{propertyContactId, jdbcType=DECIMAL}
+            </if>
+            <if test="propertyId!=null">
+                and pc.propertyId= #{propertyId,jdbcType=VARCHAR}
+            </if>
+            <if test="types != null">
+                and pch.type in
+                <foreach collection="types" item="item" index="index" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="in7days != null and in7days == true">
+                and pch.createdAt > dateadd(day,-7,getDate())
+            </if>
+            <if test="createdBy != null">
+                and pch.createdBy = #{createdBy,jdbcType = DECIMAL}
+            </if>
+        </trim>
+    </sql>
+    <select id="query" parameterType="PropertyContactHistoryParam" resultType="PropertyContactHistoryView">
+        select pch.*,
+		        e.user_name_cn as createdByStr
+ 	    from propertyContactHistory pch with(nolock)
+ 	    left join propertyContact pc with(nolock) on pch.propertyContactId = pc.id AND pc.status !=-2 AND pc.type is null
+ 	    left join oms.dbo.V_OMS_EMPLOYEE_BASEINFOR e with(nolock) on e.user_code = pch.createdBy
+ 	    <include refid="where_clause"/>
+ 	    order by ${orderby}
+    </select>
+
+    <insert id="insert" parameterType="PropertyContactHistory">
+        INSERT INTO propertyContactHistory
+        (
+            propertyContactId,
+            content,
+            createdBy,
+            type,
+            createdAt
+        )
+        VALUES
+        (
+            #{propertyContactId, jdbcType=DECIMAL},
+            #{content, jdbcType=VARCHAR},
+            #{createdBy, jdbcType=DECIMAL},
+            #{type, jdbcType=VARCHAR},
+            getDate()
+        )
+    </insert>
+
+</mapper>

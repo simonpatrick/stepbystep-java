@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="V_fy_buildingMapper" >
+
+    <select id="selectByEstateIdAndBuildingName" parameterType="map" resultType="com.dooioo.fy.view.V_fy_building">
+        select top 1 * from v_fy_building with(nolock) where estateId = #{estateId} and buildingName = #{buildingName}
+    </select>
+
+</mapper>

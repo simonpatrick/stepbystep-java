@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+            PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+            "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="KeyBoxCardProperty">
+	<typeAlias alias="keyBoxCardProperty" type="com.dooioo.keybox.model.KeyBoxCardProperty"/>
+	
+    <insert id="insert" parameterClass="keyBoxCardProperty">
+        INSERT INTO keyBoxCardPropertyMap
+        (cardNo
+        ,propertyId
+        ,fkKeyBoxId
+        ,isStore
+        ,keyType
+        ,keyBelongId
+        ,keyNo
+        <isNotEmpty property="deleteFlag" prepend=",">deleteFlag</isNotEmpty>
+        )
+        VALUES
+        (#cardNo#
+        ,#propertyId#
+        ,#fkKeyBoxId#
+        ,#isStore#
+        ,#keyType#
+        ,#keyBelongId#
+        ,#keyNo#
+        <isNotEmpty property="deleteFlag" prepend=",">#deleteFlag#</isNotEmpty>
+        )
+    </insert>
+    
+    <insert id="insertAndReturnId" parameterClass="keyBoxCardProperty">
+        insert into keyBoxCardPropertyMap
+        (
+        	cardNo
+	        ,propertyId
+	        ,fkKeyBoxId
+	        ,isStore
+	        ,keyType
+	        ,keyBelongId
+	        ,keyNo
+	        <isNotEmpty property="deleteFlag" prepend=",">deleteFlag</isNotEmpty>
+        )
+        values
+        (
+	        #cardNo#
+	        ,#propertyId#
+	        ,#fkKeyBoxId#
+	        ,#isStore#
+	        ,#keyType#
+	        ,#keyBelongId#
+	        ,#keyNo#
+	        <isNotEmpty property="deleteFlag" prepend=",">#deleteFlag#</isNotEmpty>
+        )
+        <selectKey resultClass="integer" keyProperty="id">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
+    
+    <update id="update" parameterClass="keyBoxCardProperty">
+        UPDATE 
+        	keyBoxCardPropertyMap 
+        SET 
+        	cardNo = #cardNo#
+	        ,propertyId = #propertyId#
+	        ,fkKeyBoxId = #fkKeyBoxId#
+	        ,isStore = #isStore#
+	        ,keyType = #keyType#
+	        ,keyBelongId = #keyBelongId#
+	        ,deleteFlag = #deleteFlag#
+	        ,updatedAt = GETDATE()
+        WHERE id = #id# 
+    </update>
+
+	<update id="updateByCardNo" parameterClass="keyBoxCardProperty">
+        UPDATE 
+        	keyBoxCardPropertyMap 
+        SET 
+        	updatedAt = GETDATE()
+	        ,fkKeyBoxId = $fkKeyBoxId$
+	        <isNotNull property="propertyId" prepend=" , ">propertyId = #propertyId#</isNotNull>
+	        <isNotNull property="isStore" prepend=" , ">isStore = $isStore$</isNotNull>
+	        <isNotNull property="keyType" prepend=" , ">keyType = #keyType#</isNotNull>
+	        <isNotNull property="keyBelongId" prepend=" , ">keyBelongId = $keyBelongId$</isNotNull>
+        WHERE cardNo = #cardNo# AND deleteFlag = 0
+    </update>
+    
+	<update id="updateIsStore" parameterClass="hashmap">
+        UPDATE keyBoxCardPropertyMap 
+        SET 
+        	updatedAt = GETDATE(),
+        	isStore = $isStore$,
+        	fkKeyBoxId = $fkKeyBoxId$
+        WHERE cardNo = #cardNo# AND deleteFlag = 0
+    </update>
+    
+    <update id="recoverDelete" parameterClass="integer" >
+		UPDATE 
+			keyBoxCardPropertyMap 
+		SET 
+			updatedAt = GETDATE(),
+			deleteFlag = 0 
+		WHERE id = $id$
+	</update>
+	
+    <select id="findById" parameterClass="integer" resultClass="keyBoxCardProperty">
+        SELECT 
+	        a.id
+	        ,a.cardNo
+	        ,a.propertyId
+	        ,a.fkKeyBoxId
+	        ,a.isStore
+	        ,a.keyType
+	        ,a.keyBelongId
+	        ,a.deleteFlag
+	        ,a.keyNo
+	        ,b.org_name storeName
+	        ,c.orgName deptName
+	        ,c.userName empName
+        FROM keyBoxCardPropertyMap a WITH(NOLOCK), oms.dbo.V_OMS_ORGANIZATION b, oms.dbo.v2_employee_final c
+		WHERE a.id = $id$
+			AND a.fkKeyBoxId = b.id
+			AND a.keyBelongId = c.userCode
+    </select>
+    
+    <select id="findByPropertyId" parameterClass="string" resultClass="keyBoxCardProperty">
+          SELECT TOP 1
+          	a.id
+	        ,a.cardNo
+	        ,a.propertyId
+	        ,a.fkKeyBoxId
+	        ,a.isStore
+	        ,a.keyType
+	        ,a.keyBelongId
+	        ,a.deleteFlag
+	        ,a.keyNo
+	        ,c.ID storeId
+	        ,c.org_name storeName
+	        ,d.orgName deptName
+	        ,d.userName empName
+        FROM keyBoxCardPropertyMap a WITH(NOLOCK), keyBox b WITH(NOLOCK), 
+        	oms.dbo.V_OMS_ORGANIZATION c, oms.dbo.v2_employee_final d
+		WHERE a.propertyId = #value#
+			AND a.deleteFlag = 0
+			AND a.fkKeyBoxId = b.id
+			AND b.fkStoreId = c.id
+			AND a.keyBelongId = d.userCode
+    </select>
+    
+    
+    <select id="findForNotice" resultClass="keyBoxCardProperty">
+		SELECT b.fkKeyBoxId,org.org_name as storeName,c.address, c.RoomNo,d.EstateName
+		FROM keyBoxCardPropertyMap b WITH(NOLOCK)
+			left join keyBox kb WITH(NOLOCK) on kb.id= b.fkKeyBoxId
+			left join oms.dbo.V_OMS_ORGANIZATION org WITH(NOLOCK) on org.ID=kb.fkStoreId
+			LEFT JOIN Property c WITH(NOLOCK) ON c.PropertyID = b.propertyId
+			LEFT JOIN Estate d WITH(NOLOCK) ON d.EstateID = c.EstateID
+		WHERE b.deleteFlag = 0 AND b.propertyId=#propertyId#
+    </select>
+    
+    <select id="queryByPropertyIds" parameterClass="string" resultClass="keyBoxCardProperty">
+        SELECT 
+        	id
+	        ,cardNo
+	        ,propertyId
+	        ,fkKeyBoxId
+	        ,isStore
+	        ,keyType
+	        ,keyBelongId
+	        ,deleteFlag
+        FROM keyBoxCardPropertyMap WITH(NOLOCK)
+        WHERE deleteFlag = 0
+        	AND propertyId IN ($ids$)
+    </select>
+    
+    <select id="queryByCardNos" parameterClass="string" resultClass="keyBoxCardProperty">
+        SELECT id
+	        ,cardNo
+	        ,propertyId
+	        ,fkKeyBoxId
+	        ,isStore
+	        ,keyType
+	        ,keyBelongId
+	        ,deleteFlag
+        FROM keyBoxCardPropertyMap WITH(NOLOCK)
+        WHERE deleteFlag = 0
+        	AND cardNo IN ($ids$)
+    </select>
+    
+    <select id="findByCardNo" parameterClass="string" resultClass="keyBoxCardProperty">
+    	SELECT id
+	    	,cardNo
+	        ,propertyId
+	        ,fkKeyBoxId
+	        ,isStore
+	        ,keyType
+	        ,keyBelongId
+	        ,deleteFlag
+        FROM keyBoxCardPropertyMap WITH(NOLOCK)
+		WHERE cardNo = #cardNo#
+		AND deleteFlag=0
+    </select>
+
+
+    
+    <select id="query" parameterClass="keyBoxCardProperty" resultClass="keyBoxCardProperty">
+        SELECT id
+	        ,cardNo
+	        ,propertyId
+	        ,fkKeyBoxId
+	        ,isStore
+	        ,keyType
+	        ,keyBelongId
+	        ,deleteFlag
+        FROM keyBoxCardPropertyMap WITH(NOLOCK)
+        WHERE deleteFlag=0
+        <isNotNull property="cardNo" prepend=" and ">cardNo = #cardNo#</isNotNull>
+        <isNotNull property="propertyId" prepend=" and ">propertyId = #propertyId#</isNotNull>
+       	<isNotNull property="fkKeyBoxId" prepend=" and ">fkKeyBoxId = #fkKeyBoxId#</isNotNull>
+       	<isNotNull property="isStore" prepend=" and ">isStore = #isStore#</isNotNull>
+       	<isNotNull property="keyType" prepend=" and ">keyType = #keyType#</isNotNull>
+       	<isNotNull property="keyBelongId" prepend=" and ">keyBelongId = #keyBelongId#</isNotNull>
+    </select>
+
+	<select id="queryOnlineKeyByBoxId" parameterClass="integer" resultClass="keyBoxCardProperty">
+		SELECT
+			a.addr, a.cardNo, 
+			b.propertyId, a.fkKeyBoxId, b.isStore, b.keyBelongId, b.keyType, 
+			c.address, c.RoomNo,c.status as propertyStatus,
+			d.EstateName
+		FROM keyBoxCardList a WITH(NOLOCK)
+			LEFT JOIN keyBoxCardPropertyMap b WITH(NOLOCK) ON a.cardNo = b.cardNo 
+			LEFT JOIN Property c WITH(NOLOCK) ON c.PropertyID = b.propertyId
+			LEFT JOIN Estate d WITH(NOLOCK) ON d.EstateID = c.EstateID
+		WHERE 
+			a.deleteFlag = 0 AND b.deleteFlag = 0
+			AND a.fkKeyBoxId = $fkKeyBoxId$
+		ORDER BY a.addr 
+    </select>
+
+    <select id="queryOnlineKeyByPropertyId" parameterClass="hashmap" resultClass="keyBoxCardProperty">
+        SELECT top 1
+        a.addr, a.cardNo,
+        b.propertyId, a.fkKeyBoxId, b.isStore, b.keyBelongId, b.keyType,
+        c.address, c.RoomNo,
+        d.EstateName
+        FROM keyBoxCardList a WITH(NOLOCK)
+        LEFT JOIN keyBoxCardPropertyMap b WITH(NOLOCK) ON a.cardNo = b.cardNo
+        LEFT JOIN Property c WITH(NOLOCK) ON c.PropertyID = b.propertyId
+        LEFT JOIN Estate d WITH(NOLOCK) ON d.EstateID = c.EstateID
+        WHERE
+        a.deleteFlag = 0 AND b.deleteFlag = 0
+        AND b.propertyId = #propertyId#
+        AND a.fkKeyBoxId=$keyBoxId$
+        ORDER BY a.addr
+    </select>
+    
+    <select id="findByKeyBoxId" parameterClass="integer" resultClass="keyBoxCardProperty">
+           SELECT p.cardNo ,
+                p.isStore
+           FROM   dbo.keyBoxCardPropertyMap p WITH(NOLOCK)
+           WHERE  p.fkKeyBoxId = $keyBoxId$
+    </select>
+    
+    <select id="queryNotStoreByKeyBoxId" parameterClass="integer" resultClass="keyBoxCardProperty">
+    	SELECT  
+			a.propertyId ,
+			a.fkKeyBoxId ,
+			a.isStore ,
+			a.keyBelongId ,
+			a.keyType ,
+			b.address ,
+			b.RoomNo ,
+			c.EstateName,b.status as propertyStatus
+		FROM    keyBoxCardPropertyMap a WITH(NOLOCK)
+		        LEFT JOIN Property b WITH(NOLOCK) ON b.PropertyID = a.propertyId
+		        LEFT JOIN Estate c WITH(NOLOCK) ON c.EstateID = b.EstateID
+		WHERE   a.fkKeyBoxId = $fkKeyBoxId$
+		        AND a.deleteFlag = 0
+		        AND a.cardNo NOT IN ( SELECT l.cardNo FROM dbo.keyBoxCardList l WITH(NOLOCK)
+		                              WHERE l.deleteFlag = 0 AND l.fkKeyBoxId = $fkKeyBoxId$ )
+
+    </select>
+			
+    <update id="deleteById" parameterClass="integer">
+    	UPDATE keyBoxCardPropertyMap SET deleteFlag = 1, updatedAt = GETDATE() WHERE id = $id$ 
+    </update>
+    
+    <update id="deleteByCardNo" parameterClass="string">
+    	UPDATE keyBoxCardPropertyMap SET deleteFlag=1, updatedAt = GETDATE() WHERE cardNo = #cardNo# 
+    </update>
+
+    <update id="cancelKey" parameterClass="string">
+        UPDATE
+          dbo.keyBoxCardPropertyMap
+        SET
+          deleteFlag = 1, updatedAt = GETDATE()
+        WHERE deleteFlag = 0 AND propertyId = #value#;
+
+        UPDATE
+          dbo.propertyInfo
+        SET
+          havakey = 0
+        WHERE propertyId = #value#;
+    </update>
+
+    <select id="queryAll"   resultClass="keyBoxCardProperty">
+        SELECT  *
+        FROM    dbo.keyBoxCardPropertyMap m
+        WHERE   m.deleteFlag = 0
+    </select>
+    
+</sqlMap>

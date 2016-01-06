@@ -1,0 +1,25 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyContactSynthForLianJiaMapper">
+
+    <!--插入到缓冲表-->
+    <insert id="insert" parameterType="integer">
+        INSERT INTO propertyContactSynthForLianJia(
+            propertyContactId,--德佑联系人id
+            ownerName,  --业主姓名
+            ownerPhone, --业主电话号码（解密后Md5)
+            ownerType, --业主类型（0：普通业主 --统一为0）
+            agentCode,--更新经纪人code (转换成链家员工号)
+            status --图片状态：0删除  1：新增
+        )VALUES (
+            #{propertyContactId},--德佑联系人id
+            '',
+            '',
+            '',
+            '',
+            1
+        )
+    </insert>
+</mapper>

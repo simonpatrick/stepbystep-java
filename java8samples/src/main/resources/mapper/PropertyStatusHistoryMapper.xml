@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyStatusHistoryMapper">
+
+    <insert id="insert">
+		insert into PropertyStatusHistory
+        (propertyId, fromEmpNo, toEmpNo, fromStatus, toStatus, type, startHandleAt,versionId,ruleId,relatedEmpNo)
+        values
+        (#{propertyId}, #{fromEmpNo}, #{toEmpNo}, #{fromStatus}, #{toStatus}, #{type}, #{startHandleAt},#{versionId},#{ruleId},#{relatedEmpNo})
+	</insert>
+
+    <update id="clearRentHistory">
+        update a set status = 2, completedAt = getdate(), handledResult = #{handledResult}, updatedAt=getdate()
+        from PropertyStatusHistory a
+        where propertyId = #{propertyId} and type = 'rent' and status != 2
+    </update>
+
+    <update id="clearSaleHistory">
+        update a set status = 2, completedAt = getdate(), handledResult = #{handledResult}, updatedAt=getdate()
+        from PropertyStatusHistory a
+        where propertyId = #{propertyId} and type = 'sale' and status != 2
+    </update>
+
+	<update id="initJobHistory">
+        update a set ruleId = #{ruleId}
+        from PropertyStatusHistory a
+        where versionId is not null 
+    </update>
+    
+    <select id="queryLastStatusHistory" resultType="PropertyStatusHistory">
+        select top 1 * from PropertyStatusHistory with(nolock)
+        where propertyId = #{propertyId} and type = #{type} and status != 2
+        order by id desc
+    </select>
+    
+    <select id="queryNoRecieveStatusHistory" resultType="PropertyStatusHistory">
+        select * from PropertyStatusHistory with(nolock)
+        where startHandleAt IS NULL
+        and status != 2
+        AND <![CDATA[ createdAt < GETDATE() - 7 ]]>
+        and <![CDATA[(updatedAt IS NULL OR updatedAt < GETDATE() - 7)]]>
+    </select>
+    
+    
+    <select id="queryMaxVersionId" resultType="Integer" >
+        select Max(versionId) from PropertyStatusHistory with(nolock)
+    </select>
+    
+    <select id="queryAllVersion" resultType="PropertyStatusHistoryView" >
+          select ph.completedAt,ph.createdAt,ph.fromEmpNo,ph.handledResult,ph.toEmpNo,ph.type,ph.versionId,ph.propertyId,ph.fromStatus,ph.followDates,
+         			ps.saleStartHandleAt,ps.rentStartHandleAt,
+					p.saleStatus,p.rentStatus,p.specialStatus
+			 from (Select a.*,b.followDates from PropertyStatusHistory a ,AutoEditStatusRule b with(nolock) where a.versionId is not null and a.ruleId = b.id
+			 	
+			 		<if test="beginDate != null">
+					  and a.createdAt >=#{beginDate}
+					 </if>
+					 
+					 <if test="endDate != null ">
+					  and a.createdAt &lt; #{endDate}
+					 </if>
+			 	
+			 	) ph 
+				left join PropertyStat ps with(nolock) on ps.propertyId = ph.propertyId and ps.status !=-1
+				left join property  p with(nolock) on p.PropertyID = ph.propertyId 
+    </select>
+    
+    <select id="queryByPhase" resultType="PropertyStatusHistoryView" >
+          select ph.completedAt,ph.createdAt,ph.fromEmpNo,ph.handledResult,ph.toEmpNo,ph.type,ph.versionId,ph.propertyId,ph.fromStatus,ph.followDates,
+         			ps.saleStartHandleAt,ps.rentStartHandleAt,
+					p.saleStatus,p.rentStatus,p.specialStatus
+			 from (Select a.*,b.followDates from PropertyStatusHistory a ,AutoEditStatusRule b with(nolock) where a.versionId is not null and a.ruleId = b.id
+					 <if test="treated">
+					  and a.handledResult is not null
+					 </if>
+					 
+					 <if test="!treated">
+					  and a.handledResult is null
+					 </if>
+					 
+					 <if test="beginDate != null">
+					  and a.createdAt >=#{beginDate}
+					 </if>
+					 
+					 <if test="endDate != null ">
+					  and a.createdAt &lt; #{endDate}
+					 </if>
+					 
+			 		) ph 
+				left join PropertyStat ps with(nolock) on ps.propertyId = ph.propertyId and ps.status !=-1
+				left join property  p with(nolock) on p.PropertyID = ph.propertyId 
+    </select>
+    
+    <update id="updateToEmpNoById">
+        update a set toEmpNo = #{toEmpNo}, updatedAt=getdate()
+        from PropertyStatusHistory a
+        where id = #{id}
+    </update>
+
+    <update id="updateSaleToEmpNoByPropertyId">
+        update a set toEmpNo = #{afterToEmpNo}, updatedAt = getDate()
+        from PropertyStatusHistory a
+        where propertyId = #{propertyId}
+        and type = 'sale'
+        and status != 2
+    </update>
+
+    <update id="updateSaleToEmpNoByToEmpNo">
+        update a set toEmpNo = #{afterToEmpNo}, updatedAt = getdate()
+        from PropertyStatusHistory a
+        where toEmpNo = #{beforeToEmpNo}
+        and type = 'sale'
+        and status != 2
+    </update>
+
+    <update id="updateRentToEmpNoByPropertyId">
+        update a set toEmpNo = #{afterToEmpNo}, updatedAt = getdate()
+        from PropertyStatusHistory a
+        where propertyId = #{propertyId}
+        and type = 'rent'
+        and status != 2
+    </update>
+
+    <update id="updateRentToEmpNoByToEmpNo">
+        update a set toEmpNo = #{afterToEmpNo}, updatedAt = getdate()
+        from PropertyStatusHistory a
+        where toEmpNo = #{beforeToEmpNo}
+        and type = 'rent'
+        and status != 2
+    </update>
+
+    <select id="hasStatusNotice" resultType="Integer">
+        select count(1) from propertyStatusHistory with(nolock)
+        where propertyId = #{propertyId} and status = 0
+    </select>
+
+    <select id="queryNotCompleteByPropertyId" resultType="PropertyStatusHistoryView">
+        select * from propertyStatusHistory with(nolock)
+        where propertyId = #{propertyId} and status = 0
+        and completedAt is null
+    </select>
+
+    <select id="queryNotComplete" resultType="PropertyStatusHistory">
+        select a.* from propertyStatusHistory a  with(nolock)
+         LEFT JOIN property p with(nolock) ON a.propertyId = p.PropertyID
+        left join v_fy_estate est on p.EstateId = est.EstateId
+        where a.status = 0
+        and a.completedAt is null
+        and est.cityName = '${cityName}'
+        and a.toEmpNo in
+        <foreach collection="empNos" index="index" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="queryNotCompleteByRuleId" resultType="PropertyStatusHistory">
+        select * from propertyStatusHistory with(nolock)
+        where status = 0
+        and completedAt is null
+        and relatedEmpNo =#{relatedEmpNo}
+        and ruleId=#{ruleId}
+    </select>
+
+    <select id="queryNoStartStatusHistory" resultType="PropertyStatusHistory">
+        select * from propertyStatusHistory with(nolock)
+        where type = #{type} and status = 0
+        and startHandleAt is null
+        and toEmpNo in
+        <foreach collection="empNos" separator="," item="item" index="index" open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <update id="updateStartStatusProtect">
+        update a set startHandleAt = getDate(), updatedAt = getdate()
+        from propertyStatusHistory a
+        where id = #{id}
+    </update>
+    
+    
+    <!-- 查询需要发送无效通知的房源 -->
+    <select id="queryInvalidProperty" resultType="com.dooioo.fy.temp.Property" parameterType="hashMap">
+		select top 15000 propertyId,saleStatus,rentStatus,saleEmpNo,rentEmpNo,status
+        from  property v WITH ( NOLOCK ) INNER JOIN dbo.v_fy_estate est ON v.EstateID = est.EstateID
+        where
+		 (v.saleStatus = '出售' or v.rentStatus ='出租') and v.RegDate &lt; DateAdd(DAY,-#{followDay},getdate()) 
+		 and not exists (select 1 from AutoEditStatusRuleWhiteList wl with(nolock) where wl.PropertyID=v.propertyId )
+		 and not exists (select 1 from propertyStatusHistory h with(nolock) where v.PropertyID=h.propertyId and  status =0 )
+		 and not exists (select 1 from PropertyDescHistory dh with(nolock) where createdAt >DateAdd(DAY,-#{followDay},getdate()) and content  not like '描述方由%转给%' and v.propertyId = dh.propertyId)
+		 and not exists (Select 1 from propertyEntrustApply eh with(nolock) where createdAt >DateAdd(DAY,-#{followDay},getdate()) and v.propertyId = eh.propertyId)
+		 and not exists (select 1 from FollowHistory fh with(nolock) where FollowCategory=1 and FollowDate>DateAdd(DAY,-#{followDay},getdate()) and v.PropertyID=fh.PropertyID)
+		 <if test="responsibility != null">
+			 and est.responsibility = #{responsibility}
+		 </if>
+    </select>
+    
+    <select id="countInvalidProperty" resultType="Integer" parameterType="hashMap">
+		select count(1)
+        from property v WITH ( NOLOCK ) INNER JOIN dbo.v_fy_estate est ON v.EstateID = est.EstateID
+        where
+		 (v.saleStatus = '出售' or v.rentStatus ='出租') and v.RegDate &lt; DateAdd(DAY,-#{followDay},getdate()) 
+		 and not exists (select 1 from AutoEditStatusRuleWhiteList wl with(nolock) where wl.PropertyID=v.propertyId )
+		 and not exists (select 1 from propertyStatusHistory h with(nolock) where v.PropertyID=h.propertyId and  status =0 )
+		 and not exists (select 1 from PropertyDescHistory dh with(nolock) where createdAt >DateAdd(DAY,-#{followDay},getdate()) and content  not like '描述方由%转给%' and v.propertyId = dh.propertyId)
+		 and not exists (Select 1 from propertyEntrustApply eh with(nolock) where createdAt >DateAdd(DAY,-#{followDay},getdate()) and v.propertyId = eh.propertyId)
+		 and not exists (select 1 from FollowHistory fh with(nolock) where FollowCategory=1 and FollowDate>DateAdd(DAY,-#{followDay},getdate()) and v.PropertyID=fh.PropertyID)
+		 <if test="responsibility != null">
+			 and est.responsibility = #{responsibility}
+		 </if>
+    </select>
+
+	<select id="queryByPropertyTypeRuleId" resultType="PropertyStatusHistory">
+		select top 1 * from propertyStatusHistory with(nolock)
+        where status = 0 
+	        and ruleId = #{ruleId}
+	        and propertyId =#{propertyId}
+	        and type =#{type}
+	        order by createdAt desc
+	</select>
+</mapper>

@@ -1,0 +1,28 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyPageViewMapper">
+	<!--查询房源浏览总量-->
+	<select id="findPropertyPageViewCount" resultType="int">
+			SELECT
+				COUNT (0)
+		    FROM PropertyPageView
+	</select>
+
+	<!--插入浏览记录-->
+	<insert id="insertPropertyPageView" parameterType="map">
+		INSERT INTO [dbo].[PropertyPageView](
+			propertyId,
+			pageViewCount,
+			createTime,
+			viewTime
+		)
+		VALUES(
+			#{propertyId},
+			#{pageViewCount},
+			getdate(),
+			#{viewTime}
+		)
+	</insert>
+</mapper>

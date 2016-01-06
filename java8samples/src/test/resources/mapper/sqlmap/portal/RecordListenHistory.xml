@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+        PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="RecordListenHistory">
+    <typeAlias alias="recordListenHistory" type="com.dooioo.portal.model.RecordListenHistory"/>
+
+    <insert id="insert" parameterClass="recordListenHistory" >
+        INSERT INTO RecordListenHistory(empNo, telPostHistoryId)
+        VALUES
+        (#empNo#, #telPostHistoryId#)
+    </insert>
+
+    <select id="countByFollowId" parameterClass="string" resultClass="int">
+        select COUNT(distinct(empNo)) from RecordListenHistory rlh with(nolock) inner join FollowCallRelation fcr with(nolock) on rlh.telPostHistoryId = fcr.telPostHistoryId
+        where fcr.status = 0 and followId = #id# and rlh.sysName = 'property'
+    </select>
+</sqlMap>

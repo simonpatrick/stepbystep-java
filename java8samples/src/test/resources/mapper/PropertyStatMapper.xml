@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyStatMapper">
+
+	<update id="updateLastFollowDate" parameterType="map">
+        UPDATE ps SET updatedAt=getDate(),
+        	lastFollowDate =#{lastFollowDate}
+        FROM dbo.PropertyStat ps
+        WHERE ps.propertyId = #{propertyId}
+    </update>
+    
+    <update id="updateHasMobilePhone" parameterType="PropertyStatParam">
+        UPDATE ps SET hasMobilePhone = #{hasMobilePhone,jdbcType=VARCHAR}
+        FROM dbo.PropertyStat ps
+        WHERE ps.propertyId = #{propertyId,jdbcType=VARCHAR}
+    </update>
+    
+ 	<update id="updateMainPicture" parameterType="map">
+        UPDATE ps SET updatedAt=getDate(),
+        	mainPictureId =#{mainPictureId},mainPicturePath=#{mainPicturePath}
+        FROM dbo.PropertyStat ps
+        WHERE ps.propertyId = #{propertyId}
+    </update>
+
+
+    <update id="clearRentStartHandleAt">
+        update a set rentStartHandleAt = null
+        from propertyStat a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="clearSaleStartHandleAt">
+        update a set saleStartHandleAt = null
+        from propertyStat a
+        where propertyId = #{propertyId}
+    </update>
+
+    <select id="queryOverTimeSaleProtectProperty" resultType="PropertyStatView">
+        select * from propertyStat with(nolock)
+        where saleStartHandleAt &lt; (getDate() - #{protectionDay})
+    </select>
+
+    <select id="queryOverTimeRentProtectProperty" resultType="PropertyStatView">
+        select * from propertyStat with(nolock)
+        where rentStartHandleAt &lt; (getDate() - #{protectionDay})
+    </select>
+
+    <update id="startSaleStartHandleAt">
+        update a set saleStartHandleAt = getDate()
+        from propertyStat a
+        where propertyId = #{propertyId} and  saleStartHandleAt is null
+    </update>
+
+    <update id="startRentStartHandleAt">
+        update a set rentStartHandleAt = getDate()
+        from propertyStat a
+        where propertyId = #{propertyId} and  rentStartHandleAt is null
+    </update>
+
+    <select id="queryNotCompleteStatusProtect" resultType="PropertyStatView">
+        select distinct(ps.propertyId)
+        from propertyStat ps with(nolock)
+        inner join PropertyStatusHistory psh with(nolock) on ps.propertyId = psh.propertyId
+        inner join Property p  with(nolock) on ps.propertyId=p.propertyId
+        where  p.flagDeleted = 0 and p.flagTrashed = 0
+        and ps.status != -1 and psh.status  != -1 and psh.completedAt is null
+        and ((p.saleEmpNo in ($empNos$) and psh.type = 'sale') or (p.rentEmpNo in ($empNos$) and psh.type = 'rent'))
+    </select>
+
+    <insert id="insert">
+        insert into propertyStat(propertyId)
+        values (#{propertyId})
+    </insert>
+
+    <update id="updateSaleKeepDate">
+        update a set saleKeepDate = getDate()
+        from propertyStat a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateSaleKeepDateByDK">
+        UPDATE ps SET ps.saleKeepDate = a.createdAt
+        FROM dbo.PropertyStat ps WITH(nolock)
+        INNER JOIN (SELECT iwp.propertyId, iwp.createdAt, ROW_NUMBER() OVER (PARTITION BY propertyId ORDER BY createdAt desc) AS row
+        FROM keyuan.dbo.V_InquiryTakeWatch iwp WITH(NOLOCK)
+        WHERE iwp.takeType = '二手' AND iwp.createdAt > GETDATE() - 7) a ON a.propertyId = ps.propertyId AND row = 1
+        WHERE ps.saleKeepDate IS NULL OR <![CDATA[ ps.saleKeepDate < a.createdAt ]]>
+    </update>
+
+    <select id="queryRentPropertyBothEmptyNeedWashToJH" resultType="WashRentPropertyCheck">
+        SELECT TOP ${topN} 
+	vp.propertyId,
+	vp.propertyNo,
+		1 AS type,
+	vp.rentEmpNo,vp.propertyUsage,vp.roomNo,est.estateName,vp.address as building,
+	vp.PropertyLook,
+	pi.currentStatus,
+	pwh.checkTime
+	  FROM dbo.property vp WITH ( NOLOCK )
+            LEFT JOIN dbo.PropertyInfo pi WITH ( NOLOCK ) ON vp.PropertyID = pi.propertyId
+            INNER JOIN dbo.v_fy_estate est ON vp.EstateID = est.EstateID
+	 LEFT JOIN 
+	 (SELECT propertyId,checkTime,checkEmpNo FROM
+		 (SELECT propertyId,checkTime,checkEmpNo,
+				 ROW_NUMBER() OVER (PARTITION BY propertyId
+									ORDER BY checkTime DESC) AS ROW
+		  FROM dbo.PropertyWashHistory WITH(nolock)
+		   WHERE (type = 1 OR type = 2 OR type =3 ) AND STATUS !=-1
+		   ) b
+		 WHERE b.ROW = 1) pwh ON pwh.propertyId = vp.PropertyID
+
+	  	WHERE est.responsibility = 1 AND vp.rentStatus ='出租'
+	  	 AND ISNULL(pi.currentStatus,'') = '' AND ISNULL(vp.PropertyLook,'') = ''
+	  	AND NOT EXISTS (SELECT pwhi.propertyId FROM dbo.PropertyWashHistory pwhi WITH(nolock)
+							WHERE pwhi.propertyId = vp.PropertyID AND (pwhi.type = 1 OR pwhi.type = 2 OR pwhi.type =3 ) AND pwhi.STATUS !=-1 AND pwhi.createdAt >#{checkTime} )
+
+	  	
+    </select>
+    
+    <select id="queryRentPropertyOnlyOneEmptyNeedWashToJH" resultType="WashRentPropertyCheck">
+        SELECT TOP ${topN} 
+	vp.propertyId,
+	vp.propertyNo,
+	<!-- 租约情况 -->
+	CASE WHEN ISNULL(pi.currentStatus,'') != ''  AND ISNULL(cus.createdAt,'1970-01-01') >= ISNULL(pwh.checkTime,'1970-01-01') AND ISNULL(cus.createdAt,'1970-01-01') >= vp.onlineDate THEN  cus.createdAt
+		WHEN ISNULL(pi.currentStatus,'') != ''  AND  ISNULL(pwh.checkTime,'1970-01-01') >= ISNULL(cus.createdAt,'1970-01-01') AND ISNULL(pwh.checkTime,'1970-01-01') >= vp.onlineDate THEN  pwh.checkTime
+		WHEN ISNULL(pi.currentStatus,'') != ''  AND vp.onlineDate >= ISNULL(pwh.checkTime,'1970-01-01') AND vp.onlineDate >=ISNULL(cus.createdAt,'1970-01-01') THEN  vp.onlineDate
+		
+		<!-- 看房情况 -->
+		WHEN ISNULL(pi.currentStatus,'') = ''  AND ISNULL(lookSta.createdAt,'1970-01-01') >= ISNULL(pwh.checkTime,'1970-01-01') AND ISNULL(lookSta.createdAt,'1970-01-01') >= vp.onlineDate THEN  lookSta.createdAt
+		WHEN ISNULL(pi.currentStatus,'') = ''  AND  ISNULL(pwh.checkTime,'1970-01-01') >= ISNULL(lookSta.createdAt,'1970-01-01') AND ISNULL(pwh.checkTime,'1970-01-01') >= vp.onlineDate THEN  pwh.checkTime
+		WHEN ISNULL(pi.currentStatus,'') = ''  AND vp.onlineDate >= ISNULL(pwh.checkTime,'1970-01-01') AND vp.onlineDate >=ISNULL(lookSta.createdAt,'1970-01-01') THEN  vp.onlineDate
+	END AS rentkeepDate ,
+	
+	<!-- 参考：IConst.WashPropertyType -->
+	CASE WHEN ISNULL(cus.createdAt,'1970-01-01') &lt; #{checkTime} AND ISNULL(lookSta.createdAt,'1970-01-01') &lt; #{checkTime} THEN 1
+		 WHEN ISNULL(cus.createdAt,'1970-01-01') &lt; #{checkTime}  THEN 2
+		 WHEN ISNULL(lookSta.createdAt,'1970-01-01') &lt; #{checkTime} THEN 3
+		 END AS type ,
+		 
+	vp.rentEmpNo,vp.propertyUsage,vp.roomNo,est.estateName,vp.address as building,
+	vp.onlineDate,
+	vp.PropertyLook,
+        pi.currentStatus,
+	cus.createdAt AS currentModifyTime,
+	lookSta.createdAt AS lookHouseModifyTime,
+	pwh.checkTime
+	  FROM dbo.property vp WITH ( NOLOCK )
+        LEFT JOIN dbo.PropertyInfo pi WITH ( NOLOCK ) ON vp.PropertyID = pi.propertyId
+        INNER JOIN dbo.v_fy_estate est ON vp.EstateID = est.EstateID
+	 LEFT JOIN  
+	  (SELECT * FROM
+		 (SELECT propertyId,beforeValue,afterValue,employeeId,createdAt,
+				 ROW_NUMBER() OVER (PARTITION BY propertyId
+									ORDER BY createdAt DESC) AS ROW
+		  FROM dbo.PropertyInfoHistory WITH(nolock)
+		  WHERE fieldName = 'currentStatus'  ) a
+		 WHERE a.ROW = 1) cus ON cus.propertyId = vp.PropertyID
+	  LEFT JOIN  
+	  (SELECT * FROM
+		 (SELECT propertyId,beforeValue,afterValue,employeeId,createdAt,
+				 ROW_NUMBER() OVER (PARTITION BY propertyId
+									ORDER BY createdAt DESC) AS ROW
+		  FROM dbo.PropertyInfoHistory WITH(nolock)
+		  WHERE fieldName = 'lookHouseStatus'  ) b
+		 WHERE b.ROW = 1) lookSta ON lookSta.propertyId = vp.PropertyID
+	 LEFT JOIN 
+	 (SELECT propertyId,checkTime,checkEmpNo FROM
+		 (SELECT propertyId,checkTime,checkEmpNo,
+				 ROW_NUMBER() OVER (PARTITION BY propertyId
+									ORDER BY checkTime DESC) AS ROW
+		  FROM dbo.PropertyWashHistory WITH(nolock)
+		  WHERE (type = 1 OR type = 2 OR type =3 ) AND STATUS !=-1
+		   ) b
+		 WHERE b.ROW = 1) pwh ON pwh.propertyId = vp.PropertyID
+		 
+	  	WHERE est.responsibility = 1 AND vp.rentStatus ='出租'
+	  	  AND (( ISNULL(pi.currentStatus,'') = '' AND ISNULL(vp.PropertyLook,'') != '' )
+	  			OR ( ISNULL(pi.currentStatus,'') != '' AND ISNULL(vp.PropertyLook,'') = '' ) )
+	  	   AND (ISNULL(cus.createdAt,'1970-01-01') &lt; #{checkTime} OR ISNULL(lookSta.createdAt,'1970-01-01') &lt; #{checkTime} )
+	  	   AND vp.onlineDate &lt; #{checkTime}  AND   ISNULL(pwh.checkTime,'1970-01-01') &lt; #{checkTime}
+	  	   AND NOT EXISTS (SELECT pwhi.propertyId FROM dbo.PropertyWashHistory pwhi WITH(nolock)
+							WHERE pwhi.propertyId = vp.PropertyID AND (pwhi.type = 1 OR pwhi.type = 2 OR pwhi.type =3 ) AND pwhi.STATUS !=-1 AND pwhi.createdAt >#{checkTime} )
+	  	ORDER by rentkeepDate ASC
+	  	
+    </select>
+
+<select id="queryPropertyBothFilledNeedWashToJH" resultType="WashRentPropertyCheck">
+SELECT TOP ${topN}  *,
+	  	CASE WHEN ISNULL(currentKeepDate,'1970-01-01') &lt; ISNULL(lookstaKeepDate,'1970-01-01')  THEN  currentKeepDate
+		 ELSE lookstaKeepDate
+	END AS rentkeepDate  
+	FROM 
+	(
+	  	SELECT 
+	vp.propertyId,
+	vp.propertyNo,
+	CASE WHEN cus.createdAt IS NOT NULL AND  cus.createdAt >=ISNULL(pwh.checkTime,'1970-01-01') AND cus.createdAt >= ISNULL(vp.onlineDate,'1970-01-01') THEN  cus.createdAt
+		 WHEN  pwh.checkTime IS NOT NULL AND  pwh.checkTime  >= ISNULL(cus.createdAt,'1970-01-01')    AND  pwh.checkTime >= ISNULL(vp.onlineDate,'1970-01-01') THEN  pwh.checkTime
+		 WHEN vp.onlineDate IS NOT NULL AND  vp.onlineDate  >= ISNULL(cus.createdAt,'1970-01-01')    AND vp.onlineDate >= ISNULL(pwh.checkTime,'1970-01-01') THEN  vp.onlineDate
+	END AS currentKeepDate ,
+	
+	CASE WHEN lookSta.createdAt IS NOT NULL   AND  lookSta.createdAt  >= ISNULL(pwh.checkTime,'1970-01-01')  AND lookSta.createdAt  >= ISNULL(vp.onlineDate,'1970-01-01') THEN  lookSta.createdAt
+	WHEN pwh.checkTime IS NOT NULL AND  pwh.checkTime  >= ISNULL(lookSta.createdAt,'1970-01-01')  AND  pwh.checkTime >= ISNULL(vp.onlineDate,'1970-01-01') THEN  pwh.checkTime
+	WHEN vp.onlineDate IS NOT NULL AND vp.onlineDate  >= ISNULL(lookSta.createdAt,'1970-01-01') AND vp.onlineDate >= ISNULL(pwh.checkTime,'1970-01-01') THEN  vp.onlineDate
+	END AS lookstaKeepDate ,
+	
+	CASE WHEN ISNULL(cus.createdAt,'1970-01-01') &lt; #{checkTime} AND ISNULL(lookSta.createdAt,'1970-01-01') &lt; #{checkTime} THEN 1
+		 WHEN ISNULL(cus.createdAt,'1970-01-01') &lt; #{checkTime}  THEN 2
+		 WHEN ISNULL(lookSta.createdAt,'1970-01-01') &lt; #{checkTime} THEN 3
+		 END AS type ,
+		 
+	vp.rentEmpNo,vp.propertyUsage,vp.roomNo,est.estateName,vp.address AS building,
+	vp.onlineDate,
+	vp.PropertyLook,
+	pi.currentStatus,
+	cus.createdAt AS currentModifyTime,
+	lookSta.createdAt AS lookHouseModifyTime,
+	pwh.checkTime
+	  FROM dbo.property vp WITH ( NOLOCK )
+        LEFT JOIN dbo.PropertyInfo pi WITH ( NOLOCK ) ON vp.PropertyID = pi.propertyId
+        INNER JOIN dbo.v_fy_estate est ON vp.EstateID = est.EstateID
+	 LEFT JOIN  
+	  (SELECT * FROM
+		 (SELECT propertyId,beforeValue,afterValue,employeeId,createdAt,
+				 ROW_NUMBER() OVER (PARTITION BY propertyId
+									ORDER BY createdAt DESC) AS ROW
+		  FROM dbo.PropertyInfoHistory WITH(nolock)
+		  WHERE fieldName = 'currentStatus'  ) a
+		 WHERE a.ROW = 1) cus ON cus.propertyId = vp.PropertyID
+	  LEFT JOIN  
+	  (SELECT * FROM
+		 (SELECT propertyId,beforeValue,afterValue,employeeId,createdAt,
+				 ROW_NUMBER() OVER (PARTITION BY propertyId
+									ORDER BY createdAt DESC) AS ROW
+		  FROM dbo.PropertyInfoHistory WITH(nolock)
+		  WHERE fieldName = 'lookHouseStatus'  ) b
+		 WHERE b.ROW = 1) lookSta ON lookSta.propertyId = vp.PropertyID
+	 LEFT JOIN 
+	 (SELECT propertyId,checkTime,checkEmpNo FROM
+		 (SELECT propertyId,checkTime,checkEmpNo,
+				 ROW_NUMBER() OVER (PARTITION BY propertyId
+									ORDER BY checkTime DESC) AS ROW
+		  FROM dbo.PropertyWashHistory WITH(nolock)
+		  WHERE (type = 1 OR type = 2 OR type =3 ) AND STATUS !=-1
+		   ) b
+		 WHERE b.ROW = 1) pwh ON pwh.propertyId = vp.PropertyID
+		 
+	  	WHERE est.responsibility = 1 AND vp.rentStatus ='出租'
+	  	  AND ISNULL(pi.currentStatus,'') != '' AND ISNULL(vp.PropertyLook,'') != ''
+	  	  AND (ISNULL(cus.createdAt,'1970-01-01') &lt; #{checkTime} OR ISNULL(lookSta.createdAt,'1970-01-01') &lt; #{checkTime} )
+	  	  AND vp.onlineDate &lt; #{checkTime}  AND   ISNULL(pwh.checkTime,'1970-01-01') &lt; #{checkTime}
+	  	  AND NOT EXISTS (SELECT pwhi.propertyId FROM dbo.PropertyWashHistory pwhi WITH(nolock)
+							WHERE pwhi.propertyId = vp.PropertyID AND (pwhi.type = 1 OR pwhi.type = 2 OR pwhi.type =3 ) AND pwhi.STATUS !=-1 AND pwhi.createdAt >#{checkTime} )
+	  	)temp   	
+	  	ORDER BY  rentkeepDate ASC
+</select>
+
+<select id="queryPropertyNeedWashToJH" resultType="propertyView">
+        SELECT TOP ${topN}
+        ps.propertyId ,
+        p.propertyNo ,
+        e.EstateName ,
+        p.Address ,
+        p.RoomNo ,
+        p.saleEmpNo ,
+        ps.saleKeepDate
+        FROM    dbo.PropertyStat ps WITH ( NOLOCK )
+                INNER JOIN property p WITH ( NOLOCK ) ON p.PropertyID = ps.propertyId AND p.FlagDeleted = 0 AND p.FlagTrashed = 0
+                                                         AND p.saleStatus = '出售' 
+                INNER JOIN dbo.Estate e WITH ( NOLOCK ) ON p.EstateID = e.EstateID AND e.FlagDeleted = 0 AND e.FlagTrashed = 0 AND e.IsHidden = 0
+                INNER JOIN dbo.EstateInfo ei WITH ( NOLOCK ) ON p.EstateID = ei.EstateId
+                <if	test="responsibility ==true">
+					AND ei.responsibility = 1
+				</if>
+				<if	test="responsibility ==false">
+					AND ei.responsibility = 0
+				</if>
+                                                                
+        <!-- where ps.saleKeepDate &lt; getDate() - 25 -->
+        ORDER BY ps.saleKeepDate asc 
+    </select>
+    
+    <select id="selectByPropertyId" resultType="com.dooioo.fy.temp.PropertyStat" parameterType="map">
+        SELECT TOP 1
+                *
+        FROM    dbo.PropertyStat WITH ( NOLOCK )
+        WHERE   PropertyID = #{propertyId} AND status = 0
+    </select>
+
+    <delete id="delete" parameterType="map">
+        UPDATE  a
+        SET     a.status = -1
+        FROM    PropertyStat a
+        WHERE   propertyId = #{propertyId}
+    </delete>
+<!-- 
+	<update id="updateSendSmsFlag">
+        exec  proc_updatePropertySendSmsFlagThreeTime
+    </update>
+
+    <update id="updateSendSmsFlagWithoutUpdateSolr">
+        exec  proc_updatePropertySendSmsFlagThreeTime 0
+    </update>
+
+    <update id="clearSendSmsFlag">
+        UPDATE dbo.PropertyStat SET sendcount = 0 ,sendDate = DATEADD(DAY,-1,GETDATE()),sendedEmpNo = ''
+    </update>
+  -->   
+    <update id="updateOpenHouseInfo" parameterType="map">
+		update PropertyStat set updatedAt=getDate()
+		<if	test="openhouseStartTime !=null ">
+			,openhouseStartTime=#{openhouseStartTime}
+		</if>
+		<if	test="openhouseEndTime !=null ">
+			,openhouseEndTime=#{openhouseEndTime}
+		</if>
+		where propertyId=#{propertyId}
+	</update>
+	
+	 <update id="updateDescriptCount" parameterType="map">
+		update PropertyStat set updatedAt=getDate(),
+		descriptCount = #{descriptCount}
+		where propertyId=#{propertyId}
+	</update>
+	
+	<update id="updateHasHDPicture" parameterType="map">
+        UPDATE ps SET updatedAt=getDate(), hasHDPicture = #{hasHDPicture}
+        FROM dbo.PropertyStat ps
+        WHERE ps.propertyId = #{propertyId}
+    </update>
+    
+    <update id="updatePictureCount" parameterType="map">
+        UPDATE ps SET updatedAt=getDate(), pictureCount = #{pictureCount}
+        FROM dbo.PropertyStat ps
+        WHERE ps.propertyId = #{propertyId}
+    </update>
+    
+     <update id="updatePanoramaCount" parameterType="map">
+        UPDATE ps SET updatedAt=getDate(), panoramaCount = #{panoramaCount}
+        FROM dbo.PropertyStat ps
+        WHERE ps.propertyId = #{propertyId}
+    </update>
+    
+</mapper>

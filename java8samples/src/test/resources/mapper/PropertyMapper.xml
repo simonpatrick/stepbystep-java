@@ -1,0 +1,1297 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyMapper">
+
+	<!--修改信息方权益归属   -->
+	<update id="updateEmpNo">
+		update Property set empNo=#{empNo}, trustDate=getDate() where propertyId=#{propertyId}
+	</update>   
+	
+	<!--根据信息方查询房源   -->
+	<select id="selectPropertyByEmpNo" resultType="PropertyBenefitor">
+		<include refid="CommonMapper.Pagination_Head"/>
+			select a.PropertyID,a.status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice 
+			 from v_viewValidPropertyBenefit as a with (nolock) where empNo = #{empNo} 
+	 	<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+	 	<include refid="CommonMapper.Pagination_Foot" />
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select>
+	
+	<select id="selectTopNPropertyByEmpNo" resultType="PropertyBenefitor">
+		select top ${topN} a.PropertyID,status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice from 
+			v_viewValidPropertyBenefit as a with (nolock) where empNo=#{empNo}
+		<if test="orderby !=null">
+			order by  ${orderby}
+		</if>
+	</select>
+	
+	<select id="countByEmpNo" resultType="int">
+		select count(1) from 
+		v_viewValidPropertyBenefit as a with (nolock) where empNo=#{empNo}
+		<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+	</select>
+	
+	<!--修改有效出售方权益归属   -->
+	<update id="updateSaleEmpNo">
+		update Property set saleEmpNo=#{saleEmpNo},
+        <if test="saleEmpNo == null">
+            saleTrustDate = null
+        </if>
+        <if test="saleEmpNo != null">
+            saleTrustDate = getDate()
+        </if>
+		where propertyId=#{propertyId}
+	</update>
+	<!--修改钥匙方权益归属   -->
+	<update id="updateKeyEmpNo">
+		update Property set keyEmpNo=#{keyEmpNo},
+        <if test="keyEmpNo == null">
+            keyTrustDate = null
+        </if>
+        <if test="keyEmpNo != null">
+            keyTrustDate = getDate()
+        </if>
+		where propertyId=#{propertyId}
+	</update> 
+	<!--根据有效出售方查询房源   -->
+	<select id="selectTopNPropertyBySaleEmpNo" resultType="PropertyBenefitor">
+		select top ${topN} a.PropertyID,status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice from 
+		v_viewValidPropertyBenefit as a with (nolock) where saleEmpNo=#{saleEmpNo}
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select> 
+	<!--根据钥匙方查询房源 -->
+	<select id="selectTopNPropertyBykeyEmpNo" resultType="PropertyBenefitor">
+		select top ${topN} a.PropertyID,status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice from 
+		v_viewValidPropertyBenefit as a with (nolock) where keyEmpNo=#{keyEmpNo}
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select>
+	
+	
+	<select id="selectPropertyBySaleEmpNo" resultType="PropertyBenefitor">
+		<include refid="CommonMapper.Pagination_Head"/>
+		 select a.PropertyID,a.status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice
+			 from v_viewValidPropertyBenefit as a with (nolock)
+			 where saleEmpNo = #{saleEmpNo}
+		 <if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+		 <include refid="CommonMapper.Pagination_Foot" />
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select>
+
+	<select id="selectPropertyByKeyEmpNo" resultType="PropertyBenefitor">
+		<include refid="CommonMapper.Pagination_Head"/>
+		 select a.PropertyID,a.status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice
+			 from v_viewValidPropertyBenefit as a with (nolock)
+			 where keyEmpNo = #{keyEmpNo}
+		 <if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+		 <include refid="CommonMapper.Pagination_Foot" />
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select>  
+	
+	<select id="countBySaleEmpNo" resultType="int">
+		select count(1) from 
+		v_viewValidPropertyBenefit as a with (nolock)
+		where saleEmpNo=#{saleEmpNo}
+		<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<select id="countByKeyEmpNo" resultType="int">
+		select count(1) from 
+		v_viewValidPropertyBenefit as a with (nolock)
+		where keyEmpNo=#{keyEmpNo}
+		<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+	</select>
+		<!--修改有效出租方权益归属   -->
+	<update id="updateRentEmpNo">
+		update Property
+		set rentEmpNo = #{rentEmpNo},
+		    <if test="rentEmpNo == null">
+                rentTrustDate = null
+		    </if>
+            <if test="rentEmpNo != null">
+                rentTrustDate = getDate()
+            </if>
+		where propertyId = #{propertyId}
+	</update>   
+	<!--根据有效出租方查询房源   -->
+	<select id="selectPropertyByRentEmpNo" resultType="PropertyBenefitor">
+		<include refid="CommonMapper.Pagination_Head"/>
+	 	select a.PropertyID,a.status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice
+			 from v_viewValidPropertyBenefit as a  with (nolock)
+			 where rentEmpNo = #{rentEmpNo}
+	 	<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+	 	<include refid="CommonMapper.Pagination_Foot" />
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select>  
+	
+	<select id="selectTopNPropertyByRentEmpNo" resultType="PropertyBenefitor">
+		select top ${topN} a.PropertyID,status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice from 
+		v_viewValidPropertyBenefit as a  with (nolock)
+		where rentEmpNo=#{rentEmpNo}
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select>  
+	
+	<select id="countByRentEmpNo" resultType="int">
+		select count(1) from 
+		v_viewValidPropertyBenefit as a with (nolock)
+		where rentEmpNo=#{rentEmpNo}
+		<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+	</select>  
+	
+		
+	<!--修改私盘方权益归属   -->
+	<update id="updatePrivateEmpNo">
+		update Property set privateEmpNo=#{privateEmpNo}
+		where propertyId=#{propertyId}
+	</update>  
+	<!--根据私盘方查询房源   -->
+	<select id="selectPropertyByPrivateEmpNo" resultType="PropertyBenefitor">
+		<include refid="CommonMapper.Pagination_Head"/>
+			select a.PropertyID,a.status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice
+			 from v_viewValidPropertyBenefit as a with (nolock)
+			where privateEmpNo = #{privateEmpNo} and privy=1 
+		<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+		<include refid="CommonMapper.Pagination_Foot" />
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select>  
+	
+	<select id="selectTopNPropertyByPrivateEmpNo" resultType="PropertyBenefitor">
+		select top ${topN} a.PropertyID,status,a.EstateName,a.Address,a.RoomNo,countF,countT,countW,price,rentPrice from 
+		v_viewValidPropertyBenefit as a with (nolock)
+		where privateEmpNo=#{privateEmpNo} and a.privy=1
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select>  
+	
+	
+	<select id="countByPrivateEmpNo" resultType="int">
+		select count(1) from 
+		v_viewValidPropertyBenefit as a  with (nolock)
+		where privateEmpNo=#{privateEmpNo} and a.privy=1
+		<if test="propertyNo!=null">
+			   and a.propertyNo= #{propertyNo,jdbcType=VARCHAR}
+		</if>
+	</select>  
+
+	
+    <!--********************-->
+    <!--以上人员异动相关-->
+
+    <select id="findByPropertyId" resultType="PropertyView" parameterType="string">
+        SELECT top 1 * FROM dbo.v_viewProperty_v2 with(nolock) WHERE PropertyID = #{propertyId}
+    </select>
+
+    <!--<select id="findByPropertyNo" resultType="PropertyView" parameterType="string">-->
+        <!--SELECT top 1 * FROM dbo.v_viewProperty_v2 with(nolock) WHERE propertyNo = #{propertyNo}-->
+    <!--</select>-->
+
+    <select id="query" resultType="map" parameterType="PropertyParam">
+        <include refid="CommonMapper.Pagination_Head"/>
+        SELECT p.propertyId,est.estateName,p.address as building,p.roomNo,pea.empNo as limitEmpNo,pea.entrustEndDate,pea.limitPrice
+        FROM dbo.Property p WITH ( NOLOCK )
+        inner JOIN dbo.v_fy_estate est WITH ( NOLOCK ) ON p.EstateID = est.EstateID
+        inner JOIN ( SELECT  *
+                            FROM    dbo.propertyEntrustApply WITH ( NOLOCK )
+                            WHERE   entrustType = 3
+                            AND status = 0
+        ) pea ON pea.propertyId = p.PropertyID
+        <trim prefix="where" prefixOverrides="and|or">
+            <if test="less15daysTolimitEntrustEndDate != null and less15daysTolimitEntrustEndDate == true">
+                and pea.entrustEndDate &lt; dateadd(day,14,getDate())
+                and pea.entrustEndDate > DATEADD(DAY,-1,GETDATE())
+            </if>
+                and p.saleStatus = '出售'
+            <if test="limitSellEntrustCheckStatus != null">
+                and pea.checkState = #{limitSellEntrustCheckStatus,jdbcType = VARCHAR}
+            </if>
+		</trim>
+        <include refid="CommonMapper.Pagination_Foot" />
+    </select>
+
+    
+    <select id="queryPropertyOwnerToInquiryAdd1" resultType="propertyView">
+        SELECT p.PropertyID,p.DistrictName,e.EstateName,a.AreaName AS area,p.Price,pinfo.handprice,a.areaId
+        FROM dbo.Property p WITH(NOLOCK)
+        INNER JOIN propertyInfo pinfo WITH(nolock) ON p.PropertyID = pinfo.propertyId
+        INNER JOIN dbo.Estate e WITH(nolock) ON p.EstateID = e.EstateID
+        INNER JOIN area a WITH(NOLOCK) ON e.AreaID = a.AreaID
+        WHERE p.saleStatus = '出售'
+        AND <![CDATA[saleTrustDate < DATEADD(day,-90,GETDATE())]]>
+        AND saleTrustDate > DATEADD(day,-91,GETDATE())
+        AND limitSellEntrustApplyId is null 
+        AND exclusiveRentEntrustApplyId is not null 
+        AND exclusiveSellEntrustApplyId is not null 
+        AND jpsEmpNo IS NULL
+        AND jpzEmpNo IS NULL
+        AND ISNULL(privy,0) != 1
+        AND EXISTS (SELECT pp.propertyId FROM dbo.PropertyPhone pp WITH(nolock)
+        WHERE pp.propertyId = p.PropertyID AND pp.status = 0)
+    </select>
+
+    <select id="queryPropertyOwnerToInquiryAdd2" resultType="propertyView">
+        SELECT p.PropertyID,p.DistrictName,e.EstateName,a.areaName AS area, p.Price,pinfo.handprice,a.areaId
+        FROM dbo.Property p WITH(nolock)
+        INNER JOIN dbo.Estate e WITH(nolock) ON p.EstateID = e.EstateID
+        INNER JOIN area a WITH(NOLOCK) ON e.AreaID = a.AreaID
+        INNER JOIN dbo.PropertyInfoHistory phis ON phis.propertyId = p.PropertyID AND CAST(phis.afterValue AS VARCHAR(50)) = p.Status
+        INNER JOIN propertyInfo pinfo WITH(nolock) ON p.PropertyID = pinfo.propertyId
+        WHERE phis.fieldName IN ('status','status3')
+        and ISNULL(p.saleStatus,'') not in ('出售','我售') and ISNULL(p.specialStatus,'') not in ('预定','错盘')
+        AND <![CDATA[phis.createdAt < DATEADD(day,-30,GETDATE())]]>
+        AND phis.createdAt > DATEADD(day,-31,GETDATE())
+        AND limitSellEntrustApplyId IS NULL
+        AND exclusiveRentEntrustApplyId IS NULL
+        AND exclusiveSellEntrustApplyId IS NULL
+        AND jpsEmpNo IS NULL
+        AND jpzEmpNo IS NULL
+        AND ISNULL(privy,0) != 1
+        AND EXISTS (SELECT pp.propertyId FROM dbo.PropertyPhone pp WITH(nolock)
+        WHERE pp.propertyId = p.PropertyID AND pp.status = 0)
+    </select>
+
+    <select id="queryPropertyOwnerToInquiryAdd3" resultType="propertyView">
+        SELECT p.PropertyID,p.DistrictName,e.EstateName,a.AreaName AS area,p.Price,pinfo.handprice,a.areaId
+        FROM dbo.Property p WITH(nolock)
+        INNER JOIN dbo.Estate e WITH(nolock) ON p.EstateID = e.EstateID
+        INNER JOIN area a WITH(NOLOCK) ON e.AreaID = a.AreaID
+        INNER JOIN propertyInfo pinfo WITH(nolock) ON p.PropertyID = pinfo.propertyId
+        WHERE ISNULL(p.saleStatus,'') not in ('出售','我售') and ISNULL(p.specialStatus,'') not in ('预定','错盘')
+        AND <![CDATA[p.TrustDate < DATEADD(day,-30,GETDATE())]]>
+        AND p.TrustDate > DATEADD(day,-31,GETDATE())
+        AND limitSellEntrustApplyId is null 
+        AND exclusiveRentEntrustApplyId is not null 
+        AND exclusiveSellEntrustApplyId is not null 
+        AND jpsEmpNo IS NULL
+        AND jpzEmpNo IS NULL
+        AND ISNULL(privy,0) != 1
+        AND NOT EXISTS (SELECT phis.propertyId FROM dbo.PropertyInfoHistory phis WITH(nolock)
+        WHERE phis.propertyId = p.PropertyID AND phis.fieldName IN ('status','status3'))
+        AND EXISTS (SELECT pp.propertyId FROM dbo.PropertyPhone pp WITH(nolock)
+        WHERE pp.propertyId = p.PropertyID AND pp.status = 0)
+    </select>
+
+    <select id="queryPropertyOwnerToInquiryDelete" resultType="propertyView">
+        SELECT p.PropertyID
+        FROM dbo.Property p WITH(NOLOCK)
+        LEFT JOIN propertyInfo pinfo WITH(nolock) ON p.PropertyID = pinfo.propertyId
+         WHERE p.saleStatus = '我售' OR
+         p.specialStatus = '预定' OR
+         limitSellEntrustApplyId is not null  OR
+         exclusiveRentEntrustApplyId is not null  OR
+         exclusiveSellEntrustApplyId is not null  OR
+         jpsEmpNo IS NOT NULL OR
+         jpzEmpNo IS NOT NULL OR
+         ISNULL(privy,0) = 1
+    </select>
+
+    <update id="updateRevertSystemProperty" parameterType="hashMap">
+        update a set empNo = #{empNo}, orgId = #{orgId}, status = #{status}
+        from property a
+        where propertyId = #{propertyId}
+    </update>
+
+    
+    <update id="updateStatus" parameterType="hashMap">
+        update a set status = #{status},
+        saleStatus = #{saleStatus},
+        rentStatus = #{rentStatus},
+        specialStatus = #{specialStatus}
+        from property a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateOnlineDate">
+        update a set onlineDate = getDate()
+        from property a
+        where propertyId = #{propertyId}
+    </update>
+    
+    
+    <update id="updatePropertyTabForTrust">
+		update property 
+		set propertyTrust = #{propertyTrust}
+		where propertyId = #{propertyId}
+	</update>
+    
+	<update id="updatePropertyByAuthInfo" parameterType="com.dooioo.fy.model.PropertyAuthInfo">
+		UPDATE property
+		<set>
+            buyinDate = #{buyinDate},
+            square =  ${square}
+		</set>
+		where propertyId = #{propertyId}
+	</update>
+
+    <update id="updatePriceAndPriceMemo">
+        update a set price = #{price},
+            priceMemo = #{priceMemo}
+        from property a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateRentPrice">
+        update a set rentPrice = #{rentPrice}
+        from property a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateBuyinDate" parameterType="hashMap">
+        update a set buyinDate = #{buyinDate}, buyinDateStr = #{buyinDateStr}
+        from property a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateBillPrice" parameterType="hashMap">
+        update a set billPrice = #{billPrice}
+        from property a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateRoomLayout" parameterType="hashMap">
+        update a set countF = #{countF}, countT = #{countT}, countW = #{countW}, countY = #{countY}
+        from property a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updatePropertyDirection" parameterType="hashMap">
+        update a set propertyDirection = #{propertyDirection}
+        from property a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updatePropertyDecoration" parameterType="hashMap">
+        update a set propertyDecoration = #{propertyDecoration}
+        from property a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateSquare" parameterType="hashMap">
+        update a set square = #{square}
+        from property a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateKeyword" parameterType="hashMap">
+        update a set address = #{address},
+        roomNo = #{roomNo}
+        from property a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updatePropertySource" parameterType="hashMap">
+        update a set propertySource = #{propertySource}
+        from property a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateMgtPrice">
+        update a set mgtPrice = #{mgtPrice}
+        from property a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateFloor">
+        update a set floor = #{floor}
+        from property a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateLookHouseStatus">
+        update a set propertyLook = #{propertyLook}
+        from property a
+        where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateRemark">
+        update a set remark = #{remark}
+        from property a
+        where propertyId = #{propertyId}
+    </update>
+
+    <insert id="insert">
+        INSERT INTO Property
+        (PropertyID
+        ,CityName
+        ,DistrictName
+        ,EstateID
+        ,RoomNo
+        ,Floor
+        ,Status
+        ,CountF
+        ,CountT
+        ,CountW
+        ,CountY
+        ,PropertyUsage
+        ,PropertyType
+        ,PropertyDirection
+        ,PropertySource
+        ,Square
+        ,Price
+        ,PriceBase
+        ,RentPrice
+        ,MgtPrice
+        ,PropertyDecoration
+        ,Remark
+        ,RegPerson
+        ,RegDate
+        ,FlagTrashed
+        ,FlagDeleted
+        ,Address
+        ,UnitName
+        ,RentUnitName
+        ,Usage1
+        ,Usage2
+        ,Usage
+        ,BuyinDate
+        ,flagLoan
+        ,buyinDateStr
+        ,empNo
+        ,orgId
+        ,rentEmpNo
+        ,rentOrgId
+         <if test="rentEmpNo != null">
+            ,rentTrustDate
+        </if>
+        ,saleEmpNo
+        ,saleOrgId
+        <if test="saleEmpNo != null">
+            ,saleTrustDate
+        </if>
+        ,onlineDate
+        ,registerDate
+        ,trustDate
+        ,saleStatus
+        ,rentStatus
+        ,specialStatus
+        ,propertyLook)
+        VALUES
+        (#{propertyId}
+        ,#{cityName}
+        ,#{districtName}
+        ,#{estateId}
+        ,#{roomNo}
+        ,#{floor}
+        ,#{status}
+        ,#{countF}
+        ,#{countT}
+        ,#{countW}
+        ,#{countY}
+        ,#{propertyUsage}
+        ,#{propertyType}
+        ,#{propertyDirection}
+        ,#{propertySource}
+        ,#{square}
+        ,#{price}
+        ,#{priceBase}
+        ,#{rentPrice}
+        ,#{mgtPrice}
+        ,#{propertyDecoration}
+        ,#{remark}
+        ,#{regPerson}
+        ,getDate()
+        ,0
+        ,0
+        ,#{address}
+        ,#{unitName}
+        ,#{rentUnitName}
+        ,#{usage1}
+        ,#{usage2}
+        ,#{usage}
+        ,#{buyinDate}
+        ,#{flagLoan}
+        ,#{buyinDateStr}
+        ,#{empNo}
+        ,#{orgId}
+        ,#{rentEmpNo}
+        ,#{rentOrgId}
+        <if test="rentEmpNo != null">
+            ,getDate()
+        </if>
+        ,#{saleEmpNo}
+        ,#{saleOrgId}
+        <if test="saleEmpNo != null">
+            ,getDate()
+        </if>
+        ,getDate()
+        ,getDate()
+        ,getDate()
+        ,#{saleStatus}
+        ,#{rentStatus}
+        ,#{specialStatus}
+        ,#{propertyLook})
+    </insert>
+
+    <update id="ayscPropertyNo">
+        update property set propertyNo = cast(propertyNoProudcter as varchar)
+		where propertyId = #{propertyId}
+    </update>
+
+    <update id="updateForSystemPropertyAdd">
+        update property
+        set CityName = #{cityName}
+        ,DistrictName = #{districtName}
+        ,EstateID = #{estateId}
+        ,RoomNo = #{roomNo}
+        ,Floor  = #{floor}
+        ,CountF = #{countF}
+        ,CountT = #{countT}
+        ,CountW = #{countW}
+        ,CountY = #{countY}
+        ,PropertyUsage = #{propertyUsage}
+        ,PropertyType = #{propertyType}
+        ,PropertyDirection = #{propertyDirection}
+        ,PropertySource = #{propertySource}
+        ,Square = #{square}
+        ,Price = #{price}
+        ,PriceBase = #{priceBase}
+        ,RentPrice = #{rentPrice}
+        ,MgtPrice = #{mgtPrice}
+        ,PropertyDecoration  = #{propertyDecoration}
+        ,Remark = #{remark}
+        ,RegPerson = #{regPerson}
+        ,FlagTrashed = 0
+        ,FlagDeleted = 0
+        ,Address = #{address}
+        ,UnitName = #{unitName}
+        ,RentUnitName = #{rentUnitName}
+        ,Usage1 = #{usage1}
+        ,Usage2 = #{usage2}
+        ,Usage = #{usage}
+        ,BuyinDate = #{buyinDate}
+        ,flagLoan  = #{flagLoan}
+        ,buyinDateStr = #{buyinDateStr}
+        ,onlineDate = getDate()
+        ,trustDate = getDate()
+        ,registerDate = getDate()
+		where propertyId = #{propertyId}
+    </update>
+    
+     <update id="cancelPrivate">
+        update property set
+            privateEmpNo = null,
+            privateOrgId = null,
+            privateCreatedAt = null,
+            privy = 0
+        where propertyId = #{propertyId}
+    </update>
+    <!--关注时，房源表中的关注量递增，一遍排序时使用关注量排序-->
+	<update id="addAttentionCount" parameterType="string">
+        UPDATE  dbo.Property
+                SET     attentionCount = attentionCount + 1
+        WHERE   PropertyID = #{propertyId}
+    </update>
+	
+	<!-- 设置房源私盘 -->
+     <update id="setPropertyPrivy">
+		update property set
+			privateEmpNo = #{privateEmpNo},
+			privateOrgId = #{privateOrgId}, 
+			privateCreatedAt = getdate(),
+			privy = 1
+		where propertyId = #{propertyId}
+	</update>
+    <!--取消关注时，房源表中的关注量递减，一遍排序时使用关注量排序-->
+    <update id="reductionAttentionCount" parameterType="string">
+        UPDATE  dbo.Property
+        SET     attentionCount = attentionCount - 1
+        WHERE   PropertyID = #{propertyId}
+    </update>
+    <!-- 更新浏览量-->
+    <update id="updatePageView" parameterType="hashmap">
+        UPDATE  dbo.Property
+        SET     pageViewCount = #{pageViewCount}
+        WHERE   PropertyID = #{propertyId}
+    </update>
+
+    <!--非出售房源存在有效出售方的情况清理-->
+    <select id="findCanClearSaleEmpNoProperty" resultType="hashMap">
+        SELECT propertyId,saleEmpNo
+        FROM    dbo.property WITH(NOLOCK)
+        WHERE  (ISNULL(saleStatus,'') not in('出售','我售'))
+        AND ISNULL(specialStatus,'') not IN('预定','错盘')
+        AND saleEmpNo IS NOT NULL order by propertyId asc
+    </select>
+
+    <!--非出租房源存在有效出租方情况-->
+    <select id="findCanClearRentEmpNoProperty" resultType="hashMap">
+        SELECT propertyId,rentEmpNo
+        FROM    dbo.property WITH(NOLOCK)
+        WHERE  (ISNULL(rentStatus,'') not in('出租'))
+        and (ISNULL(saleStatus,'') not in('我售'))
+        AND ISNULL(specialStatus,'') not IN('预定','错盘')
+        AND rentEmpNo IS NOT NULL order by propertyId asc
+    </select>
+
+    <select id="queryPropertyFoCleanWithoutPhone" resultType="map">
+  		SELECT  v.propertyId
+   		FROM    dbo.Property v WITH ( NOLOCK )
+        LEFT JOIN propertyinfo pi WITH ( NOLOCK ) ON v.propertyid = pi.propertyId
+        LEFT JOIN temp_clear_nodelete c WITH(NOLOCK) ON v.PropertyID = c.propertyid
+        WHERE ISNULL(v.saleStatus, '') NOT IN ('出售', '我售')
+        AND ISNULL(v.rentStatus, '') NOT IN ('出租')
+        AND ISNULL(v.specialStatus, '') NOT IN ('错盘', '系统盘')
+        AND ISNULL(v.Status,'') NOT IN ('系统盘')
+        AND c.propertyid  IS NULL
+        AND (PropertyLook NOT IN ('有密码','有钥匙','随时可看（有密码）','随时可看（有钥匙）')  or PropertyLook is null)
+        AND jpsEmpNo IS NULL
+        AND jpzEmpNo IS NULL
+	   AND v.PropertyID NOT IN (SELECT propertyid FROM propertyphone WITH(NOLOCK) WHERE (status = 0 OR ((status=-1 OR status = -2)  AND <![CDATA[ updatedAt>GETDATE()-3  ]]> )) OR ( phoneNumber LIKE '17%'AND phoneNumber NOT LIKE '175%' and  <![CDATA[ LEN (phoneNumber ) > 10  ]]>))
+	   AND PropertyUsage NOT IN('商铺','写字楼');
+    </select>
+
+    <select id="queryOverduePropery" resultType="map">
+        SELECT   v.propertyId
+        FROM    dbo.Property v WITH ( NOLOCK )
+        LEFT JOIN propertyinfo pi WITH ( NOLOCK ) ON v.propertyid = pi.propertyId
+        LEFT JOIN temp_clear_nodelete c WITH(NOLOCK) ON v.PropertyID = c.propertyid
+        WHERE ISNULL(v.saleStatus, '') NOT IN ('出售', '我售')
+        AND ISNULL(v.rentStatus, '') NOT IN ('出租')
+        AND ISNULL(v.specialStatus, '') NOT IN ('错盘', '系统盘')
+        AND ISNULL(v.Status,'') NOT IN ('系统盘')
+        AND c.propertyid  IS NULL
+        AND (PropertyLook NOT IN ('有密码','有钥匙','随时可看（有密码）','随时可看（有钥匙）')  or PropertyLook is null)
+        AND jpsEmpNo IS NULL
+        AND jpzEmpNo IS NULL
+        AND  <![CDATA[   TrustDate < GETDATE() - 90  ]]>
+        AND v.PropertyID NOT IN (SELECT propertyid FROM dbo.PropertyPhone WITH(NOLOCK) WHERE (status = 0 AND  ( <![CDATA[  connectedAll > 0 OR callAll < 5 ]]> )) OR (phoneNumber LIKE '17%' AND phoneNumber NOT LIKE '175%' and <![CDATA[  LEN (phoneNumber) > 10  ]]>))
+        AND v.PropertyID NOT IN (SELECT propertyid FROM dbo.PropertyPhone WITH(NOLOCK) WHERE status = 0 AND (connectedAll IS NULL OR callAll IS NULL))
+        AND PropertyUsage NOT IN ('商铺','写字楼')
+        AND v.FlagDeleted = 0
+    </select>
+
+    <update id="cleanStatus" parameterType="string">
+        UPDATE  dbo.Property
+        SET     Status = '系统盘' ,
+        specialStatus = '系统盘'
+        WHERE   PropertyID =  #{propertyId}
+    </update>
+
+    <insert id="backupForclearProperty" parameterType="string">
+        INSERT INTO   dbo.temp_clear_property
+  SELECT [PropertyID]
+      ,[CityName]
+      ,[DistrictName]
+      ,[EstateID]
+      ,[RoomNo]
+      ,[Floor]
+      ,[Trade]
+      ,[Status]
+      ,[CountF]
+      ,[CountT]
+      ,[CountW]
+      ,[CountY]
+      ,[FlagRecommand]
+      ,[PropertyUsage]
+      ,[PropertyType]
+      ,[PropertyDirection]
+      ,[PropertyLook]
+      ,[PropertyBuy]
+      ,[PropertyCommission]
+      ,[PropertySource]
+      ,[Square]
+      ,[PriceUnit]
+      ,[Price]
+      ,[PriceBase]
+      ,[RentPriceUnit]
+      ,[RentPrice]
+      ,[MgtPrice]
+      ,[TrustDate]
+      ,[DeptID]
+      ,[EmpID]
+      ,[PropertyDecoration]
+      ,[PropertyFloor]
+      ,[Remark]
+      ,[RegPerson]
+      ,[RegDate]
+      ,[ModPerson]
+      ,[ModDate]
+      ,[PropertyTrust]
+      ,[KeyNo]
+      ,[CompleteYear]
+      ,[PropertyOccupy]
+      ,[PropertyOwn]
+      ,[SquareUse]
+      ,[LastFollowDate]
+      ,[FlagTrashed]
+      ,[FlagDeleted]
+      ,[OwnerName]
+      ,[OwnerTel]
+      ,[ContactName]
+      ,[PropertyFurniture]
+      ,[PropertyNo]
+      ,[PriceLine]
+      ,[RentPriceLine]
+      ,[Address]
+      ,[PropertyCertificate]
+      ,[PropertyElectric]
+      ,[ExDate]
+      ,[FloorAll]
+      ,[HandOverDate]
+      ,[UnitName]
+      ,[RentUnitName]
+      ,[PhotoCount]
+      ,[Usage1]
+      ,[Usage2]
+      ,[TrustNo]
+      ,[PropertyTax]
+      ,[OwnerMobile]
+      ,[Country]
+      ,[DeptID1]
+      ,[EmpID2]
+      ,[DeptID2]
+      ,[EmpID1]
+      ,[Usage]
+      ,[BusDatas]
+      ,[Privy]
+      ,[BuyinDate]
+      ,[flagLoan]
+      ,[flagRent]
+      ,[POwner]
+      ,[BillDate]
+      ,[BillPrice]
+      ,[lockCounter]
+      ,[hot]
+      ,[LoanMemo]
+      ,[KeyMemo]
+      ,[ParkMemo]
+      ,[PriceMemo]
+      ,[LookMemo]
+      ,[OwnerMemo]
+      ,[buyinDateStr]
+      ,[rentDeptId]
+      ,[rentEmpId]
+      ,[rentTrustDate]
+      ,[empNo]
+      ,[orgId]
+      ,[soleEmpNo]
+      ,[soleOrgId]
+      ,[privateEmpNo]
+      ,[privateOrgId]
+      ,[rentEmpNo]
+      ,[rentOrgId]
+      ,[soleCreatedAt]
+      ,[privateCreatedAt]
+      ,[propertyNoProudcter]
+      ,[isSendSMS]
+      ,[saleEmpNo]
+      ,[saleOrgId]
+      ,[saleTrustDate]
+      ,[onlineDate]
+      ,GETDATE() FROM dbo.Property p WITH(NOLOCK) WHERE p.PropertyID = #{propertyId}
+    </insert>
+    
+    <select id="queryListByEstateId" resultType="com.dooioo.fy.model.view.PropertyView" parameterType="hashMap" >
+		select * from v_viewPropertyBenefit  a with(nolock)  where estateId = #{estateId}
+			<if test="!isContainWrongProperty"> and (status != '错盘' or ISNULL(specialStatus,'') != '错盘') </if>
+			<if test="address !=null and address !='' "> and address = #{address}</if>
+	</select>
+    
+    
+    <select id="queryByPropertyIds" resultType="com.dooioo.fy.model.view.PropertyView" parameterType="hashMap" >
+		select a.* from v_viewPropertyBenefit a  with(nolock)
+ 		where propertyId in(${ids})
+	</select>
+
+    <update id="updateDownPriceTime" parameterType="hashMap">
+        UPDATE dbo.Property SET priceDownTime = GETDATE() WHERE PropertyID = #{propertyId}
+    </update>
+
+    <update id="clearDownPriceTime" parameterType="hashMap">
+        UPDATE dbo.Property SET priceDownTime = '1900-1-1 00:00:00'  WHERE PropertyID = #{propertyId}
+    </update>
+
+    <update id="updateRentPriceDownTime" parameterType="hashMap">
+        UPDATE dbo.Property SET rentPriceDownTime = GETDATE() WHERE PropertyID = #{propertyId}
+    </update>
+
+    <update id="clearRentPriceDownTime" parameterType="hashMap">
+        UPDATE dbo.Property SET rentPriceDownTime = '1900-1-1 00:00:00' WHERE PropertyID = #{propertyId}
+    </update>
+
+    <update id="updateModDate">
+        update a set ModDate = getDate()
+        from property a
+        where propertyId = #{propertyId}
+    </update>
+
+    <!--<update id="deleteSelectedCoverPicture" parameterType="string">-->
+        <!--DELETE <![CDATA[ ##temp_covepicture_propertyId  ]]> WHERE propertyId = #{propertyId}-->
+    <!--</update>-->
+
+    <!--<update id="clearForSelectCoverPicture" parameterType="string">-->
+        <!--DROP TABLE ##temp_covepicture_propertyId-->
+    <!--</update>-->
+
+    <!--<update id="initForCoverPictureSelect">-->
+        <!--SELECT  p.PropertyID-->
+         <!--INTO   ##temp_covepicture_propertyId-->
+         <!--FROM   dbo.v_viewProperty_v2 p with(noLock);-->
+    <!--</update>-->
+    
+    <update id="updatePropertyLook">
+        update a set propertyLook = #{propertyLook}
+        from property a
+        where propertyId = #{propertyId}
+    </update>
+
+    <select id="findByBuildingIdAndRoomNo" resultType="PropertyView">
+        SELECT TOP 1 *
+        FROM dbo.Property p WITH ( NOLOCK )
+         LEFT JOIN dbo.v_fy_building b WITH(NOLOCK) ON p.EstateID = b.EstateID AND p.Address = b.buildingName
+        WHERE buildingId = #{buildingId} and roomNo = #{roomNo} AND p.FlagDeleted=0 and p.FlagTrashed=0
+    </select>
+    
+    <select id="findPrivateConditionEntrust" parameterType="hashMap" resultType="PropertyView">
+        SELECT  p.propertyId ,
+            p.privateEmpNo ,
+            p.privateCreatedAt ,
+            p.privy ,
+            pea.empno AS limitSellEntrustEmpNo ,
+            est.estateName ,
+            p.Address AS building ,
+            p.roomNo
+        FROM    dbo.Property p WITH ( NOLOCK )
+        INNER JOIN dbo.v_fy_estate est ON p.EstateID = est.EstateID
+        INNER JOIN ( SELECT  empNo ,
+                            propertyId
+                            FROM    dbo.propertyEntrustApply
+                            WHERE   entrustType = 3
+                            AND status = 0
+        ) pea ON p.PropertyID = pea.propertyId
+        WHERE   privateEmpNo IS NOT NULL
+        AND Privy = 1
+        AND p.FlagDeleted = 0
+		<if test = "entrustPrivy">
+            AND pea.empno IS NOT NULL
+		</if>
+		<if test = "!entrustPrivy">
+            AND pea.empno IS NULL
+		</if>
+	</select>
+	
+	<select id="getPropertyByPropertyLook" parameterType="hashMap" resultType="PropertyView" >
+            SELECT  p.PropertyID ,
+                    PropertyLook ,
+                    p.Status ,
+                    keyLocation ,
+                    keyPassword
+            FROM    dbo.property p WITH ( NOLOCK )
+                    LEFT JOIN dbo.PropertyInfo pi WITH ( NOLOCK ) ON p.PropertyID = pi.propertyId
+            WHERE   PropertyLook = #{propertyLook}
+                    AND p.FlagDeleted = 0
+    </select>
+	
+	<select id="getRentPropertyToNotify" parameterType="hashMap" resultType="NotifyRentEmpNo" >
+		<include refid="CommonMapper.Pagination_Head"/>
+        SELECT  p.propertyId ,
+        p.rentEmpNo ,
+        p.propertyUsage ,
+        p.roomNo ,
+        est.estateName ,
+        p.Address AS building
+        FROM    property p WITH ( NOLOCK )
+        INNER JOIN dbo.v_fy_estate est ON p.EstateID = est.EstateID
+        WHERE   rentEmpNo IS NOT NULL
+        AND rentStatus = #{rentStatus}
+        AND p.FlagDeleted = 0
+ 		<include refid="CommonMapper.Pagination_Foot"/>
+    </select>
+    
+    <select id="countRentPropertyToNotify" parameterType="hashMap" resultType="int" >
+        SELECT count(1) FROM  property WITH(NOLOCK)
+ 				WHERE rentEmpNo IS NOT NULL AND rentStatus = #{rentStatus} and FlagDeleted = 0
+    </select>
+    
+    <select id="getRentPropertyLackAvailDate" parameterType="hashMap" resultType="RentHistDataProcessVO" >
+        SELECT p.propertyId,pi.currentStatus,pi.rentExpireDate,pi.currentStatusRemark FROM
+        dbo.Property p WITH ( NOLOCK ) LEFT JOIN dbo.PropertyInfo pi WITH(NOLOCK) ON p.PropertyID = PI.propertyid
+		 WHERE (
+					pi.currentStatus ='无租约，自住中'
+				OR  pi.currentStatus ='无租约，空置中'
+				OR (pi.currentStatus = '有租约'  AND pi.rentExpireDate IS NOT NULL)
+				) AND pi.rentAvailableDate IS NULL AND p.rentStatus ='出租'  AND p.FlagDeleted = 0
+			AND NOT EXISTS (SELECT 1 FROM dbo.PropertyInfoHistory pif WITH(nolock) WHERE pif.fieldName ='currentStatus' and pif.propertyId = p.propertyId AND createdAt > '2015-01-22 00:00:00')
+
+    </select>
+    
+    <select id="countRentPropertyLackAvailDate" parameterType="hashMap" resultType="int" >
+        SELECT count(1) FROM dbo.Property p WITH ( NOLOCK ) LEFT JOIN dbo.PropertyInfo pi WITH(NOLOCK) ON p.PropertyID = PI.propertyid
+		 WHERE (
+					pi.currentStatus ='无租约，自住中'
+				OR  pi.currentStatus ='无租约，空置中'
+				OR (pi.currentStatus = '有租约'  AND pi.rentExpireDate IS NOT NULL)
+				) AND pi.rentAvailableDate IS NULL AND p.rentStatus ='出租' AND p.FlagDeleted = 0
+
+			AND NOT EXISTS (SELECT 1 FROM dbo.PropertyInfoHistory pif WITH(nolock) WHERE pif.fieldName ='currentStatus' and pif.propertyId = p.propertyId AND createdAt > '2015-01-22 00:00:00')
+	
+    </select>
+
+
+
+
+    <select id="selectByPropertyId" parameterType="map" resultType="com.dooioo.fy.temp.Property" >
+        SELECT  TOP 1 *
+        FROM    dbo.Property WITH ( NOLOCK )
+        WHERE   PropertyID = #{propertyId} AND FlagDeleted = 0
+    </select>
+    
+    <select id="selectByBuildingIdAndRoomNo" resultType="com.dooioo.fy.temp.Property">
+        SELECT TOP 1 *
+        FROM dbo.Property p WITH ( NOLOCK )
+        inner JOIN dbo.v_fy_building b WITH(NOLOCK) ON p.EstateID = b.EstateID AND p.Address = b.buildingName
+        WHERE buildingId = #{buildingId} and roomNo = #{roomNo} AND p.FlagDeleted=0 and p.FlagTrashed=0
+    </select>
+    
+    <select id="selectListByBuildingId" resultType="com.dooioo.fy.temp.Property">
+        SELECT *
+        FROM dbo.Property p WITH ( NOLOCK )
+        inner JOIN dbo.v_fy_building b WITH(NOLOCK) ON p.EstateID = b.EstateID AND p.Address = b.buildingName
+        WHERE buildingId = #{buildingId} AND p.FlagDeleted=0 and p.FlagTrashed=0
+    </select>
+
+    <select id="selectByPropertyNo" parameterType="map" resultType="com.dooioo.fy.temp.Property" >
+        SELECT  TOP 1 *
+        FROM    dbo.Property WITH ( NOLOCK )
+        WHERE   PropertyNo = #{propertyNo} AND FlagDeleted = 0
+    </select>
+
+    <delete id="delete" parameterType="map">
+        UPDATE  a
+        SET     a.FlagTrashed = 1 ,
+        a.FlagDeleted = 1 ,
+        a.modDate = GETDATE()
+        FROM    Property a
+        WHERE   PropertyID = #{propertyId}
+    </delete>
+
+<!-- 查询所有出售房源   用来我的维护房源计算 -->
+	<select id="selectAllSalePropertyForMyProperty" resultType="PropertyBenefitInfoForMyProperty">
+		<include refid="CommonMapper.Pagination_Head"/>
+			select a.PropertyId,a.propertyNo,a.EstateId,a.limitSellEntrustEmpNo,a.descriptEmpNo,a.saleEmpNo,a.propertyUsage,a.areaId
+			 from v_viewValidPropertyBenefit as a with (nolock) 
+				LEFT JOIN PropertyMaintainInfo AS inf WITH (NOLOCK) ON inf.PropertyId = a.PropertyId 
+			 WHERE a.cityName=#{cityName} and a.saleStatus = '出售' and a.propertyUsage !='写字楼' AND a.propertyUsage !='商铺' AND a.propertyUsage !='厂房' and ISNULL(inf.TYPE ,0) !=1
+	 	<include refid="CommonMapper.Pagination_Foot" />
+	</select>
+	<select id="selectSalePropertyForMyPropertyByPropertyId" resultType="PropertyBenefitInfoForMyProperty">
+		select a.PropertyId,a.propertyNo,a.EstateId,a.limitSellEntrustEmpNo,a.descriptEmpNo,a.saleEmpNo,a.propertyUsage,a.areaId
+			 from v_viewValidPropertyBenefit as a with (nolock) 
+				LEFT JOIN PropertyMaintainInfo AS inf WITH (NOLOCK) ON inf.PropertyId = a.PropertyId 
+			 WHERE a.cityName=#{cityName} and a.saleStatus = '出售' and a.propertyUsage !='写字楼' AND a.propertyUsage !='商铺' AND a.propertyUsage !='厂房' and ISNULL(inf.TYPE ,0) !=1
+			 	and a.PropertyId =#{propertyId}
+	</select>
+	
+	<select id="countAllSalePropertyForMyProperty" resultType="int">
+		select COUNT(1)
+			 from v_viewValidPropertyBenefit as a with (nolock) 
+			 LEFT JOIN PropertyMaintainInfo AS inf WITH (NOLOCK) ON inf.PropertyId = a.PropertyId 
+			 WHERE a.cityName=#{cityName} and a.saleStatus = '出售' and a.propertyUsage !='写字楼' AND a.propertyUsage !='商铺' AND a.propertyUsage !='厂房' and ISNULL(inf.TYPE ,0) !=1
+	</select>
+	
+    <select id="selectByPrivateOrgId" parameterType="map" resultType="com.dooioo.fy.temp.Property">
+        SELECT  top 1 a.*
+        FROM    property a  WITH ( NOLOCK )
+        INNER JOIN dbo.PropertyInfo b   WITH ( NOLOCK ) ON a.PropertyID = b.propertyId
+        WHERE   a.FlagDeleted = 0
+        AND a.Privy = 1
+        AND a.privateOrgId = #{privateOrgId}
+        AND b.safePrivy != 1
+    </select>
+    
+    <!-- 2KM以内门店（楼盘2KM以内覆盖的所有门店  orgid） -->
+     <select id="getGeoAllStoreIdsRadiNkm" parameterType="map" resultType="int">
+		 SELECT orgid FROM oms.dbo.T_OMS_ORGANIZATION_COORDINATE orgCd,oms.dbo.T_OMS_ORGANIZATION org
+		 where orgCd.orgId = org.id and org.orgType ='门店' and org.status = 1
+			 AND orgCd.x >#{leftDownLat}
+			 	<![CDATA[
+							AND orgCd.x<#{topRightLat}
+							]]> 
+			  
+			 AND orgCd.y > #{leftDownLng}
+			 <![CDATA[
+			 	 AND orgCd.y< #{topRightLng}
+			 ]]> 
+    </select>
+
+    <select id="queryRentSignedType" parameterType="hashmap" resultType="int">
+        select top 1 1 from
+         <if test="fms == 'test'">
+            fms_test..t_fms_case
+         </if>
+         <if test="fms == 'integration'">
+            fms..t_fms_case
+         </if>
+        <if test="fms == 'production'">
+            fms..t_fms_case
+        </if>
+        where hourse_source_no = #{houseSource}
+        and signedType = #{signedType}
+    </select>
+
+
+    <select id="findPrivateEmpPropertyId" parameterType="map" resultType="string">
+        SELECT  p.propertyId
+        FROM    property p WITH ( NOLOCK )
+                INNER JOIN dbo.PropertyInfo pi WITH ( NOLOCK ) ON p.PropertyID = pi.propertyId
+        WHERE   Privy = 1
+                AND ISNULL(safePrivy, 0) != 1
+                AND p.FlagDeleted = 0
+                AND p.privateEmpNo IN
+                <foreach item="item" index="index" collection="privateEmployeeList"
+                         open="(" separator="," close=")">
+                    #{item.userCode}
+                </foreach>
+    </select>
+
+
+    <update id="updateEstateIdByPropertyId" parameterType="map">
+        UPDATE  p
+        SET     p.estateId = #{estateId}
+        FROM    PROPERTY p
+        WHERE   p.propertyId = #{propertyId}
+    </update>
+
+    <update id="updateBuildingByPropertyId" parameterType="map">
+        UPDATE  p
+        SET     p.address = #{building}
+        FROM    PROPERTY p
+        WHERE   p.propertyId = #{propertyId}
+    </update>
+
+
+    <update id="updateEstateIdAndBuildingByPropertyId" parameterType="map">
+         UPDATE  p
+        SET     p.address = #{building} , p.estateId = #{estateId}
+        FROM    PROPERTY p
+        WHERE   p.propertyId = #{propertyId}
+    </update>
+
+
+    <update id="clearPropertySaleEmpNo" parameterType="map">
+        UPDATE  property
+        SET     saleEmpNo = NULL ,
+                saleOrgId = NULL ,
+                saleTrustDate = NULL
+        WHERE   propertyId = #{propertyId}
+    </update>
+
+    <update id="clearPropertyRentEmpNo" parameterType="map">
+        UPDATE  property
+        SET     rentEmpNo = NULL ,
+        rentOrgId = NULL ,
+        rentTrustDate = NULL
+        WHERE   propertyId = #{propertyId}
+    </update>
+
+    <select id="selectPropertyIdByPermitNo" parameterType="map" resultType="com.dooioo.fy.temp.Property">
+        SELECT TOP 1
+        p.*
+        FROM    property p WITH ( NOLOCK )
+                INNER JOIN propertyinfo pi WITH ( NOLOCK ) ON pi.propertyId = p.propertyId
+        WHERE   p.FlagTrashed = 0
+                AND p.FlagDeleted = 0
+                AND p.propertyUsage = '商铺'
+                AND p.specialStatus != '错盘'
+                AND permitNo = #{permitNo}
+    </select>
+
+
+    <!--根据楼盘id 栋座 室号查询房源-->
+    <select id="selectByEstateIdAddressRoomNo" parameterType="map" resultType="com.dooioo.fy.temp.Property">
+        SELECT  *
+        FROM    property WITH ( NOLOCK )
+        WHERE   estateId = #{estateId}
+                AND address = #{ADDRESS}
+                AND roomNo = #{roomNo}
+                AND flagTrashed = 0
+                AND flagDeleted = 0
+                AND status != '错盘'
+    </select>
+
+    <!--更新系统盘-->
+    <update id="updateForSystemPropertyAddProperty">
+        update property
+        set Floor  = #{floor}
+        ,CountF = #{countF}
+        ,CountT = #{countT}
+        ,CountW = #{countW}
+        ,PropertyDirection = #{propertyDirection}
+        ,PropertySource = #{propertySource}
+        ,Square = #{square}
+        ,Price = #{price}
+        ,PriceBase = #{priceBase}
+        ,RentPrice = #{rentPrice}
+        ,MgtPrice = #{mgtPrice}
+        ,PropertyDecoration  = #{propertyDecoration}
+        ,Remark = #{remark}
+        ,RegPerson = #{regPerson}
+        ,FlagTrashed = 0
+        ,FlagDeleted = 0
+        ,RentUnitName = #{rentUnitName}
+        ,Usage1 = #{usage1}
+        ,Usage2 = #{usage2}
+        ,Usage = #{usage}
+        ,BuyinDate = #{buyinDate}
+        ,buyinDateStr = #{buyinDateStr}
+        ,onlineDate = getDate()
+        ,trustDate = getDate()
+        ,registerDate = getDate()
+        where propertyId = #{propertyId}
+    </update>
+
+	<select id="checkProperty" parameterType="map" resultType="com.dooioo.fy.temp.Property">
+		select propertyId, estateId, address, roomNo from property with(nolock)  where estateId = #{estateId}
+			and flagTrashed= 0 and flagDeleted=0 and status != '错盘'
+            <if test="propertyId != null and propertyId != '' ">
+			   and propertyId != #{propertyId}
+			</if>
+			<if test="address != null and address != ''">
+			   and address = #{address}
+			</if>
+	</select>
+	
+	 <select id="queryPropertysForNoPhone" resultType="com.dooioo.fy.temp.Property">
+        select distinct p.* from property p with(nolock)
+        inner join Estate e with(nolock) on  p.estateId = e.estateId
+        left join PropertyPhone pp with(nolock) on p.propertyId = pp.propertyId and pp.status > -1
+        left join AutoEditStatusRuleWhiteList wl with(nolock) on p.propertyId = wl.propertyId
+        where p.FlagTrashed = 0 and p.FlagDeleted = 0 and wl.propertyId is null
+        and e.FlagTrashed = 0 and e.FlagDeleted = 0 and pp.propertyId is null
+        and ((p.saleStatus = '出售') or (p.rentStatus = '出租'))
+    </select>
+    
+    <select id="selectBuildingRoomLayoutPicture" parameterType="hashMap" resultType="com.dooioo.fy.model.view.PropertyView">
+    	SELECT top 1  EstateID,  BuildingID,  BuildingName as building,  id,  name,  picPath FROM View_BuildingRoomLayoutPicture_FloorPlan  with(nolock) 
+    	WHERE estateId = #{estateId} 
+    	AND buildingname = #{address} 
+    </select>
+    
+     <select id="selectEstatePicture" parameterType="hashMap" resultType="com.dooioo.fy.model.view.PropertyView">
+    	 SELECT top 1 * FROM View_EstatePicture_PlotPlan with(nolock)  WHERE estateId =  #{estateId} 
+    </select>
+    
+    <select id="getRecommendProperty" parameterType="hashMap" resultType="com.dooioo.fy.temp.Property">
+        SELECT    p.*
+        FROM      dbo.Property p
+        LEFT JOIN dbo.PropertyInfo pi ON p.PropertyID = pi.propertyId
+        INNER JOIN dbo.v_fy_estate e ON p.EstateID = e.EstateID
+        left join oms.dbo.v_employee_final jps on pi.jpsEmpNo = jps.userCode
+        left join oms.dbo.v_employee_final jpz on pi.jpzEmpNo = jpz.userCode
+        where pi.status = 0
+        <if test="recommendType != null and recommendType =='sale' ">
+			   and jps.orgId = #{orgId}
+		</if>
+		<if test="recommendType != null and recommendType =='rent' ">
+			   and jpz.orgId = #{orgId}
+		</if>
+    </select>
+    
+     <select id="findPropertyByPermitNo" parameterType="hashMap" resultType="com.dooioo.fy.temp.Property">
+        select top 1 p.* from property p  with(nolock)
+        inner join propertyinfo pi  with(nolock) on pi.propertyId = p.propertyId
+        where p.FlagTrashed = 0 and p.FlagDeleted = 0
+        and p.propertyUsage = '商铺'
+        and p.status != '错盘'
+        and pi.permitNo = #{permitNo}
+         <if test="propertyId != null and propertyId != '' ">
+			   and pi.propertyId != #{propertyId}
+		</if>
+    </select>
+    
+     <select id="checkPermitNo" parameterType="hashMap" resultType="int">
+        select count(p.propertyId) from property p with(nolock)  inner join propertyinfo pi on pi.propertyId = p.propertyId
+        where p.FlagTrashed = 0 and p.FlagDeleted = 0 and p.propertyUsage = '商铺' and pi.permitNo = #{permitNo}
+        <if test="propertyId != null and propertyId != '' ">
+			   and pi.propertyId != #{propertyId}
+		</if>
+    </select>
+    
+    <select id="checkPropertyIncludeError" parameterType="hashMap" resultType="com.dooioo.fy.temp.Property">
+		select propertyId, estateId, address, roomNo from property with(nolock)  where estateId = #{estateId}
+			and flagTrashed= 0 and flagDeleted=0 
+		<if test="propertyId != null and propertyId != '' ">
+			   and propertyId != #{propertyId}
+		</if>
+		<if test="address != null and address != '' ">
+			   and address = #{address}
+		</if>
+	</select>
+  
+  <select id="selectIncompleteProperty" resultType="com.dooioo.fy.temp.Property">
+      SELECT
+        p.*
+      FROM
+        property p
+      JOIN propertyinfo pi ON p.propertyid = pi.propertyid
+      JOIN Estate e ON p.estateId = e.EstateID
+      WHERE
+        e.cityName = '苏州'
+      AND p.saleStatus = '出售'
+      AND (
+        pi.handprice IN (0, 1)
+        OR pi.handprice IS NULL
+        OR (
+          p.CountF IS NULL
+          AND p.CountT IS NULL
+          AND p.CountW IS NULL
+        )
+        OR p.Square = 0
+        OR p.Square IS NULL
+      )
+  </select>
+  
+  	<!--修改钥匙方权益归属   -->
+	<update id="updateKeyEmpNoForKey">
+		update Property set keyEmpNo = #{keyEmpNo} ,keyTrustDate = #{keyTrustDate} where propertyId = #{propertyId}
+	</update>
+    
+    <select id="queryNeedAllocateSaleProperty" resultType="com.dooioo.fy.model.NeedAllocateSaleProperty">
+      select vp.propertyId,vp.estateId,vp.propertyUsage,vp.saleEmpNo,vef.userName,vef.positionName, vef.status as empStatus
+	from agencyjizhong.dbo.v_Property vp  
+	left join oms.dbo.v_employee_final vef on vef.userCode = vp.saleEmpNo     
+	where vp.saleStatus='出售' and   
+	(   ( (vef.orgLongCode not like '12020001/120720495/12020003%' AND vef.orgLongCode not like '12020001/120720495/130614162756%')     
+	or vef.positionName !='经纪人'    or (vef.positionName ='经纪人' and vef.status ='特殊账号')   )   
+	and vef.company !='苏州链家公司' and vp.cityName='上海' and vp.propertyUsage !='商铺'  
+	AND vp.propertyUsage != '写字楼' and vp.propertyUsage !='厂房' and  vp.propertyUsage !='其它'   )  
+	<if test="estateId != null and estateId != '' ">
+			   and vp.estateId = #{estateId}
+		</if>
+  </select>
+    
+</mapper>

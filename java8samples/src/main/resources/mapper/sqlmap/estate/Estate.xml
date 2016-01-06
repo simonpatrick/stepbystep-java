@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+            PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+            "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Estate">
+	<typeAlias alias="estate" type="com.dooioo.estate.model.Estate"/>
+
+    <insert id="insert" parameterClass="estate">
+        insert into estate (districtName,estateId,estateName,cityName,areaId,propertyUsage,houseType,completeYear,address,spell,flagdeleted,flagTrashed,Square,Room,MgtPrice,Price)
+        values(#districtName#,#estateId#,#estateName#,#cityName#,#areaId#,#propertyUsage#,#houseType#,#completeYear#,#address#,#spell#,0,0,0,0,0,0)
+    </insert>
+
+    <select id="findById" parameterClass="java.lang.String" resultClass="estate">
+		select * from estate a with(noLock) where estateId = #id#  and flagTrashed = 0 and flagDeleted = 0
+	</select>
+
+    <select id="findByBean" parameterClass="estate" resultClass="estate">
+		select top 1 t.*
+        from (
+            select a.*
+            from estate a with(noLock)
+            inner join estateinfo b  with(noLock)
+               on a.estateid = b.estateid
+            where a.estateName = #estateName#  and a.flagTrashed = 0 and a.flagDeleted = 0 and a.IsHidden = 0 AND a.cityName = #cityName#
+            UNION ALL
+            select a.*
+            from estate a with(noLock)
+            inner join estateinfo b  with(noLock)
+               on a.estateid = b.estateid
+            where b.alias = #estateName# and a.flagTrashed = 0 and a.flagDeleted = 0 and a.IsHidden = 0 AND a.cityName = #cityName#
+        ) t
+	</select>
+	
+
+    <select id="viewDetail" parameterClass="estate" resultClass="estate">
+        select e.*, a.areaName from estate e with(nolock)
+        left join area a with(nolock)on e.areaId = a.areaId
+        where e.estateId = #estateId#
+        and e.flagTrashed = 0 and e.flagDeleted = 0
+    </select>
+
+    <select id="countRoomlayoutPicture" parameterClass="string" resultClass="int">
+        select count(*) from buildingRoomlayoutPicture rlp with(nolock)
+        where rlp.status > 0 and buildingRoomlayoutId in (
+            select rl.id  from BuildingRoomLayout  rl
+            where rl.status != -1 and buildingId in (
+                select b.buildingId from estate e
+                left join building b on e.estateId = b.estateId
+                where e.estateId = #id#)
+        )
+    </select>
+
+    <update id="updateCoord" parameterClass="estate">
+        update estate set x = #x#, y = #y# where estateId = #id#;
+    </update>
+
+	<update id="updateDistrictManager" parameterClass="hashMap">
+        update estate set districtManager = #empNo#  where estateId = #estateId#;
+    </update>
+    
+    <update id="initEstateInfo" parameterClass="estate">
+        exec sp_InitEstateInfo;
+    </update>
+    
+    <update id="insertEstateInfo" parameterClass="estate">
+    	INSERT INTO EstateInfo 
+		( EstateId, EstateNo, alias, ring )
+			VALUES  
+		(#estateId#, (select top 1 estateNo from Estate where estateId = #estateId#), #alias#, #ring#)
+    </update>
+
+    <select id="findAllName" resultClass="string">
+        select estateName from estate with(noLock) where FlagTrashed = 0 and FlagDeleted = 0 and isHidden = 0
+    </select>
+
+    <select id="checkEstate" parameterClass="estate" resultClass="int">
+        SELECT COUNT(e.estateId) FROM dbo.Estate e with(noLock)
+			LEFT JOIN dbo.EstateInfo info with(noLock) ON e.EstateID = info.EstateId
+		WHERE e.FlagDeleted = 0 AND e.FlagTrashed = 0
+			AND (e.EstateName = #estateName# OR info.alias = #estateName#)
+		<isNotEmpty property="estateId" prepend="AND">
+			e.estateId != #estateId#
+		</isNotEmpty>
+    </select>
+
+    <update id="updateEstateCount" parameterClass="string">
+        exec sp_UpdateBuildingOfPrpCount '$id$'
+    </update>
+
+    <select id="findNoEstate" parameterClass="string" resultClass="integer">
+             select count(*) from Estate es with(noLock) inner join EstateInfo ei with(noLock) on es.EstateID=ei.EstateId
+             where es.EstateName=#estateName# and ei.certificationStatus=1 and es.FlagDeleted=0 and es.FlagTrashed=0 AND es.cityName = #cityName#
+    </select>
+
+
+	<insert id="insertEstateAndInfo" parameterClass="estate">
+		INSERT INTO dbo.Estate ( EstateID,EstateName,CityName,DistrictName,AreaID,Spell,Address,PropertyUsage
+	        	,HouseType,CompleteYear,ModDate	,ExDate,PropertyType ,DevCompany ,MgtCompany ,Price  ,MgtPrice
+		        ,Remark ,LandGrade ,FrameWork ,MgtTel  ,Environment ,Transportation ,Education ,Business ,Entertainment
+		        ,Room ,Square ,BuildingRule )
+		VALUES ( #estateId#	,#estateName#	,'上海',#districtName#	,'0','',#address#	,'住宅'	,#houseType#
+				,''	,GETDATE()	,GETDATE()	,''    ,''   ,''  ,0  ,0 ,''  ,''  ,''  ,''  ,''  ,''  ,''  ,''
+		        ,''  ,0  ,0 ,1
+	    )
+
+		INSERT INTO EstateInfo ( EstateId, EstateNo, alias, ring )
+			VALUES  (#estateId#, (select top 1 estateNo from Estate where estateId = #estateId#), '', '')
+	</insert>
+
+    <select id="validateBuilding" parameterClass="hashMap" resultClass="int">
+        EXEC Estate_ValidateBuilding '$estateId$', '$building$'
+    </select>
+
+    <select id="validateRoomNo" parameterClass="hashMap" resultClass="boolean">
+        EXEC Estate_ValidateRoomNo '$estateId$', '$building$','$roomNo$'
+    </select>
+
+    <select id="queryEstateNameByAlias" parameterClass="hashMap" resultClass="string">
+        EXEC dbo.Estate_QueryEstateNameByAlias '$alias$', '$cityName$'
+    </select>
+
+    <select id="getCertificationStatus" parameterClass="hashMap" resultClass="boolean">
+        EXEC dbo.Estate_GetCertificationStatus '$estateId$'
+    </select>
+
+    <select id="getPropertyRight" parameterClass="hashMap" resultClass="hashMap">
+        EXEC Estate_QueryEdsProperty  '$estateId$', '$building$','$roomNo$'
+    </select>
+
+    <select id="getBuildingFloorAndCertificationStatus" parameterClass="hashMap" resultClass="hashMap">
+        EXEC Estate_QueryFloorAll  '$estateId$', '$building$'
+    </select>
+
+    <select id="queryHuXingPic" parameterClass="hashMap" resultClass="hashMap">
+        EXEC dbo.Estate_QueryLayoutPicture #propertyId#
+    </select>
+
+    <select id="queryForMapApp" parameterClass="hashMap" resultClass="estate">
+        SELECT
+        TOP 1000
+        e.EstateID, e.EstateName, e.estateNo, e.b_x, e.b_y, e.properties, e.saleProperties
+        FROM dbo.Estate e with(nolock)
+        WHERE e.FlagDeleted = 0 AND e.FlagTrashed = 0 AND e.isHidden = 0
+        <isNotNull property="minX">
+            <![CDATA[
+					AND e.b_x >= $minX$ AND e.b_x <= $maxX$
+					AND e.b_y >= $minY$ AND e.b_y <= $maxY$
+				]]>
+        </isNotNull>
+    </select>
+</sqlMap>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+            PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+            "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="FollowRemind">
+	<typeAlias alias="followRemind" type="com.dooioo.portal.model.FollowRemind"/>
+
+	<insert id="insert" parameterClass="followRemind">
+		insert into FollowRemind
+		(relationId, relationType, empNo, content, remindAt)
+			values
+		(#relationId#, #relationType#, $empNo$, #content#, #remindAt#)
+	</insert>
+
+    <update id="update" parameterClass="followRemind">
+        update
+          FollowRemind
+        set
+          content = #content# ,remindAt = #remindAt#,createdAt = getdate()
+        where
+          id = #id#
+    </update>
+
+    <select id="queryLastFollowRemind" parameterClass="followRemind" resultClass="followRemind">
+        select top 1
+            id,relationId, relationType, empNo, content,createdAt, remindAt as remindAtt
+        from
+            FollowRemind with(nolock)
+        where
+            relationId = #relationId# and relationType = #relationType#
+            and empNo = #empNo# and remindAt > getdate() order by remindAt;
+    </select>
+</sqlMap>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyDividePlateMapper">
+	<select id="getAllPropertyDivide"  resultType="PropertyDividePlate">
+     	 SELECT  orgId,areaId
+  			FROM yunying.dbo.propertyDividePlate WHERE status  =0
+    </select>
+	
+	<select id="getPropertyDivideByOrgId"  resultType="PropertyDividePlateView">
+		SELECT  pdp.orgId,pdp.areaId,ar.areaName
+	  			FROM yunying.dbo.propertyDividePlate pdp WITH(NOLOCK) 
+	  			inner join area ar WITH (NOLOCK)  ON pdp.areaId = ar.AreaID
+	  			AND pdp.status  =0 and pdp.orgId=#{orgId} AND ar.FlagDeleted =0 AND ar.FlagTrashed =0
+    </select>
+    
+    	<select id="queryAllPlateName" resultType="com.dooioo.fy.fenpan.model.PropertyDividePlateVo">
+       select a.orgId, a.areaId,b.DistrictName,b.AreaName from 
+			(select orgId,areaId,id from yunying.dbo.propertyDividePlate with (nolock) where status = 0 )  a
+			left join agencyjizhong.dbo.Area b with (nolock) on a.areaId = b.AreaID order by b.DistrictNo asc,b.areaNo asc
+    </select>
+    
+    <select id="queryAllDividePlate" resultType="com.dooioo.fy.fenpan.model.PropertyDividePlate">
+       select a.*,b.DistrictName,b.AreaName from 
+			(select orgId,areaId,id from yunying.dbo.propertyDividePlate with (nolock) where status = 0 )  a
+			left join agencyjizhong.dbo.Area b with (nolock) on a.areaId = b.AreaID order by b.DistrictNo asc,b.areaNo asc
+    </select>
+    
+	<select id="queryDividePlateByAreaId" resultType="com.dooioo.fy.fenpan.model.PropertyDividePlate">
+		select top 1 * from yunying.dbo.propertyDividePlate with (nolock) where status = 0 and orgId = #{orgId} and areaId = #{areaId}
+	</select>
+	
+	<select id="queryDividePlateByOrgId" resultType="com.dooioo.fy.fenpan.model.PropertyDividePlateVo">
+	select  a.orgId, a.areaId,b.DistrictName,b.AreaName from 
+			(select orgId,areaId,id from yunying.dbo.propertyDividePlate with (nolock) where status = 0 and orgId = #{orgId})  a
+			left join agencyjizhong.dbo.Area b with (nolock) on a.areaId = b.AreaID order by b.DistrictNo asc,b.areaNo asc
+	</select>
+  
+    <select id="queryAllDividePlateByAreaId" resultType="com.dooioo.fy.fenpan.model.PropertyDividePlateVo">
+    select  a.orgId, a.areaId,b.DistrictName,b.AreaName from 
+        (select orgId,areaId,id from yunying.dbo.propertyDividePlate with (nolock) where status = 0 and areaId = #{areaId})  a
+        left join agencyjizhong.dbo.Area b with (nolock) on a.areaId = b.AreaID order by b.DistrictNo asc,b.areaNo asc
+    </select>
+ 
+	<insert id="addDividePlate">
+       insert into yunying.dbo.propertyDividePlate (orgId,areaId,operEmpNo,status) values (#{orgId},#{areaId},#{operEmpNo},#{status})
+    </insert>
+    
+    <update id="deleteDividePlate">
+    	update yunying.dbo.propertyDividePlate set status = -1 where id = #{id}
+    </update>
+</mapper>

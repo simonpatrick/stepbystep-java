@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyDescHistoryMapper">
+
+    <sql id="where_Clause">
+        <trim prefix="where" prefixOverrides="and|or">
+            <if test="propertyId != null">
+                and propertyId = #{propertyId, jdbcType=VARCHAR}
+            </if>
+            <if test="empNo != null">
+                and empNo = #{empNo, jdbcType=DECIMAL}
+            </if>
+            <if test="startCreatedAt != null">
+                and createdAt >= #{startCreatedAt}
+            </if>
+            <if test="status == null">
+                and status = 0
+            </if>
+        </trim>
+    </sql>
+
+    <select id="list"  resultType="PropertyDescHistoryView">
+        SELECT *
+		FROM PropertyDescHistory with (NOLOCK)	
+		<include refid="where_Clause"/>
+		<if test="orderby!=null">
+			order by ${orderby}
+		</if>
+    </select>
+    
+    <select id="selectOne"  resultType="PropertyDescHistoryView">
+        SELECT top 1 *
+		FROM PropertyDescHistory with (NOLOCK)	
+		<include refid="where_Clause"/>
+		<if test="orderby!=null">
+			order by ${orderby}
+		</if>
+    </select>
+
+    <insert id="insert" parameterType="PropertyDescHistory">
+        <selectKey keyProperty="id" resultType="int" order="AFTER">
+            select @@IDENTITY
+        </selectKey>
+        insert into PropertyDescHistory
+        (
+            propertyId,
+            empNo,
+            content,
+            operEmpNo
+        )
+        values
+        (
+            #{propertyId, jdbcType=VARCHAR},
+            #{empNo, jdbcType=DECIMAL},
+            #{content, jdbcType=VARCHAR},
+            #{operEmpNo , jdbcType = DECIMAL}
+        )
+    </insert>
+    
+    <update id="delete">
+    	update PropertyDescHistory set status = '-1'
+    	where id = ${id}
+    
+    </update>
+    
+    <update id="update">
+		update PropertyDescHistory  set empNo = #{set_empNo}	
+		where empNo = #{empNo} and propertyId = #{propertyId}
+	</update>
+
+</mapper>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="OtherCompanyLjPropertyInfoMapper">
+
+    <select id="queryPropertyById" resultType="OtherCompanyLjPropertyInfo">
+        SELECT * FROM  LjPropertyInfo WHERE propertyNo=#{propertyNo}
+    </select>
+
+ <insert id="insert" parameterType="OtherCompanyLjPropertyInfo">
+        insert into LjPropertyInfo
+        (propertyNo,
+	  countF,
+	  countT,
+	  countC,
+	  countW,
+	  countY,
+	  square ,
+	  direction ,
+	  completeYear ,
+	  schoolHouse ,
+	  limitPurchase ,
+	  fiveYearAlready ,
+	  basePrice ,
+	  isShare ,
+	  isOnly,
+	  houseSituation ,
+	  decoration,
+	  weakGoodness ,
+	  adaptDegree ,
+	  saleSuggest ,
+	  addtionGift ,
+	  fundRequire ,
+	  specialRemind	 )
+        values
+        (
+	        #{propertyNo} , 
+	        #{countF},
+			#{countT},
+			#{countC},
+			#{countW},
+			#{countY},
+			#{square},
+			#{direction},
+			#{completeYear},
+			#{schoolHouse},
+			#{limitPurchase},
+			#{fiveYearAlready},
+			#{basePrice},
+			#{isShare},
+			#{isOnly},
+			#{houseSituation},
+			#{decoration},
+			#{weakGoodness},
+			#{adaptDegree},
+			#{saleSuggest},
+			#{addtionGift},
+			#{fundRequire},
+			#{specialRemind}
+        )
+    </insert>
+    
+    <delete id="deleteAll">
+    	DELETE FROM ljpropertyInfo
+	</delete>
+</mapper>

@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyPictureMapper">
+
+    <sql id="PropertyPicture_Where">
+        <trim prefix="where" prefixOverrides="and|or">
+            <if test="propertyId != null">
+                and propertyId = #{propertyId, jdbcType=VARCHAR}
+            </if>
+            <if test="status != null">
+                and a.status = #{status, jdbcType=VARCHAR}
+            </if>
+            <if test="statusArray != null">
+                and a.status in
+                <foreach item="tmp_status" collection="statusArray" open="(" separator=" , " close=")">
+					#{tmp_status , jdbcType=INTEGER}
+		        </foreach>
+            </if>
+            <if test="id != null">
+                and a.id = #{id, jdbcType=DECIMAL}
+            </if>
+            <if test="pictureIds !=null">
+            	and a.id in
+             	<foreach item="tmp_pictureId" collection="pictureIds" open="(" separator=" , " close=")">
+					#{tmp_pictureId , jdbcType=DECIMAL}
+		        </foreach>
+            </if>
+            <if test="employeeId != null">
+                and employeeId = #{employeeId, jdbcType=DECIMAL}
+            </if>
+            <if test="cateId1 != null">
+             	and cateId1 = #{cateId1}
+            </if>
+            <if test="cateIds1 != null">
+             	and cateId1 in
+             	<foreach item="tmp_cateId1" collection="cateIds1" open="(" separator=" , " close=")">
+					#{tmp_cateId1 , jdbcType=DECIMAL}
+		        </foreach>
+            </if>
+            <if test="cateId2 != null">
+             	and cateId2 = #{cateId2}
+            </if>
+            <if test="cateIds2 != null">
+             	and cateId2 in
+             	<foreach item="tmp_cateId2" collection="cateIds2" open="(" separator=" , " close=")">
+					#{tmp_cateId2 , jdbcType=DECIMAL}
+		        </foreach>
+            </if>
+             <if test="externalSource != null">
+             	and externalSource = #{externalSource}
+            </if>
+            <if test="externalId != null">
+             	and externalId = cast(#{externalId , jdbcType=VARCHAR} as varchar(100))
+            </if>
+            
+            <if test="updatedAt != null">
+            	<![CDATA[ and updatedAt >= #{updatedAt}]]> 
+            </if>
+        </trim>
+    </sql>
+
+	<update id ="deleteById">
+		update PropertyPicture set status = '-1',updatedAt = getdate() where id = ${id}
+	</update>
+	
+	
+	<select id="count" resultType="int">
+		select  count(1) 
+		from PropertyPicture a  with(noLock)
+		<include refid="PropertyPicture_Where"/>
+	</select>
+
+
+	<select id="list" resultType="PropertyPictureView">
+		select  b.name  as cateName1, c.name  as cateName2, a.* , a.originalFileName 
+		from PropertyPicture  a with(nolock)
+		left join PictureCategory b with(nolock)
+		on a.cateId1 = b.id
+		left join PictureCategory c with(nolock)
+		on a.cateId2 = c.id
+		<include refid="PropertyPicture_Where"/>
+		order by c.sortOrder
+	</select>
+	
+	<select id="selectOne" resultType="PropertyPictureView">
+		select top 1  b.name  as cateName1, c.name  as cateName2, a.* , a.originalFileName 
+		from PropertyPicture  a with(nolock)
+		left join PictureCategory b with(nolock)
+		on a.cateId1 = b.id
+		left join PictureCategory c with(nolock)
+		on a.cateId2 = c.id
+		<include refid="PropertyPicture_Where"/>
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+	</select>
+	
+	<select id="selectById" resultType="PropertyPictureView">
+		select top 1  b.name  as cateName1, c.name  as cateName2, a.* , a.originalFileName
+		from PropertyPicture  a with(nolock)
+		left join PictureCategory b  with(nolock)
+		on a.cateId1 = b.id
+		left join PictureCategory c with(nolock)
+		on a.cateId2 = c.id
+		where a.id = #{id}
+	</select>
+	
+	
+	
+	<insert id="insert" parameterType="PropertyPicture">
+		<selectKey keyProperty="id" resultType="int" order="AFTER">
+			select
+			@@IDENTITY
+		</selectKey>
+		insert into propertyPicture
+		(
+		propertyId,
+		employeeId,
+		cateId1,
+		cateId2,
+		path,
+		reference,
+		originalFileName,
+		status,
+		externalId , 
+		externalSource,
+		remark,
+		layoutDirection,
+        fingerprintCode
+		<if test="createdAt != null">
+				,createdAt
+		</if>
+		
+		)
+		values
+		(
+		#{propertyId},
+		#{employeeId},
+		#{cateId1},
+		#{cateId2},
+		#{path},
+		0,
+		#{originalFileName},
+		#{status},
+		#{externalId} , 
+		#{externalSource},
+		#{remark},
+		#{layoutDirection},
+        #{fingerprintCode}
+		<if test="createdAt != null">
+				,#{createdAt}
+		</if>
+		)
+	</insert>
+	
+	<update id="update" parameterType="PropertyPicture">
+		update PropertyPicture
+		<set>
+		
+			updatedAt = getdate(),
+			
+			<if test="cateId1 != null">
+				cateId1 = #{cateId1},
+			</if>
+			<if test="cateId2 != null">
+				cateId2 = #{cateId2},
+			</if>
+			<if test="remark != null">
+				remark = #{remark},
+			</if>
+			<if test="status != null">
+				status = #{status},
+			</if>
+			<if test="externalId != null">
+				externalId = #{externalId},
+			</if>
+			<if test="externalSource != null">
+				externalSource = #{externalSource},
+			</if>
+			<if test="layoutDirection != null">
+				layoutDirection = #{layoutDirection},
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	
+	<update id="updateNoIf" parameterType="PropertyPicture"> 
+		update PropertyPicture set
+			cateId1 = #{cateId1} , 
+			cateId2 = #{cateId2} , 
+			remark = #{remark} , 
+			status = #{status} ,
+			externalId = #{externalId} ,
+			externalSource = #{externalSource} ,
+			updatedAt = getDate(),
+			layoutDirection = #{layoutDirection}
+		where id = #{id}
+	</update>
+	
+	<select id="saveRoomLayoutPicture2Estate" parameterType="Map" resultType="int"  statementType="CALLABLE">
+		EXEC dbo.Estate_InsertLayoutPicture_v2
+ 		#{propertyPictureId}
+	</select>
+	
+	
+	<select id="queryMainPictureCount" resultType="int">
+	 SELECT count(1) FROM PropertyPicture WITH ( NOLOCK )
+                         WHERE     status = 1
+                         AND cateId1 IN ( 55, 39, 46, 42, 61,50, 47 ) and propertyId=#{propertyId}
+	
+	</select>
+
+    <select id="queryPictureByEmpNo" parameterType="hashMap" resultType="PropertyPictureView">
+        SELECT  b.name AS cateName1 ,
+        c.name AS cateName2 ,
+        a.* ,
+        a.originalFileName
+        FROM    PropertyPicture a WITH ( NOLOCK )
+        LEFT JOIN PictureCategory b WITH ( NOLOCK ) ON a.cateId1 = b.id
+        LEFT JOIN PictureCategory c WITH ( NOLOCK ) ON a.cateId2 = c.id
+            WHERE   a.status != -1
+                <if test="propertyId != null">
+                      AND a.propertyId = #{propertyId}
+                </if>
+                <if test="employeeId != null">
+                      AND a.employeeId = #{employeeId}
+                </if>
+            ORDER BY a.createdAt DESC;
+    </select>
+
+    <select id="queryFoGenPicFingerprintCode" resultType="PropertyPictureView">
+        SELECT TOP 100 * FROM dbo.PropertyPicture pp WITH (NOLOCK) WHERE  pp.FingerprintCode IS NULL AND pp.status = 1
+    </select>
+
+    <select id="queryFoGenPicFingerprintCodeById" parameterType="string" resultType="PropertyPictureView">
+        SELECT TOP 100 * FROM dbo.PropertyPicture pp WITH (NOLOCK) WHERE pp.propertyId = #{propertyId} and  pp.FingerprintCode IS NULL
+    </select>
+
+    <update id="savePicFingerprintCode" parameterType="hashMap">
+         UPDATE dbo.PropertyPicture
+         SET    FingerprintCode =#{fingerprintCode}
+         WHERE  id = #{picId}
+     </update>
+
+    <select id="queryRepeatPictures" parameterType="hashMap" resultType="PropertyPictureView">
+        SELECT *
+                FROM    dbo.PropertyPicture pp WITH (NOLOCK)
+                WHERE pp.status=1 AND  pp.id NOT IN (SELECT p.id FROM dbo.PropertyPicture p WITH (NOLOCK) WHERE p.propertyId = #{propertyId}
+        AND p.employeeId = #{empNo}) AND pp.FingerprintCode != 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' AND pp.FingerprintCode = #{fingerprintCode}
+    </select>
+    
+    <update id="updateForKeyAdd" parameterType="PropertyPicture">
+		update PropertyPicture
+		<set>
+			updatedAt = getdate(),
+			<if test="remark != null">
+				remark = null,
+			</if>
+				status = 1,
+				externalId = #{externalId}
+		</set>
+		where propertyId = #{propertyId}
+		    and employeeId = #{employeeId}
+		    and status = #{status}
+		    <if test="remark != null">
+		        and remark = #{remark}
+		    </if>
+		    <if test="cateId2 != null">
+			    and cateId2 = #{cateId2}
+			</if>
+	</update>
+
+	<update id="updateForKeyCancel" parameterType="PropertyPicture">
+		update PropertyPicture
+		<set>
+			updatedAt = getdate(),
+				status = -1,
+		</set>
+		where propertyId = #{propertyId}
+		    and externalId = #{externalId}
+		    and status = #{status}
+		    <if test="cateId2 != null">
+			    and cateId2 = #{cateId2}
+			</if>
+	</update>
+
+    <select id="listForKey" resultType="PropertyPictureView">
+		select
+		    b.name  as cateName1, c.name  as cateName2, a.* , a.originalFileName 
+		from
+		    PropertyPicture  a with(nolock)
+        where
+            a.propertyId = #{propertyId}
+            <![CDATA[and a.status <> 0]]>
+            and a.externalId = #{externalId}
+            and a.cateId2 = #{cateId2}
+		order by c.sortOrder
+	</select>
+</mapper>

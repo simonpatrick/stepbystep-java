@@ -1,0 +1,192 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="StatEstateMapper">
+
+	<!--批量：全量更新已经存在统计信息-->
+	<update id="updateStateEstates">
+		--创建临时表
+		select
+			p.EstateID,
+			p.propertyId,
+			p.saleStatus,
+			p.rentStatus
+		into #propertyOnline
+		from  agencyjizhong.dbo.property p  with(nolock)
+		where p.FlagTrashed = 0 and p.FlagDeleted = 0
+			and (p.saleStatus='出售' or p.rentStatus='出租') and (p.specialStatus is null or p.specialStatus = '')
+			and exists (
+					select b.BuildingID from building b with(nolock)
+					inner join estate e with(nolock) on e.EstateID = p.EstateID and b.estateId = e.estateId
+					where
+						b.estateId = p.estateId and b.buildingName = p.address
+						and b.FlagTrashed = 0 and b.FlagDeleted = 0
+						and e.FlagTrashed = 0 and e.FlagDeleted = 0 and e.IsHidden = 0
+				);
+
+
+		declare @day7 int;
+		declare @date7ago date;
+		declare @date1ago date;
+		declare @dateToday date;
+		set @day7 = 7;
+		set @date7ago = CONVERT(VARCHAR(10), GETDATE() - @day7, 120);
+		set @date1ago =  DATEADD(day,6,@date7ago);
+		set @dateToday =  DATEADD(day,7,@date7ago);
+		update 	se
+		set se.lookCountAll = se.lookCountAll + isnull(lc.lookCountYesterday,0), --楼盘所有房子总带看
+			se.lookCount7Days = isnull(lc.lookCount7Days,0), --楼盘所有在售房子7天带看总量
+			se.lookAvg7Days = isnull(lc.lookCount7Days,0)/isnull(nullif(pcs.pcount,0),1), --当前楼盘每套房子7天平均带看量
+			se.pageViewCountAll = se.pageViewCountAll + isnull(pvc.pageViewCountYesterday,0),--楼盘所有房子总浏览量
+			se.pageViewCount7Days = isnull(pvc.pageViewCount7Days,0),--楼盘所有房子7天浏览量
+			se.pageViewAvg7Days = isnull(pvc.pageViewCount7Days,0)/isnull(nullif(pczs.pcount,0),1), --当前楼盘每套房子7天平均浏览看量
+			se.updateTime = getdate() --更新时间
+		from [dbo].[StatEstate] se
+			--楼盘对应所有出售房源
+			left join(
+				select
+					count(0) as pcount,
+					p.estateId
+				from #propertyOnline p
+				where p.saleStatus='出售'
+				group by p.EstateID
+			) pcs on pcs.EstateID = se.estateId
+			 --楼盘对应所有出售或出租房源
+			left join(
+				select
+					count(0) as pcount,
+					p.estateId
+				from #propertyOnline p
+				group by p.EstateID
+			) pczs on pczs.EstateID = se.estateId
+			--7天及昨天带看
+			left join
+			(
+				select
+					count(0) as lookCount7Days ,
+					SUM(case when tw.lookTime >= @date1ago then 1 else 0 end ) as lookCountYesterday,
+					p.estateId
+				from [keyuan].[dbo].V_InquiryTakeWatch tw  with(nolock)
+				inner join #propertyOnline p on tw.propertyId = p.PropertyID
+				where tw.takeType = '二手' and p.saleStatus='出售' and tw.lookTime >= @date7ago and tw.lookTime &lt;  @dateToday
+				group by p.estateId
+			) lc on se.estateId = lc.estateId
+
+			--7天及昨天浏览量
+			left join(
+				SELECT
+					SUM(ppv.pageViewCount)  AS pageViewCount7Days,
+					SUM(case when ppv.viewTime >= @date1ago then ppv.pageViewCount else 0 end ) as pageViewCountYesterday,
+					p.EstateID as estateId
+				from PropertyPageView ppv  with(nolock)
+				inner join #propertyOnline p on ppv.propertyId = p.propertyId
+				where  ppv.viewTime >=  @date7ago and ppv.viewTime &lt;   @dateToday
+				group by p.EstateID
+			) pvc on pvc.estateId = se.estateId;
+
+			drop table #propertyOnline;
+	</update>
+
+	<!-- 批量：全量插入新增的统计信息-->
+	<update id="insertStatEstates">
+		--创建临时表
+		select
+			p.EstateID,
+			p.propertyId,
+			p.saleStatus,
+			p.rentStatus
+		into #propertyOnline
+		from  agencyjizhong.dbo.property p with(nolock)
+		where p.FlagTrashed = 0 and p.FlagDeleted = 0
+			and (p.saleStatus='出售' or p.rentStatus='出租') and (p.specialStatus is null or p.specialStatus = '')
+			and exists (
+					select b.BuildingID from building b with(nolock)
+					inner join estate e with(nolock) on e.EstateID = p.EstateID
+					where
+						b.estateId = p.estateId and b.buildingName = p.address
+						and b.FlagTrashed = 0 and b.FlagDeleted = 0
+						and e.FlagTrashed = 0 and e.FlagDeleted = 0 and e.IsHidden = 0
+				);
+
+
+		declare @day7 int;
+		declare @date7ago date;
+		declare @date1ago date;
+		declare @dateToday date;
+		set @day7 = 7;
+		set @date7ago = CONVERT(VARCHAR(10), GETDATE() - @day7, 120);
+		set @date1ago =  DATEADD(day,6,@date7ago);
+		set @dateToday =  DATEADD(day,7,@date7ago);
+		insert into [StatEstate](
+				estateId,
+				lookCountAll,
+				lookCount7Days,
+				lookAvg7Days,
+				pageViewCountAll,
+				pageViewCount7Days,
+				pageViewAvg7Days,
+				createTime,
+				updateTime
+			)
+			select
+				e2.estateId,
+				isnull(lc.lookCountAll,0), --楼盘所有房子总带看
+				isnull(lc.lookCount7Days,0), --楼盘所有房子7天带看总量
+				isnull(lc.lookCount7Days,0)/isnull(nullif(pcs.pcount,0),1), --当前楼盘每套房子7天平均带看量(在售)
+				isnull(pvc.pageViewCount7Days,0),--楼盘所有房子总浏览量
+				isnull(pvc.pageViewCount7Days,0),--楼盘所有房子7天浏览量
+				isnull(pvc.pageViewCount7Days,0)/isnull(nullif(pczs.pcount,0),1), --当前楼盘每套房子7天平均浏览看量（售或租）
+				getdate(), --创建时间
+				getdate() --更新时间
+			from estate  e2
+				--楼盘对应所有出售房源
+				left join(
+					select
+						count(0) as pcount,
+						p.estateId
+					from #propertyOnline p
+					where p.saleStatus='出售'
+					group by p.EstateID
+				) pcs on pcs.EstateID = e2.estateId
+				 --楼盘对应所有出售或出租房源
+				left join(
+					select
+						count(0) as pcount,
+						p.estateId
+					from #propertyOnline p
+					group by p.EstateID
+				) pczs on pczs.EstateID = e2.estateId
+					--总带看
+				left join
+				(
+					select
+						count(0) as lookCountAll ,
+						SUM(case when tw.lookTime >= @date7ago and tw.lookTime &lt; @dateToday then 1 else 0 end ) as lookCount7Days,
+						p.estateId
+					from [keyuan].[dbo].V_InquiryTakeWatch tw  with(nolock)
+					inner join #propertyOnline p on tw.propertyId = p.PropertyID
+					where tw.takeType = '二手' and p.saleStatus='出售'
+					group by p.estateId
+				) lc on e2.estateId = lc.estateId
+				--7天浏览量
+				left join(
+					SELECT
+						SUM(ppv.pageViewCount)  AS pageViewCount7Days,
+						p.EstateID as estateId
+					from PropertyPageView ppv  with(nolock)
+					inner join #propertyOnline p on ppv.propertyId = p.propertyId
+					where  ppv.viewTime >=  @date7ago and ppv.viewTime &lt;   @dateToday
+					group by p.EstateID
+				) pvc on pvc.estateId = e2.estateId
+				--统计表中没有的楼盘
+				where not exists (
+					select
+						se2.estateId
+					from [StatEstate]  se2 where e2.estateId = se2.estateId
+				)
+				and e2.FlagTrashed = 0 and e2.FlagDeleted = 0 and e2.IsHidden = 0;
+
+			 drop table #propertyOnline;
+	</update>
+</mapper>

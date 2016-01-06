@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="V_fy_estateMapper" >
+
+    <select id="selectByEstateId" parameterType="map" resultType="com.dooioo.fy.view.V_fy_estate">
+        select top 1 * from v_fy_estate with(nolock) where estateId = #{estateId}
+    </select>
+
+    <select id="listAll" resultType="com.dooioo.fy.view.V_fy_estate">
+        select * from v_fy_estate with(nolock)
+    </select>
+
+    <select id="selectByEstateNameAndCityName" parameterType="map" resultType="com.dooioo.fy.view.V_fy_estate">
+        SELECT  *
+        FROM    dbo.v_fy_estate WITH ( NOLOCK )
+        WHERE   estateName = #{estateName}
+                AND cityName = #{cityName}
+    </select>
+
+    <select id="selectByEstateAliasNameAndCityName" parameterType="map" resultType="string">
+        SELECT  a.estateID
+        FROM    estate a WITH ( NOLOCK )
+                INNER JOIN estateinfo b WITH ( NOLOCK ) ON a.estateid = b.estateid
+        WHERE   b.alias = #{alias}
+                AND a.flagTrashed = 0
+                AND a.flagDeleted = 0
+                AND a.IsHidden = 0
+                AND a.cityName = #{cityName}
+    </select>
+
+</mapper>

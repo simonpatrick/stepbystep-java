@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="Solr_PropertyMapper">
+
+    <select id="insert" parameterType="SolrPropertyParam">
+		INSERT INTO dbo.Solr_Property ( PK, sync, updateTime, action, priority)
+		Values( #{PK}, 0, getdate(), '', 0)
+	</select>
+
+	<select id="selectOne" parameterType="java.lang.String" resultType="com.dooioo.property.model.Property">
+		select top 1 *  from v_property with(noLock) where propertyId = #{propertyId} 
+	</select>
+
+	<select id= "getSolrProperty" resultType="java.lang.String">
+		exec dbo.solr_GetProperty
+	</select>
+
+	<insert id="insPrpByEstateIdAndBuilding" parameterType="hashMap">
+		INSERT INTO Solr_Property (PK,updateTime)
+		SELECT propertyId ,getdate() from property with(nolock)
+		where
+		estateId = #estateId#
+		<if test="building != null" >
+			address = #{building}
+		</if>
+	</insert>
+
+
+</mapper>

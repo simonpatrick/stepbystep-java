@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PortalOrganization">
+
+	<typeAlias alias="organization" type="com.dooioo.framework.model.PortalOrganization"/>
+	
+	<cacheModel id="npstLruCache" type="MEMORY" serialize="true" readOnly="true">
+        <flushInterval hours="2"/>
+    </cacheModel>
+
+    <cacheModel id="omsLruCache2" type="MEMORY" serialize="true" readOnly="true">
+        <flushInterval hours="1"/>
+    </cacheModel>
+
+    <cacheModel id="subOrgCache" type="MEMORY" serialize="true" readOnly="true">
+        <flushInterval hours="1"/>
+    </cacheModel>
+
+    <cacheModel id="allRegionalOrg" type="MEMORY" serialize="true" readOnly="true">
+        <flushInterval hours="1"/>
+    </cacheModel>
+    
+	<resultMap id="organizationResult" class="organization">
+		<result property="id" column="ID"/>
+		<result property="parentId" column="PARENT_ID"/>
+		<result property="orgCode" column="ORG_CODE"/>
+		<result property="orgLongcode" column="ORG_LONGCODE"/>
+		<result property="orgName" column="ORG_NAME"/>
+		<result property="orgLevel" column="ORG_LEVEL"/>
+		<result property="orgType" column="ORG_TYPE"/>
+		<result property="status" column="STATUS"/>
+		<!--<result property="locIndex" column="LOC_INDEX"/>-->
+		<result property="costOwner" column="COST_OWNER"/>
+		<result property="costOrgNo" column="COST_ORG_NO"/>
+		<result property="accountMethod" column="ACCOUNT_METHOD"/>
+		<result property="wageOwner" column="WAGE_OWNER"/>
+		<result property="wageOrgNo" column="WAGE_ORG_NO"/>
+		<result property="orgAddress" column="ORG_ADDRESS"/>
+		<result property="orgPhone" column="ORG_PHONE"/>
+		<result property="orgFax" column="ORG_FAX"/>
+		<result property="updateTime" column="UPDATE_TIME"/>
+		<result property="updator" column="UPDATOR"/>
+		<result property="createTime" column="CREATE_TIME"/>
+		<result property="creator" column="CREATOR"/>
+		<result property="oldBranchId" column="OLD_BRANCH_ID"/>
+    </resultMap>
+
+    <select id="findById" parameterClass="int" resultMap="organizationResult">
+    	SELECT 
+        	ID,PARENT_ID,ORG_CODE,ORG_LONGCODE,ORG_NAME,ORG_LEVEL,ORG_TYPE,STATUS,COST_OWNER,COST_ORG_NO,ACCOUNT_METHOD,WAGE_OWNER,WAGE_ORG_NO,ORG_ADDRESS,ORG_PHONE,ORG_FAX,UPDATE_TIME,UPDATOR,CREATE_TIME,CREATOR,OLD_BRANCH_ID
+        FROM 
+        	OMS.DBO.V_OMS_ORGANIZATION WITH(NOLOCK) 
+        WHERE 
+        	ID = #id#
+    </select>
+    
+    <select id="findByBean" parameterClass="organization" resultMap="organizationResult">
+    	SELECT 
+        	TOP 1 ID,PARENT_ID,ORG_CODE,ORG_LONGCODE,ORG_NAME,ORG_LEVEL,ORG_TYPE,STATUS,COST_OWNER,COST_ORG_NO,ACCOUNT_METHOD,WAGE_OWNER,WAGE_ORG_NO,ORG_ADDRESS,ORG_PHONE,ORG_FAX,UPDATE_TIME,UPDATOR,CREATE_TIME,CREATOR,OLD_BRANCH_ID
+        FROM 
+        	OMS.DBO.V_OMS_ORGANIZATION WITH(NOLOCK) 
+        WHERE STATUS = 1
+        	<isNotEmpty  prepend="AND" property="id">ID=$id$</isNotEmpty>
+        	<isNotEmpty  prepend="AND" property="parentId">PARENT_ID=#parentId#</isNotEmpty>
+        	<isNotEmpty  prepend="AND" property="orgCode">ORG_CODE=#orgCode#</isNotEmpty>
+        	<isNotEmpty  prepend="AND" property="orgLongcode">ORG_LONGCODE=#orgLongcode#</isNotEmpty>
+        	<isNotEmpty  prepend="AND" property="orgName">ORG_NAME=#orgName#</isNotEmpty>
+        	<isNotEmpty  prepend="AND" property="orgLevel">ORG_LEVEL=#orgLevel#</isNotEmpty>
+        	<isNotEmpty  prepend="AND" property="orgType">ORG_TYPE=#orgType#</isNotEmpty>
+        	<isNotEmpty  prepend="AND" property="status">STATUS=#status#</isNotEmpty>
+        	<isNotEmpty  prepend="AND" property="costOwner">COST_OWNER=#costOwner#</isNotEmpty>
+        	<isNotEmpty  prepend="AND" property="costOrgNo">COST_ORG_NO=#costOrgNo#</isNotEmpty>
+        	<isNotEmpty  prepend="AND" property="accountMethod">ACCOUNT_METHOD=#accountMethod#</isNotEmpty>
+        	<isNotEmpty  prepend="AND" property="wageOwner">WAGE_OWNER=#wageOwner#</isNotEmpty>
+        	<isNotEmpty  prepend="AND" property="wageOrgNo">WAGE_ORG_NO=#wageOrgNo#</isNotEmpty>
+        	<isNotEmpty  prepend="AND" property="orgAddress">ORG_ADDRESS=#orgAddress#</isNotEmpty>
+        	<isNotEmpty  prepend="AND" property="orgPhone">ORG_PHONE=#orgPhone#</isNotEmpty>
+        	<isNotEmpty  prepend="AND" property="orgFax">ORG_FAX=#orgFax#</isNotEmpty>
+        	<isNotEmpty  prepend="AND" property="updateTime">UPDATE_TIME=#updateTime#</isNotEmpty>
+        	<isNotEmpty  prepend="AND" property="updator">UPDATOR=#updator#</isNotEmpty>
+        	<isNotEmpty  prepend="AND" property="createTime">CREATE_TIME=#createTime#</isNotEmpty>
+        	<isNotEmpty  prepend="AND" property="creator">CREATOR=#creator#</isNotEmpty>
+        	<isNotEmpty  prepend="AND" property="oldBranchId">OLD_BRANCH_ID=#oldBranchId#</isNotEmpty>
+        order by org_name 
+	</select>
+	
+	<select id="query" parameterClass="organization" resultMap="organizationResult" cacheModel="omsLruCache2">
+    	SELECT 
+          ID,PARENT_ID,ORG_CODE,ORG_LONGCODE,ORG_NAME,ORG_LEVEL,ORG_TYPE,STATUS,COST_OWNER,COST_ORG_NO,ACCOUNT_METHOD,WAGE_OWNER,WAGE_ORG_NO,ORG_ADDRESS,ORG_PHONE,ORG_FAX,UPDATE_TIME,UPDATOR,CREATE_TIME,CREATOR,OLD_BRANCH_ID
+        FROM
+          OMS.DBO.V_OMS_ORGANIZATION o WITH(NOLOCK) 
+        WHERE o.STATUS = 1
+          AND ((o.ORG_TYPE = '分行' ) OR EXISTS (
+          SELECT 1 FROM OMS.DBO.V_OMS_ORGANIZATION WITH(NOLOCK) WHERE ID = 20242 AND (o.ORG_LONGCODE LIKE ORG_LONGCODE + '%'))
+      	)
+      	ORDER BY ORG_NAME 
+      </select>
+	
+	<select id="queryOMS" resultMap="organizationResult" cacheModel="npstLruCache">
+		SELECT 
+        	ID,PARENT_ID,ORG_CODE,ORG_LONGCODE,ORG_NAME,ORG_LEVEL,ORG_TYPE,STATUS,COST_OWNER,COST_ORG_NO,ACCOUNT_METHOD,WAGE_OWNER,WAGE_ORG_NO,ORG_ADDRESS,ORG_PHONE,ORG_FAX,UPDATE_TIME,UPDATOR,CREATE_TIME,CREATOR,OLD_BRANCH_ID
+        FROM
+            OMS.DBO.V_OMS_ORGANIZATION o WITH(NOLOCK) 
+        WHERE o.status = 1 and o.ORG_TYPE = '分行'
+      	order by org_name
+	</select>
+
+    <select id="queryRegionalManagerSubOrg" parameterClass="integer" resultMap="organizationResult" cacheModel="subOrgCache">
+        SELECT 
+        	ID,PARENT_ID,ORG_CODE,ORG_LONGCODE,ORG_NAME,ORG_LEVEL,ORG_TYPE,STATUS,COST_OWNER,COST_ORG_NO,ACCOUNT_METHOD,WAGE_OWNER,WAGE_ORG_NO,ORG_ADDRESS,ORG_PHONE,ORG_FAX,UPDATE_TIME,UPDATOR,CREATE_TIME,CREATOR,OLD_BRANCH_ID 
+        FROM oms.dbo.V_OMS_ORGANIZATION o WITH(NOLOCK) 
+        WHERE o.ORG_TYPE = '分行' AND o.STATUS = 1 AND EXISTS (
+	      SELECT 1 FROM OMS.dbo.V_OMS_ORGANIZATION WITH(NOLOCK) WHERE o.ORG_LONGCODE LIKE ORG_LONGCODE + '%' AND ID = $id$
+        )  
+        ORDER BY ORG_NAME
+    </select>
+
+    <select id="countOffice" parameterClass="integer" resultClass="integer">
+        SELECT 
+        	COUNT(ID) 
+        FROM OMS.dbo.V_OMS_ORGANIZATION o WITH(NOLOCK) 
+        WHERE o.ID = $id$ AND EXISTS (
+            SELECT 1 FROM OMS.dbo.V_OMS_ORGANIZATION WITH(NOLOCK) WHERE (ID = 20445 or ID= 20477) AND (o.ORG_LONGCODE like ORG_LONGCODE + '%')
+        )
+    </select>
+
+    <select id="queryAllRegionalOrg" resultMap="organizationResult" cacheModel="allRegionalOrg">
+        SELECT
+            ID,PARENT_ID,ORG_CODE,ORG_LONGCODE,ORG_NAME,ORG_LEVEL,ORG_TYPE,STATUS,COST_OWNER,COST_ORG_NO,ACCOUNT_METHOD,WAGE_OWNER,WAGE_ORG_NO,ORG_ADDRESS,ORG_PHONE,ORG_FAX,UPDATE_TIME,UPDATOR,CREATE_TIME,CREATOR,OLD_BRANCH_ID
+        FROM
+            oms.dbo.V_OMS_ORGANIZATION o WITH(NOLOCK) 
+        WHERE
+            o.ORG_TYPE = '区域' AND o.STATUS = 1
+        ORDER BY ORG_NAME
+    </select>
+    
+	<select id="findStoreByOrgId" parameterClass="integer" resultClass="organization">
+		SELECT 
+			s.ID, s.ORG_NAME AS orgName
+		FROM oms.dbo.V_OMS_ORGANIZATION o WITH(NOLOCK) 
+			INNER JOIN oms.dbo.V_OMS_ORGANIZATION s  WITH(NOLOCK) ON o.PARENT_ID = s.ID
+		WHERE o.STATUS = 1 AND s.STATUS = 1 AND o.ID = $value$
+	</select>
+	
+    <select id="findStoreByOrgName" parameterClass="string" resultClass="organization">
+		SELECT TOP 1
+			V2O.id, V2O.orgName, V2O.address AS orgAddress, V2O.orgPhone ,
+			CASE WHEN VOC.x IS NOT NULL
+			    THEN VOC.x
+			ELSE 0
+			END AS keyStoreX,
+			CASE WHEN VOC.y IS NOT NULL
+			    THEN VOC.y
+			ELSE 0
+			END AS keyStoreY
+		FROM oms.dbo.V2_ORGANIZATION_FINAL V2O WITH(NOLOCK) 
+            LEFT JOIN oms.dbo.V_OMS_ORGANIZATION_COORDINATE VOC WITH(NOLOCK)
+            ON VOC.orgId = V2O.id 
+		WHERE V2O.orgName = #orgName# and V2O.STATUS = '1'
+	</select>
+</sqlMap>

@@ -1,0 +1,31 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 丁丁租房要的租房MAPPER，用V3是因为没有底层可用 -->        
+<mapper namespace="DingdingRentV3">
+
+	<!-- 分页 -->
+    <select id="queryForPaginate" parameterType="pagination" resultType="DingdingRentV3" >
+    	select ${columns} from V_Dingding_Rent
+    	where propertyId in (
+		    	select tt.propertyId from 
+		    	( select ${rowNumberSql},propertyId
+		    	  from V_Dingding_RentId as t ${whereSql} ) 
+		    	as tt ${pageSql}
+    		)
+    </select>
+    
+    <!-- 分页统计 -->
+    <select id="countForPaginate" resultType="int" >
+        SELECT count(1) FROM V_Dingding_Rent
+        ${whereSql}
+    </select>
+
+	<!-- 根据起始ID于时间查询 -->
+	<select id="queryListBySinceId" resultType="DingdingRentV4" parameterType="map">
+		select top ${pageSize} * 
+		from V_Dingding_Rent 
+		where id <![CDATA[>]]> #{sinceId} and updateTime between #{startTime} and #{endTime}
+		order by id
+	</select>	
+</mapper>

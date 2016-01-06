@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="OtherCompanyLjDescMapper">
+
+    <select id="queryDescForLJByPropertyNo" resultType="OtherCompanyLjDesc">
+          select * from (
+   SELECT a.*,c.newEmpNo,ipd.myPropertyId,t.propertyNo as dealPropertyNo
+		  FROM [agencyjizhong].[dbo].[LjPropertyDesc] a with(nolock) 
+		  inner join [agencyjizhong].[dbo].ImportPropertyDetail ipd with (nolock) on  a.propertyNo = ipd.propertyId
+		  left join [agencyjizhong].[dbo].[LjProperty] b with(nolock) on a.propertyNo = b.propertyNo
+		  left join [agencyjizhong].[dbo].LjEmployee c with (nolock) on b.descEmpNo = c.oldEmpId
+		  left join (select * from [agencyjizhong].[dbo].LJPropertyDescLog with (nolock) where status = 1 and source = 'desc') t  on t.propertyNo = a.propertyNo
+		  )temp  where propertyNo = #{propertyNo} and dealPropertyNo is null
+    </select>
+	<select id="queryAllDescForLJ" resultType="OtherCompanyLjDesc">
+         SELECT propertyNo
+		  FROM [agencyjizhong].[dbo].[LjPropertyDesc] a with(nolock) 
+		  inner join [agencyjizhong].[dbo].ImportPropertyDetail ipd with (nolock) on  a.propertyNo = ipd.propertyId
+		  where myPropertyId is not null and  len(myPropertyId) >5 and ipd.source ='lianJia' and status = 1
+		  group by propertyNo
+    </select>
+
+ 
+	<insert id="insertDescLog" parameterType="OtherCompanyLjFollow">
+        insert into LJPropertyDescLog
+        (propertyNo,empNo ,houseId ,path ,type,status,source )
+        values(#{propertyNo} , #{empNo} , #{houseId} , #{path} ,#{type},#{status},#{source})
+    </insert>
+</mapper>

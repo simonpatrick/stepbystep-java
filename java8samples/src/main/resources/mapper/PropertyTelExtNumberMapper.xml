@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyTelExtNumberMapper">
+    <select id="selectTelAndHistoryLastTime" parameterType="Map" resultType="PropertyTelExtNumberView">
+        select  top 1 *,phoneId as propertyPhoneId from dianhua.dbo.TelPostHistory t2 with(NOLOCK)
+        where action!= 'connected' and sysName = 'property'
+        <if test="empNo != null">
+            and t2.empNo = #{empNo}
+        </if>
+        <if test="propertyId != null">
+            and t2.relationId = #{propertyId}
+        </if>
+        order by t2.startTime desc
+    </select>
+</mapper>

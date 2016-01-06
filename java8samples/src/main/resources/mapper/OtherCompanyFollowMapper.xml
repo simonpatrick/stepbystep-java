@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="OtherCompanyFollowMapper">
+
+    <select id="queryByPropertyIdAndSource" resultType="OtherCompanyFollow">
+        SELECT flo.propertyId,flo.empNo,flo.empName,flo.followDate,flo.type,flo.detail,flo.source FROM  OtherCompanyFollow flo with(nolock)
+        WHERE propertyId=#{propertyId} and source=#{source} order by flo.followDate asc
+    </select>
+    
+     <select id="queryByPropertyIdSourceType" resultType="OtherCompanyFollow">
+        SELECT flo.propertyId,flo.empNo,flo.empName,flo.followDate,flo.type,flo.detail,flo.source FROM  OtherCompanyFollow flo with(nolock)
+        WHERE propertyId=#{propertyId} and source=#{source} and type=#{type} order by flo.followDate asc
+    </select>
+
+	<insert id="insert" parameterType="OtherCompanyFollow">
+        insert into OtherCompanyFollow
+        (propertyId,
+	  empNo ,
+	  empName ,
+	  type,
+	  followDate ,
+	  detail,
+	  source )
+        values
+        (#{propertyId} , 
+        #{empNo} , 
+        #{empName} , 
+        #{type},
+        #{followDate} ,
+	  #{detail},
+	  #{source})
+    </insert>
+    <delete id="deleteAll">
+    	DELETE FROM OtherCompanyFollow where source=#{source}
+    </delete>
+</mapper>

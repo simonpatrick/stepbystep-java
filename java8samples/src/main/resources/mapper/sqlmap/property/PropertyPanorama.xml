@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+            PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+            "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PropertyPanorama">
+	<typeAlias alias="propertyPanorama" type="com.dooioo.property.model.PropertyPanorama"/>
+	
+
+    <select id="query" parameterClass="java.util.HashMap" resultClass="propertyPanorama">
+        SELECT  t1.*,t2.name as  panoramaCateName	FROM     propertyPanorama t1 with(nolock) 
+        left join PictureCategory t2 with(nolock)  on t1.panoramaCate = t2.id 
+		WHERE  1=1  and  isActive  = '0'
+		<isNotEmpty property="propertyId">
+           and    t1.propertyId = #propertyId# 
+		</isNotEmpty>
+		<isNotEmpty property="panoramaCate">
+           and    t1.panoramaCate = #panoramaCate# 
+		</isNotEmpty>
+		<isEmpty property="panoramaCate">
+           and    t1.panoramaCate != 0 
+		</isEmpty>
+		order by createTime
+    </select>
+    
+    <select id="count" parameterClass="propertyPanorama" resultClass="Integer">
+        SELECT  count(*) 	FROM     propertyPanorama  with(nolock) 
+		WHERE  1=1  and  isActive  = '0'
+		<isNotEmpty property="propertyId">
+           and    propertyId = #propertyId# 
+		</isNotEmpty>
+		<isNotEmpty property="mediaType">
+           and    mediaType = #mediaType# 
+		</isNotEmpty>
+		<isNotEmpty property="panoramaCate">
+           and    panoramaCate = #panoramaCate# 
+		</isNotEmpty>
+		<isEmpty property="panoramaCate">
+           and    panoramaCate != 0 
+		</isEmpty>
+		
+    </select>
+
+    <insert id="insert" parameterClass="propertyPanorama">
+        insert into propertyPanorama(propertyId, employeeId, mediaUrl , isActive , PanoramaCate ,mediaType ,panoramaDesc,imageUrl	)
+        values
+        (#propertyId#, #employeeId#, #mediaUrl#, #isActive#, #panoramaCate#,#mediaType#,#panoramaDesc#,#imageUrl#)
+    </insert>
+
+
+    <update id="delete" parameterClass="propertyPanorama">
+        update propertyPanorama set isActive = -1
+       	where id = #id#
+    </update>
+    
+     <update id="update" parameterClass="propertyPanorama">
+        update propertyPanorama set  isActive = '0'
+        <isNotEmpty property="propertyId"  prepend=",">
+        	propertyId = #propertyId#
+        </isNotEmpty>
+        <isNotEmpty property="panoramaCate" prepend=",">
+       		panoramaCate = #panoramaCate#
+        </isNotEmpty>
+        <isNotEmpty property="mediaType" prepend=",">
+       		mediaType = #mediaType#
+        </isNotEmpty>
+        <isNotEmpty property="panoramaDesc"  prepend=",">
+        	panoramaDesc = #panoramaDesc#
+        </isNotEmpty>
+       	where id = #id#
+    </update>
+    
+    <update id="updateByPropertyId" parameterClass="Map">
+    	update propertyPanorama set mediaUrl = #mediaUrl#   
+    	where propertyId = #propertyId#
+    </update>
+    
+
+   
+</sqlMap>

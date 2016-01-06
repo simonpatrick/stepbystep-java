@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyAuctionMapper">
+
+    <insert id="insert" parameterType="PropertyAuction">
+        insert into PropertyAuction
+        (
+	        propertyId  ,quote ,deposit 
+		 	,depositDeadLine  ,firstAuctionTime  ,secondAuctionTime  ,thirdAuctionTime  ,otherAuctionKind, otherAuctionTime, 
+		 	note,empNo,contactName,phoneNumber,operatedBy
+        )
+        values
+        (
+        #{propertyId},
+        #{quote},
+        #{deposit},
+        #{depositDeadLine},
+        #{firstAuctionTime},
+        #{secondAuctionTime},
+        #{thirdAuctionTime},
+        #{otherAuctionKind}, 
+        #{otherAuctionTime},
+        #{note},
+        #{empNo},
+        #{contactName},
+        #{phoneNumber},
+        #{operatedBy}
+        )
+    </insert>
+
+    <delete id="delete" parameterType="HashMap">
+        update pa set status = -1,updatedAt = getDate(),reason=#{reason}
+        from PropertyAuction pa
+        where pa.propertyId = #{propertyId}
+    </delete>
+
+
+    <update id="updateAuctionAndEmpNo" parameterType="PropertyAuction">
+        update pa set status = 0,
+        quote = #{quote},
+        deposit = #{deposit},
+        depositDeadLine = #{depositDeadLine},
+        firstAuctionTime = #{firstAuctionTime},
+        secondAuctionTime = #{secondAuctionTime},
+        thirdAuctionTime = #{thirdAuctionTime},
+        otherAuctionKind = #{otherAuctionKind}, 
+        otherAuctionTime = #{otherAuctionTime},
+        note = #{note},
+        empNo = #{empNo},
+        reason= #{reason},
+        contactName = #{contactName},
+        phoneNumber = #{phoneNumber},
+        operatedBy = #{operatedBy},
+        updatedAt = getDate()
+        from PropertyAuction pa
+        where  pa.propertyId = #{propertyId}
+    </update>
+    
+    <select id="queryPropertyAuction" parameterType="HashMap" resultType="PropertyAuction">
+        select *
+        from PropertyAuction WITH (NOLOCK)
+        where
+        propertyId =#{propertyId} and status =#{status}
+    </select>
+
+
+</mapper>

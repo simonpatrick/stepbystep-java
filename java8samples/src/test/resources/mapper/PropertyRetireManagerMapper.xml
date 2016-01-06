@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="PropertyRetireManagerMapper">
+	
+	<!--  -->
+	<insert id="insert" parameterType="PropertyRetireManager" >
+		insert into PropertyRetireManager
+		(
+		retireEmpNo,managerEmpNo,reason,leaveTime,notifyStatus,status
+		) 
+		values
+		(
+		#{retireEmpNo},#{managerEmpNo},#{reason},#{leaveTime},0,0
+		)
+	</insert>
+	
+	<!-- 查询离职经理所有记录 -->
+	<select id="queryRetireManagerList" resultType="int">
+		select retireEmpNo from PropertyRetireManager with (nolock)
+	</select>
+	
+	<!-- 权益分配后更改数据状态 -->
+	<update id="deleteRetireManager">
+		update PropertyRetireManager set status=-1,updatedAt=getDate() where retireEmpNo=#{retireEmpNo}
+	</update>
+	
+	<update id="deleteAll">
+		truncate table PropertyRetireManager
+	</update>
+	
+	<!-- 通知区总后将记录通知状态改为已通知 -->
+	<update id="updateNotifyStatus">
+		update PropertyRetireManager set notifyStatus=1 where managerEmpNo=#{managerEmpNo} and notifyStatus=0
+	</update>
+	
+	<!-- 查询未通知的消息数量 -->
+	<select id="countNeedNotify" resultType="int">
+		select count(1) from PropertyRetireManager with(nolock) where status=0 and notifyStatus=0 and managerEmpNo=#{managerEmpNo}
+	</select>
+	
+	<!-- 查询已通知的消息数量 -->
+	<select id="countHasNotifyed" resultType="int">
+		select count(1) from PropertyRetireManager with(nolock) where status=0 and notifyStatus=1 and managerEmpNo=#{managerEmpNo}
+	</select>
+	
+	
+	<!--分页查询没有分配权益的离职经理-->
+	<select id="queryRetireManager" resultType="PropertyRetireManager">
+		<include refid="CommonMapper.Pagination_Head" />
+		select id,retireEmpNo,reason,leaveTime from PropertyRetireManager with(nolock)
+		where status=0
+		<if test="managerEmpNo !=null">
+			and managerEmpNo=#{managerEmpNo}
+		</if>
+		<include refid="CommonMapper.Pagination_Foot" />
+		<if test="orderby !=null">
+			order by ${orderby}
+		</if>
+	</select>
+	
+	<select id="queryRetireManagerCount" resultType="int">
+		select count(1) from PropertyRetireManager with(nolock) where status=0 
+		<if test="managerEmpNo !=null">
+			and managerEmpNo=#{managerEmpNo}
+		</if>
+	
+	</select>
+
+</mapper>

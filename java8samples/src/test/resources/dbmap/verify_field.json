@@ -1,0 +1,147 @@
+{
+    "fields" : [
+        {
+            "common" : {
+            	"status" : "status",
+                "price" : "price",
+                "rentPrice" : "rentPrice",
+                "roomLayout" : "countF",
+                "square" : "square",
+                "floor" : "floor",
+                "propertyDirection" : "propertyDirection",
+                "parking" : "parking",
+                "currentStatus" : "currentStatus",
+                "propertyLook" : "propertyLook",
+                "remark":"remark"
+            }
+        },
+        {
+            "default":{
+                "required" : 3
+            }
+        },
+        {
+            "其他":{
+                "required" : 3,
+                "sale":{
+                	"buyinDate" : "buyinDate",
+                	"isOnlyOne" : "isOnlyOne",
+                	"billPrice" : "billPrice",
+                	"loanStatus" : "loanStatus"
+                }
+            }
+        },
+        {
+            "住宅":{
+                "required" : 3,
+                "sale":{
+                	"buyinDate" : "buyinDate",
+                	"isOnlyOne" : "isOnlyOne",
+                	"billPrice" : "billPrice",
+                	"loanStatus" : "loanStatus"
+                }
+            }
+        },
+        {
+            "别墅":{
+                "required" : 3,
+                "map":{
+                    "shape":"shape",
+                    "gardenSquare":"gardenSquare" ,
+                    "gardenToward":"gardenToward",
+                    "cellar":"cellar",
+                    "parlor":"parlor",
+                    "waterToward":"waterToward",
+                    "facility":"facility"
+                },
+                "sale":{
+                	"buyinDate" : "buyinDate",
+                	"isOnlyOne" : "isOnlyOne",
+                	"billPrice" : "billPrice",
+                	"loanStatus" : "loanStatus"
+                }
+            }
+        },
+        {
+            "商住":{
+                "required" : 3,
+                "sale":{
+                	"buyinDate" : "buyinDate",
+                	"isOnlyOne" : "isOnlyOne",
+                	"billPrice" : "billPrice",
+                	"loanStatus" : "loanStatus"
+                }
+            }
+        },
+        {
+            "资料盘":{
+                "required" : 3,
+                "sale":{
+                	"buyinDate" : "buyinDate",
+                	"isOnlyOne" : "isOnlyOne",
+                	"billPrice" : "billPrice",
+                	"loanStatus" : "loanStatus"
+                }
+            }
+        },
+        {
+            "写字楼":{
+                "required" : 100,
+                "map" : {
+                    "officeGrade" : "officeGrade",
+                    "realRate" : "realRate",
+                    "floorHeight" : "floorHeight",
+                    "mgtPrice" : "mgtPrice",
+                    "airConditionCosts" : "airConditionCosts"
+                },
+                "sale":{
+                	"billPrice" : "billPrice",
+                	"loanStatus" : "loanStatus"
+                }
+            }
+        },
+        {
+            "商铺":{
+                "required" : 100,
+                "map" : {
+                    "shopLocation" : "shopLocation",
+                    "depth" : "depth",
+                    "floorHeight" : "floorHeight",
+                    "transferFee" : "transferFee",
+                    "mgtPrice" : "mgtPrice"
+                },
+                "sale":{
+                	"billPrice" : "billPrice",
+                	"loanStatus" : "loanStatus"
+                }
+            }
+        },
+        {
+            "厂房":{
+                "required" : 100,
+                "map" : {
+                    "officeArea" : "officeArea",
+                    "blankArea" : "blankArea",
+                    "totalArea" : "totalArea",
+                    "electricPower" : "electricPower"
+                },
+                "sale":{
+                	"billPrice" : "billPrice",
+                	"loanStatus" : "loanStatus"
+                }
+            }
+        }
+    ],
+    "invalidFieldValue":{
+        "price" : "@@0@@0.0@@0.00@@",
+        "rentPrice" : "@@0@@0.0@@0.00@@" ,
+        "square" :  "@@0@@0.0@@0.00@@" ,
+        "floor" : "@@0@@",
+        "billPrice" : "@@0@@0.0@@0.00@@",
+        "parking" : "invalid",
+        "loanStatus" : "invalid",
+        "lookHouseStatus" : "invalid",
+        "isOnlyOne":"invalid",
+        isFiveYears:"invalid"
+    }
+}

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="OtherCompanyLjFollowMapper">
+
+    <select id="queryByPropertyId" resultType="OtherCompanyLjFollow">
+        SELECT flo.propertyNo,flo.empNo,flo.empName,flo.followDate,flo.detail FROM  LjFollow flo WHERE propertyNo=#{propertyNo} order by flo.followDate asc
+    </select>
+
+	<insert id="insert" parameterType="OtherCompanyLjFollow">
+        insert into LjFollow
+        (propertyNo,
+	  empNo ,
+	  empName ,
+	  followDate ,
+	  detail )
+        values
+        (#{propertyNo} , 
+        #{empNo} , 
+        #{empName} , 
+        #{followDate} ,
+	  #{detail})
+    </insert>
+    <delete id="deleteAll">
+    	DELETE FROM LjFollow
+    </delete>
+</mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="EmployeeStat">
+    <typeAlias alias="employeeStat" type="com.dooioo.portal.model.EmployeeStat"/>
+
+    <select id="findById" parameterClass="integer" resultClass="employeeStat">
+        select * from EmployeeStat with(nolock) where empNo = #id#
+    </select>
+
+    <select id="queryTopOne" parameterClass="employeeStat" resultClass="employeeStat">
+        select top 1 * from employeeStat with(nolock) where empNo = #empNo#
+    </select>
+
+    <insert id="insert" parameterClass="employeeStat">
+        insert into employeeStat(empNo)
+        values
+        (#empNo#)
+    </insert>
+    
+    <update id="addSeeTelCount" parameterClass="integer">
+        update employeeStat set seeTelCount = seeTelCount + 1
+        where empNo = #id#
+    </update>
+</sqlMap>

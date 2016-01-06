@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap
+            PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+            "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="FollowWarn">
+	<typeAlias alias="followWarn" type="com.dooioo.portal.model.FollowWarn"/>
+
+	<insert id="insert" parameterClass="followWarn">
+		insert into FollowWarn
+		(relationId, relationType, empNo)
+			values
+		(#relationId#, #relationType#, $empNo$)
+	</insert>
+	
+	<update id="update" parameterClass="followWarn">
+		update FollowWarn set status = -1 , updatedAt = getDate()
+		where relationId = #relationId# and relationType = $relationType$
+	</update>
+
+	<select id="countByBean" parameterClass="followWarn" resultClass="integer">
+		select count(id) from FollowWarn with(nolock) where status != -1
+			<isNotEmpty property="relationId" prepend=" and ">relationId = #relationId#</isNotEmpty>
+			<isNotNull property="relationType" prepend=" and ">relationType = $relationType$</isNotNull>
+	</select>
+	
+	<select id="queryForPaginate" parameterClass="followWarn" resultClass="followWarn">
+		exec mst_sp_pageshowex4
+        't.*',
+        '$sql$',
+        '1=1',
+        't.createdAt desc',
+        $pageSize$, 
+        $pageNo$
+	</select>
+	
+	<select id="count" parameterClass="followWarn" resultClass="integer">
+		select count(id) from FollowWarn with(nolock) where status != -1
+			<isNotNull property="relationType" prepend=" and ">relationType = $relationType$</isNotNull>
+	</select>
+	
+</sqlMap>

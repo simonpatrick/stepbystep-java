@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SeeContactTelHistory">
+    <typeAlias alias="seeContactTelHistory" type="com.dooioo.portal.model.SeeContactTelHistory" />
+
+    <select id="queryTopOne" parameterClass="seeContactTelHistory" resultClass="seeContactTelHistory">
+        select top 1 * from SeeContactTelHistory with(nolock)
+        where
+        status >=0  and empNo = #empNo#  and relationId = #relationId# and relationType = #relationType#
+    </select>
+
+    <insert id="insert" parameterClass="seeContactTelHistory">
+        insert into SeeContactTelHistory (empNo, relationId, relationType)
+        values
+        (#empNo#, #relationId#, #relationType#)
+    </insert>
+
+    <delete id="delete" parameterClass="seeContactTelHistory">
+        update seeContactTelHistory set status = -1
+        where
+        status >=0  and empNo = #empNo#  and relationId = #relationId# and relationType = #relationType#
+    </delete>
+</sqlMap>

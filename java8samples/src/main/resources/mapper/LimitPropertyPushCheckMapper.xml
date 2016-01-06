@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="LimitPropertyPushCheckMapper">
+  <insert id="insert" parameterType="LimitPropertyPushCheck">
+    insert into LimitPropertyPushCheck(
+    propertyId,propertyNo,pushCheckDate,lastCheckStatus,checkStatus
+    ) values(#{propertyId},#{propertyNo},#{pushCheckDate},#{lastCheckStatus},0)
+  </insert>
+
+  <delete id="deleteCheckedItem">
+    delete from LimitPropertyPushCheck where checkStatus != 0
+  </delete>
+
+    <select id="queryUnpushedLimitProperty" resultType="com.dooioo.fy.temp.Property">
+        SELECT  t1.*
+        FROM    property t1 WITH ( NOLOCK )
+        LEFT JOIN dbo.PropertyInfo pi WITH ( NOLOCK ) ON t1.PropertyID = pi.propertyId
+        LEFT JOIN propertyEntrustApply AS en_limit ON en_limit.id = pi.limitsellEntrustApplyId
+        LEFT JOIN LimitPropertyPushCheck t2 WITH ( NOLOCK ) ON t1.PropertyID = t2.propertyId
+        WHERE
+        t1.saleStatus = '出售'
+        AND pi.limitSellEntrustApplyId IS NOT NULL
+        AND (
+        en_limit.checkState IS NULL
+        OR en_limit.checkState IN ('1', '2')
+        )
+        AND pi.limitCommissionRate != 0
+        AND t2.checkStatus IS NULL
+    </select>
+
+    <select id="queryLimitPropertyByCheckStatus" resultType="com.dooioo.fy.temp.Property" parameterType="int">
+      SELECT  t1.*
+        FROM    property t1 WITH ( NOLOCK )
+        LEFT JOIN dbo.PropertyInfo pi WITH ( NOLOCK ) ON t1.PropertyID = pi.propertyId
+        LEFT JOIN propertyEntrustApply AS en_limit ON en_limit.id = pi.limitsellEntrustApplyId
+        LEFT JOIN LimitPropertyPushCheck t2 WITH ( NOLOCK ) ON t1.PropertyID = t2.propertyId
+      WHERE
+        t1.saleStatus = '出售'
+      AND pi.limitSellEntrustApplyId IS NOT NULL
+      AND (
+        en_limit.checkState IS NULL
+        OR en_limit.checkState IN ('1', '2')
+      )
+      AND pi.limitCommissionRate != 0
+      AND t2.checkStatus = #{checkStatus}
+  </select>
+
+  <select id="queryListByPushCheckDate" resultType="LimitPropertyPushCheck">
+    select * from LimitPropertyPushCheck with(nolock) where pushCheckDate=#{pushCheckDate} and checkStatus = 0
+  </select>
+  
+  <update id="updateCheckStatus">
+    update LimitPropertyPushCheck set checkStatus = #{checkStatus} where propertyId = #{propertyId}
+  </update>
+</mapper>

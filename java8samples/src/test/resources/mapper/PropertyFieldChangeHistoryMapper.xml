@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PropertyFieldChangeHistoryMapper">
+	
+	<sql id="PropertyFieldChangeHistory_where">
+		 <trim prefix="where" prefixOverrides="and|or">
+            <if test="relationId != null">
+                and relationId = cast(#{relationId} as varchar)
+            </if>
+            <if test="afterValue != null">
+            	<choose>
+            		<when test="afterValue == 'notNull'">
+            			and afterValue is not null and afterValue != ''
+            		</when>
+            		<otherwise>
+            			and afterValue = #{afterValue}
+            		</otherwise>
+            	</choose>
+            </if>
+            <if test="updateField != null">
+                and updateField = #{updateField}
+            </if>
+            <if test="updateTableName == null">
+                and updateTableName = #{updateTableName}
+            </if>
+        </trim>
+	</sql>
+
+    <insert id="insert" parameterType="PropertyFieldChangeHistory">
+        insert into PropertyFieldChangeHistory
+        (relationId , beforeValue  , afterValue , updateEmpNo , updateField , updateTableName , ip)
+        values
+        (#{relationId} , #{beforeValue , jdbcType=VARCHAR}  ,#{afterValue  , jdbcType=VARCHAR} ,
+         #{updateEmpNo} , #{updateField  , jdbcType=VARCHAR} , #{updateTableName , jdbcType=VARCHAR} , #{ip , jdbcType=VARCHAR})
+    </insert>
+    
+    
+    <select id="selectOne" parameterType="Map" resultType="PropertyFieldChangeHistory">
+       select top 1  * from  PropertyFieldChangeHistory with(nolock)
+       <include refid="PropertyFieldChangeHistory_where"/>
+       <if test="orderby!=null">
+       		order by ${orderby}
+       </if>
+    </select>
+</mapper>

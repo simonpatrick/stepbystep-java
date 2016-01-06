@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="OtherCompanyLjEmployeeMapper">
+
+	<select id="queryByOldEmpId" resultType="OtherCompanyLjEmployee">
+        SELECT oldEmpId,EmpName,newEmpNo FROM  LjEmployee  WHERE oldEmpId=#{oldEmpId}
+    </select>
+    
+    <select id="queryByNewEmpNo" resultType="OtherCompanyLjEmployee">
+        SELECT oldEmpId,EmpName,newEmpNo FROM  LjEmployee  WHERE newEmpNo=#{newEmpNo}
+    </select>
+    
+</mapper>

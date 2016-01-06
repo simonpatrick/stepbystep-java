@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="SeeContactTelHistoryMapper">
+
+    <select id="count" parameterType="SeeContactTelHistory" resultType="Integer">
+		select count(1) from SeeContactTelHistory with(nolock)
+        where
+        status >= 0
+        and relationType = 'property'
+        and empNo = #{empNo, jdbcType=DECIMAL}
+        and relationId = #{relationId, jdbcType=VARCHAR}
+	</select>
+
+    <insert id="insert" parameterType="SeeContactTelHistory">
+        insert into SeeContactTelHistory
+        (empNo, relationId, relationType)
+        values
+        (
+            #{empNo, jdbcType=DECIMAL},
+            #{relationId,jdbcType=VARCHAR},
+            'property'
+        )
+    </insert>
+
+    <delete id="delete" parameterType="SeeContactTelHistory">
+        update seeContactTelHistory set status = -1
+        where
+        status >= 0
+        and relationType = 'property'
+        and empNo = #{empNo, jdbcType=DECIMAL}
+        and relationId = #{relationId, jdbcType=VARCHAR}
+    </delete>
+
+</mapper>

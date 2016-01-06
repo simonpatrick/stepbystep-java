@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="CommonMapper" >
+  <sql id="Pagination_Head" >
+    <if test="beginNum != null and endNum != null" >
+      <![CDATA[ select * from ( 
+			select row_.*, row_number() over(
+		]]> 
+		<if test="orderby !=null">
+			order by  ${orderby }
+		</if>
+		<if test="orderby ==null">
+			order by id
+		</if>
+		<![CDATA[
+			) as  rn from (
+		]]>
+    </if>
+  </sql>
+  <sql id="Pagination_Foot" >
+    <if test="beginNum != null and endNum != null" >
+      <![CDATA[ 
+      	) row_ ) as t where t.rn >= #{beginNum}  and t.rn < #{endNum}
+      	 ]]>
+    </if>
+  </sql>
+  
+  
+  	<select id="getDate" resultType="date">
+  		select getdate()
+  	</select>
+  	
+  	
+  	<select id="selectTableById" resultType="Map">
+  		select * from ${tableName} with(nolock) where ${pk} = #{pkValue}
+  	</select>
+  	
+    <!-- 周一到周日算一周 -->
+    <select id="getDiffWeekToNow" parameterType="date" resultType="integer">
+        SELECT DATEDIFF(week, #{dateFrom} - 1, getDate() - 1)
+    </select>
+</mapper>

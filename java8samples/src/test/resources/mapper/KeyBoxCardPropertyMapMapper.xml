@@ -1,0 +1,32 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="KeyBoxCardPropertyMapMapper">
+
+	<sql id="where_Clause">
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="keyBelongId!=null">
+				and keyBelongId=
+				#{keyBelongId,jdbcType=DECIMAL}
+			</if>
+			<if test="propertyID!=null"> 
+			   and propertyID= #{propertyID,jdbcType=DECIMAL}
+			</if>
+		</trim>
+	</sql>
+	
+   <!--修改权益归属 -->
+	<update id="updateInterests" >
+		update keyBoxCardPropertyMap
+		<set>
+			<if test="set_keyBelongId!=null">
+				 keyBelongId=
+				#{set_keyBelongId,jdbcType=DECIMAL},
+			</if>
+		</set>
+		<include refid="where_Clause" />
+	</update>
+
+
+</mapper>

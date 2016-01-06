@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ExosystemPropertyBenefitMapper">
+
+    <select id="queryBySourcePropertyId" resultType="ExosystemPropertyBenefit">
+        SELECT * FROM  ExosystemPropertyBenefit WHERE propertyId=#{propertyId} and source =#{source}
+    </select>
+    
+    <select id="queryByPropertyIdSources" resultType="ExosystemPropertyBenefitView">
+        SELECT * FROM  ExosystemPropertyBenefit WHERE propertyId=#{propertyId} and source in 
+        
+        <foreach item="item" index="index" collection="sources"
+                     open="(" separator="," close=")">
+                #{item}
+            </foreach>
+    </select>
+    
+    
+ <insert id="insert" parameterType="ExosystemPropertyBenefit">
+        insert into ExosystemPropertyBenefit
+        (
+	        propertyId,
+			source,
+			deptEmpNo,
+			saleEmpNo,
+			rentEmpNo,
+			descriptEmpNo,
+			sellEntrustEmpNo,
+			rentEntrustEmpNo,
+			keyEmpNo,
+			limitSellEntrustEmpNo,
+			exclusiveSellEntrustEmpNo,
+			exclusiveRentEntrustEmpNo,
+			jpsEmpNo,
+			jpzEmpNo
+        )
+        values
+        (
+         #{propertyId},
+		 #{source},
+		 #{deptEmpNo},
+		 #{saleEmpNo},
+		 #{rentEmpNo},
+		 #{descriptEmpNo},
+		 #{sellEntrustEmpNo},
+		 #{rentEntrustEmpNo},
+		 #{keyEmpNo},
+		 #{limitSellEntrustEmpNo},
+		 #{exclusiveSellEntrustEmpNo},
+		 #{exclusiveRentEntrustEmpNo},
+		 #{jpsEmpNo},
+		 #{jpzEmpNo}
+        )
+    </insert>
+    
+     <update id="update" parameterType="ExosystemPropertyBenefit">
+         UPDATE ExosystemPropertyBenefit SET 
+			  	deptEmpNo =#{deptEmpNo},
+				saleEmpNo =#{saleEmpNo},
+				rentEmpNo =#{rentEmpNo},
+				descriptEmpNo =#{descriptEmpNo},
+				sellEntrustEmpNo =#{sellEntrustEmpNo},
+				rentEntrustEmpNo =#{rentEntrustEmpNo},
+				keyEmpNo =#{keyEmpNo},
+				limitSellEntrustEmpNo =#{limitSellEntrustEmpNo},
+				exclusiveSellEntrustEmpNo =#{exclusiveSellEntrustEmpNo},
+				exclusiveRentEntrustEmpNo =#{exclusiveRentEntrustEmpNo},
+				jpsEmpNo =#{jpsEmpNo},
+				jpzEmpNo =#{jpzEmpNo}
+ 		 WHERE propertyId =#{propertyId} AND source =#{source}
+    </update>
+    
+</mapper>
