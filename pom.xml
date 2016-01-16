@@ -18,10 +18,9 @@
         <module>hedwig-concurrent</module>
         <module>dategenerator</module>
         <module>dsl-samples</module>
-        <module>toolkit</module>
         <module>ruby4j</module>
         <module>java8samples</module>
-        <module>algo</module>
+        <module>data-mapper</module>
     </modules>
 
     <properties>
